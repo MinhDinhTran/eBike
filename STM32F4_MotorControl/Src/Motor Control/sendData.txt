@@ -1,0 +1,81 @@
+#include "cmsis_os.h"
+#include "stm32f4xx_hal.h"
+#include <stdbool.h>
+#include <stdint.h>
+#include "string.h"
+#include <stdlib.h>
+#include "stdio.h"
+#include "MC.h"
+#include "Bluetooth_Msg.h"
+#include "InstDefs.h"
+
+extern QueueHandle_t xQueue_USB_TX;
+
+
+
+
+
+uint16_t dataCount = 0;
+
+
+int32_t pwmData[10] = {0};
+int32_t integData[10] = {0};
+int32_t MaitinData[10] = {0};
+uint16_t dataCount2 = 0;
+
+
+void SendData(uint32_t PWM_Lv, uint32_t midPoint) {
+	if (dataCount++ > 4)
+	{
+		pwmData[dataCount2] = PWM_Lv;//integral;//
+		integData[dataCount2] = MotorControl.Integral;//
+		MaitinData[dataCount2] = midPoint;//
+		if (dataCount2++ >= 4)
+		{
+			dataCount2 = 0;
+			if (xQueue_USB_TX != NULL)
+			{
+				//UBaseType_t uxSavedInterruptStatus;
+				//uxSavedInterruptStatus = taskENTER_CRITICAL_FROM_ISR( );
+
+
+				Bluetooth_MSG_t *msg = malloc(sizeof(*msg) );//+ 5*sizeof(int32_t));
+				if (msg != NULL)
+				{
+					msg->UUID = integ_UUID;//PWM_Lv_UUID;
+					msg->length = 5;
+					memcpy(msg->MSG, integData, 5*sizeof(int32_t));
+					xQueueSendFromISR(xQueue_USB_TX, (void * ) &msg, (TickType_t ) 3);
+				}
+
+
+				/*Bluetooth_MSG_t *msg2 = malloc(sizeof(*msg) );//+ 5*sizeof(int32_t));
+				if (msg2 != NULL)
+				{
+					msg2->UUID = integ_UUID;
+					msg2->length = 5;
+					memcpy(msg2->MSG, integData, 5*sizeof(int32_t));
+					xQueueSendFromISR(xQueue_USB_TX, (void * ) &msg2, (TickType_t ) 3);
+				}
+
+				Bluetooth_MSG_t *msg3 = malloc(sizeof(*msg) );//+ 5*sizeof(int32_t));
+				if (msg3 != NULL)
+				{
+					msg3->UUID = Maitin_lv_UUID;
+					msg3->length = 5;
+					memcpy(msg3->MSG, MaitinData, 5*sizeof(int32_t));
+					xQueueSendFromISR(xQueue_USB_TX, (void * ) &msg3, (TickType_t ) 3);
+				}*/
+				//taskEXIT_CRITICAL_FROM_ISR( uxSavedInterruptStatus );
+			}
+		}
+		dataCount = 0;
+	}
+}
+
+
+
+
+
+
+
