@@ -24,3 +24,12 @@
 *.linf
 *.browse
 *.pbd
+*.wsdt
+*.dnx
+*.dbgdt
+*.dep
+*.pbi
+*.browse
+*.linf
+*.pbi
+*.wsdt
