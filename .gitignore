@@ -3,3 +3,6 @@
 *.linf
 *.map
 *.hex
+*.wsdt
+*.dep
+*.d51
