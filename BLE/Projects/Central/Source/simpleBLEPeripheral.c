@@ -89,6 +89,7 @@
 #endif
 
 #include "npi.h"
+#include "MyMsg.h"
 
 #define DEBUGGING
 
@@ -102,7 +103,7 @@
  */
 
 // How often to perform periodic event
-#define SBP_PERIODIC_EVT_PERIOD                   5000
+#define SBP_PERIODIC_EVT_PERIOD                   200
 
 // What is the advertising interval when device is discoverable (units of 625us, 160=100ms)
 #define DEFAULT_ADVERTISING_INTERVAL          160
@@ -791,8 +792,24 @@ static void peripheralStateNotificationCB( gaprole_States_t newState )
  *
  * @return  none
  */
+extern uint8 _PWM_DUTY_CYCLE_Value;
+MyMsg_t* msg = NULL;
+bool _PWM_DUTY_CYCLE_Value_Changed = false;
 static void performPeriodicTask( void )
 {
+  if (_PWM_DUTY_CYCLE_Value_Changed && msg == NULL)
+  {
+      _PWM_DUTY_CYCLE_Value_Changed = false;
+      msg = MyMsg_CreateString(PWM_DUTY_CYCLE_ID, &_PWM_DUTY_CYCLE_Value, PWM_DUTY_CYCLE_LEN);
+     // printf("%d\n", _PWM_DUTY_CYCLE_Value);
+  }
+  else if (msg != NULL)
+  {
+      NPI_WriteTransport(msg->pData, msg->length+1);
+      free(msg->pData);
+      free(msg);
+      msg = NULL;
+  }
   /*uint8 valueToCopy;
   uint8 stat;
   stat = SimpleProfile_GetParameter( SIMPLEPROFILE_CHAR3, &valueToCopy);
@@ -826,15 +843,7 @@ static void simpleProfileChangeCB( uint8 paramID )
 
     case PWM_DUTY_CYCLE_ID:
       SimpleProfile_GetParameter( PWM_DUTY_CYCLE_ID, &newValue );
-      buf[0] = 8;
-      buf[1] = PWM_DUTY_CYCLE_ID;
-      buf[2] = 0;
-      buf[3] = 0;   
-      memcpy(&buf[4], &newValue, 2);
-      buf[6] = '\r';
-      buf[7] = '\n';
-      NPI_WriteTransport((uint8 *)buf, 8 );
-      printf("%d\n", newValue);
+      _PWM_DUTY_CYCLE_Value_Changed = true;
       
       break;
       

@@ -10,14 +10,14 @@
 
 //extern TIM_HandleTypeDef htim9;
 
-void ProccesReceivedMessage(Bluetooth_MSG_t *msg) {
+void ProccesReceivedMessage(MyMsg_t *msg) {
 	HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_13);
 	switch (msg->UUID) {
 	case PWM_DUTY_CYCLE_ID:
-		MotorControl.Wanted_DutyCycle = (uint8_t) (msg->MSG[0] >> 16);
+		//MotorControl.Wanted_DutyCycle = (uint8_t) (msg->pMsg >> 16);
 		break;
 	case V_THRESHOLD_ID:
-		MotorControl.V_Treshold = msg->MSG[0];
+		//MotorControl.V_Treshold = msg->pMsg;
 		if (MotorControl.V_Treshold > 5 && MotorControl.V_Treshold < 100)
 			MotorControl.Limits.Integral = MotorControl.V_Treshold * 100;
 		break;

@@ -1,4 +1,4 @@
-"E:\Desktop\MD_eBike\BLE\Components\osal\common\osal_bufmgr.c"
+"E:\Desktop\MD_eBike\STM32F4_MotorControl\MyLibs\MyMsg\msg.c"
 -std=c99
 -ferror-limit=100
 -I

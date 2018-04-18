@@ -20,11 +20,8 @@ void HAL_RTC_AlarmAEventCallback(RTC_HandleTypeDef *hrtc)
 	{
 
 		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
-		Bluetooth_MSG_t *msg = malloc(sizeof(*msg) + sizeof(msg->MSG[0]));
-		msg->UUID = BIKE_BATTERY_LEVEL_ID;
-		msg->length = 1;
-		msg->MSG[0] = MotorControl.ADC_VBAT;
 
+		MyMsg_t* msg = MyMsg_CreateString(BIKE_BATTERY_LEVEL_ID, &MotorControl.ADC_VBAT, sizeof(uint16_t));
 		xQueueSendFromISR(xQueueTX, (void * ) &msg, (TickType_t ) 0);
 	}
 }

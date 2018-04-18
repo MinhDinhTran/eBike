@@ -13,7 +13,7 @@ extern UART_HandleTypeDef BT_UART;
 extern TaskHandle_t BT_Task_Handle;
 
 static const TickType_t xMaxBlockTime = pdMS_TO_TICKS( 200 );
-static uint8_t RxBuffer[32];
+static uint8_t RxBuffer[3];
 
 
 static void BT_UART_TxCpltCallback();
@@ -45,18 +45,11 @@ static void BT_UART_TxCpltCallback()
 
 static void BT_UART_RxCpltCallback()
 {
-	if (xQueueRX != NULL)
-	{
-		if (RxBuffer[0] != 8)
-			return;
+	MyMsg_CacheStringPiece_ISR(RxBuffer[0]);
+	Receive_TEST();
+	//	MyMsg_t* msg = NULL;//MyMsg_ParseString((char*)RxBuffer, 8, 1);
+	//  xQueueSendFromISR(xQueueRX, (void * ) &msg, (TickType_t ) 0);
 
-		Bluetooth_MSG_t *msg = malloc(sizeof(*msg) + sizeof(msg->MSG[0]));
-		msg->UUID = RxBuffer[1];
-		msg->length = 1;
-		memcpy(msg->MSG, &RxBuffer[2], 4);
-
-		xQueueSendFromISR(xQueueRX, (void * ) &msg, (TickType_t ) 0);
-	}
 }
 
 static uint32_t Send(uint8_t* data, uint16_t Size)
@@ -70,7 +63,7 @@ static uint32_t Send(uint8_t* data, uint16_t Size)
 
 void Receive_TEST()
 {
-	if (HAL_UART_Receive_IT(&BT_UART, (uint8_t*)&RxBuffer, 8) != HAL_OK)
+	if (HAL_UART_Receive_IT(&BT_UART, (uint8_t*)&RxBuffer, 1) != HAL_OK)
 		Error_Handler();
 }
 

@@ -123,7 +123,7 @@ static uint8 _MODE_Value = 0;
 static uint8 _MODE_Desc[] = "Working mode";
 
 static uint8 _PWM_DUTY_CYCLE_Props = GATT_PROP_READ|GATT_PROP_WRITE;
-static uint8 _PWM_DUTY_CYCLE_Value = 0;
+uint8 _PWM_DUTY_CYCLE_Value = 0;
 static uint8 _PWM_DUTY_CYCLE_Desc[] = "PWM duty cycle";
 
 static uint8 _V_THRESHOLD_Props = GATT_PROP_READ|GATT_PROP_WRITE;

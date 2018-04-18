@@ -27,22 +27,22 @@ void Start_USB_Task(void) {
 
 static void USB_Task(void *pvParameters) {
 	UNUSED(pvParameters);
-	xQueue_USB_TX = xQueueCreate(10, sizeof(Bluetooth_MSG_t*));
+	xQueue_USB_TX = xQueueCreate(10, sizeof(MyMsg_t*));
 	if (xQueue_USB_TX == NULL)
 		Error_Handler();
 
 	uint8_t str[50];
-	Bluetooth_MSG_t *msgToSend;
+	MyMsg_t *msgToSend;
 
 	for (;;) {
 		if (xQueueReceive(xQueue_USB_TX, &(msgToSend), (TickType_t ) 5)) {
-			uint8_t len = UUID_LEN;
+			/*uint8_t len = UUID_LEN;
 			str[MSG_LEN_SIZE] = msgToSend->UUID;
 			str[MSG_LEN_SIZE+1] = 0;//dummy
 			str[MSG_LEN_SIZE+2] = 0;//dummy
 			len+=2;
-			uint8_t l = sizeof(msgToSend->MSG[0]) * msgToSend->length;
-			memcpy(&str[len+MSG_LEN_SIZE], msgToSend->MSG, l);
+			uint8_t l = sizeof(msgToSend->pMsg) * msgToSend->length;
+			memcpy(&str[len+MSG_LEN_SIZE], msgToSend->pMsg, l);
 			len += l;
 
 
@@ -52,9 +52,8 @@ static void USB_Task(void *pvParameters) {
 			str[0] = len & 0xff;
 
 			free(msgToSend);
-			CDC_Transmit_FS((uint8_t*) str, (int)len);
+			CDC_Transmit_FS((uint8_t*) str, (int)len);*/
 		}
-
 	}
 }
 

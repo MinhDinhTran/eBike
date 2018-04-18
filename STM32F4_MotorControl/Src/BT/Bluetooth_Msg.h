@@ -2,6 +2,7 @@
 #define BT_BLUETOOTH_MSG_H_
 
 #include "cmsis_os.h"
+#include "MyMsg.h"
 
 #define MODE_ID                         0
 #define PWM_DUTY_CYCLE_ID               1
@@ -22,12 +23,7 @@ struct UART_Driver
     TaskHandle_t *xTaskToNotify;
 };
 
-typedef struct Bluetooth_MSG_t Bluetooth_MSG_t;
-struct Bluetooth_MSG_t {
-	uint8_t UUID;
-	uint8_t length;
-	int32_t MSG[5];
-};
+
 extern UART_Driver BT_UART_Driver;
 void Init_BT_UART_Driver(void);
 

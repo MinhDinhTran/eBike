@@ -48,7 +48,6 @@ void TestTask_Init( uint8 task_id )
  
 }
 
-
 uint16 adc0;
 char adc[5];
 uint16 TestTask_ProcessEvent( uint8 task_id, uint16 events )
@@ -82,11 +81,23 @@ uint16 TestTask_ProcessEvent( uint8 task_id, uint16 events )
    return events;//( events ^ TestTask_MeasureADC);
 }
 
-
+/* UART Events *//*
+#define HAL_UART_RX_FULL         0x01
+#define HAL_UART_RX_ABOUT_FULL   0x02
+#define HAL_UART_RX_TIMEOUT      0x04
+#define HAL_UART_TX_FULL         0x08
+#define HAL_UART_TX_EMPTY        0x10
+*/
 
 void npiCBack ( uint8 port, uint8 event )
 {  
-  uint8 len = NPI_RxBufLen();
+  if (event && HAL_UART_TX_EMPTY)
+  {
+  }
+  else{
+  printf("evt:%d\n", event );
+  }
+  /*uint8 len = NPI_RxBufLen();
   uint16 lenToRead = ((UART_RxActivePos + len) < UART_BUFFER_SIZE) ? len : (UART_BUFFER_SIZE - UART_RxActivePos);
   NPI_ReadTransport((uint8*)&UART_buffer[UART_RxActivePos], lenToRead);
   UART_RxActivePos += lenToRead;
@@ -107,7 +118,7 @@ void npiCBack ( uint8 port, uint8 event )
     memmove(UART_buffer, ptr + UART_SUFFIX_SIZE, UART_BUFFER_SIZE-dataLen);
     UART_RxActivePos -= dataLen;
     ptr = (char*) memchr(UART_buffer, UART_Suffix, UART_RxActivePos);
-  }
+  }*/
 }
 
 

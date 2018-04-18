@@ -500,6 +500,7 @@
                     <state>$PROJ_DIR$\..\..\ble\Profiles\Keys\CC254x</state>
                     <state>$PROJ_DIR$\..\..\ble\Profiles\Keys</state>
                     <state>$PROJ_DIR$\..\Source</state>
+                    <state>$PROJ_DIR$\..\..\..\..\STM32F4_MotorControl\MyLibs\MyMsg</state>
                 </option>
                 <option>
                     <name>CCStdIncCheck</name>
@@ -529,7 +530,7 @@
                 <option>
                     <name>CCOptStrategy</name>
                     <version>0</version>
-                    <state>1</state>
+                    <state>2</state>
                 </option>
                 <option>
                     <name>CCOptLevelSlave</name>
@@ -579,12 +580,12 @@
                 <option>
                     <name>CCAllowList2</name>
                     <version>0</version>
-                    <state>1111110</state>
+                    <state>1111100</state>
                 </option>
                 <option>
                     <name>CCOptStrategySlave</name>
                     <version>0</version>
-                    <state>1</state>
+                    <state>2</state>
                 </option>
             </data>
         </settings>
@@ -1337,6 +1338,18 @@
         <file>
             <name>$PROJ_DIR$\..\..\ble\Libraries\Common\bin\CC254x_BLE_HCI_TL_None.lib</name>
         </file>
+    </group>
+    <group>
+        <name>MyLibs</name>
+        <group>
+            <name>MyMsg</name>
+            <file>
+                <name>$PROJ_DIR$\..\..\..\..\STM32F4_MotorControl\MyLibs\MyMsg\msg.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\..\..\STM32F4_MotorControl\MyLibs\MyMsg\MyMsg.h</name>
+            </file>
+        </group>
     </group>
     <group>
         <name>NPI</name>

@@ -7,7 +7,6 @@
 #include <stdint.h>
 #include "InstDefs.h"
 #include "MC.h"
-#include "log.h"
 
 osThreadId MotorControlThreadHandle;
 
@@ -126,28 +125,21 @@ void OnPWM_ADC_Measured(ADC_HandleTypeDef* hadc) {
 void OnVBAT_ADC_Measured(ADC_HandleTypeDef* hadc) {
 	MotorControl.ADC_VBAT = HAL_ADC_GetValue(hadc);
 
-	if (MotorControl.ADC_VBAT > 2743) //2743=42V | 2600 = +/-40V
+/*	if (MotorControl.ADC_VBAT > 2743) //2743=42V | 2600 = +/-40V
 		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_SET);
 	else
-		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_RESET);
+		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_RESET);*/
 }
 
 extern QueueHandle_t xQueueTX;
-
+#include "Bluetooth_Msg.h"
+uint16_t clickCount = 0;
 void OnButtonClick(void) {
 	processUserBtn = 1;
+	clickCount++;
 
-	/*	if (xQueueTX != NULL)
-	 {
-
-	 HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
-	 Bluetooth_MSG_t *msg = malloc(sizeof(*msg) + sizeof(msg->MSG[0]));
-	 msg->UUID = BIKE_BATTERY_LEVEL_ID;
-	 msg->length = 1;
-	 msg->MSG[0] = MotorControl.ADC_VBAT;
-
-	 xQueueSendFromISR(xQueueTX, (void * ) &msg, (TickType_t ) 0);
-	 }*/
+	MyMsg_t* msg = MyMsg_CreateString(BIKE_BATTERY_LEVEL_ID, &clickCount, sizeof(uint16_t));
+	xQueueSendFromISR(xQueueTX, (void * ) &msg, (TickType_t ) 0);
 }
 
 static uint32_t GetActualBEMF() {
