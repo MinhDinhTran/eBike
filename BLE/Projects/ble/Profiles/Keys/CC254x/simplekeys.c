@@ -194,48 +194,6 @@ CONST gattServiceCBs_t skCBs =
  */
 
 /*********************************************************************
- * @fn      SK_AddService
- *
- * @brief   Initializes the Simple Key service by registering
- *          GATT attributes with the GATT server.
- *
- * @param   services - services to add. This is a bit map and can
- *                     contain more than one service.
- *
- * @return  Success or Failure
- */
-bStatus_t SK_AddService( uint32 services )
-{
-  uint8 status;
-  
-  // Allocate Client Characteristic Configuration table
-  skConfig = (gattCharCfg_t *)osal_mem_alloc( sizeof(gattCharCfg_t) *
-                                              linkDBNumConns );
-  if ( skConfig == NULL )
-  {
-    return ( bleMemAllocError );
-  }
-  
-  // Initialize Client Characteristic Configuration attributes
-  GATTServApp_InitCharCfg( INVALID_CONNHANDLE, skConfig ); 
-  
-  if ( services & SK_SERVICE )
-  {
-    // Register GATT attribute list and CBs with GATT Server App
-    status = GATTServApp_RegisterService( simplekeysAttrTbl, 
-                                          GATT_NUM_ATTRS( simplekeysAttrTbl ),
-                                          GATT_MAX_ENCRYPT_KEY_SIZE,
-                                          &skCBs );
-  }
-  else
-  {
-    status = SUCCESS;
-  }
-
-  return ( status );
-}
-
-/*********************************************************************
  * @fn      SK_SetParameter
  *
  * @brief   Set a Simple Key Profile parameter.

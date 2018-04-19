@@ -1,59 +1,47 @@
-	
-	
-MyMsg_t* msg = NULL;
-char* res;
-char res2;
-	
-
-	
-	
 void Test_MyMsg()
 {
-	for (int i = 0; i < 10000000; i++) {
-		MyMsg_CacheStringPiece_ISR(0);
-		MyMsg_CacheStringPiece_ISR(0);
-		MyMsg_CacheStringPiece_ISR(0x0A);
-		MyMsg_CacheStringPiece_ISR(0x0D);
-		MyMsg_CacheStringPiece_ISR(0x05);
-		MyMsg_CacheStringPiece_ISR(0x00);
-		MyMsg_CacheStringPiece_ISR(0x00);
-		MyMsg_CacheStringPiece_ISR(0x00);
-		MyMsg_CacheStringPiece_ISR(0x01);
-		MyMsg_CacheStringPiece_ISR(0x01);
-		MyMsg_CacheStringPiece_ISR(0x02);
-		MyMsg_CacheStringPiece_ISR(0x03);
-		MyMsg_CacheStringPiece_ISR(0x04);
-		MyMsg_CacheStringPiece_ISR(0x05);
-		MyMsg_CacheStringPiece_ISR(0x0A);
-		MyMsg_CacheStringPiece_ISR(0x0D);
-		MyMsg_CacheStringPiece_ISR(0);
-		MyMsg_CacheStringPiece_ISR(0);
-		MyMsg_CacheStringPiece_ISR(0);
-		MyMsg_CacheStringPiece_ISR(0);
-		MyMsg_CacheStringPiece_ISR(0);
-		MyMsg_CacheStringPiece_ISR(0);
-		MyMsg_CacheStringPiece_ISR(0);
-		msg = MyMsg_ProcessCache();
+	  
+	char* res;
+	char res2;
+	for (int i = 0; i < 100; i++) 
+        {
+		MyMsg_CacheStringPiece_ISR((char)0);
+		MyMsg_CacheStringPiece_ISR((char)0x0A);
+		MyMsg_CacheStringPiece_ISR((char)0x0D);
+		MyMsg_CacheStringPiece_ISR((char)14);
+		MyMsg_CacheStringPiece_ISR((char)0x00);
+		MyMsg_CacheStringPiece_ISR((char)0x00);
+		MyMsg_CacheStringPiece_ISR((char)0x00);
+		MyMsg_CacheStringPiece_ISR((char)0x01);
+		MyMsg_CacheStringPiece_ISR((char)0x01);
+		MyMsg_CacheStringPiece_ISR((char)0x02);
+		MyMsg_CacheStringPiece_ISR((char)0x03);
+		MyMsg_CacheStringPiece_ISR((char)0x04);
+		MyMsg_CacheStringPiece_ISR((char)0x05);
+		MyMsg_CacheStringPiece_ISR((char)0x0A);
+		MyMsg_CacheStringPiece_ISR((char)0x0D);
+		MyMsg_CacheStringPiece_ISR((char)0);
+		MyMsg_t* msg = MyMsg_ProcessCache();
 		if (msg != NULL)
 			res = (char*) msg->pData;
 		else
-			Error_Handler();
+			while(1);
 
 		res2 = *res;
 		if (res2 != 1)
-			Error_Handler();
+			while(1);
 		res++;
 		res2 = *res;
 		if (res2 != 2)
-			Error_Handler();
+			while(1);
 		res++;
 		res2 = *res;
 		if (res2 != 3)
-			Error_Handler();
+			while(1);
 		res++;
 		res2 = *res;
 		if (res2 != 4)
-			Error_Handler();
+			while(1);
 		free(msg->pData);
 		free(msg);
 	}

@@ -7,6 +7,7 @@
 #include <stdint.h>
 #include "InstDefs.h"
 #include "MC.h"
+#include "Bluetooth_Msg.h"
 
 osThreadId MotorControlThreadHandle;
 
@@ -59,7 +60,10 @@ void MotorControlThread(void const * argument) // MotorControlThread function
 	ChangePWMSwitchingSequence(Regeneration);
 	for (;;) {
 		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
-		osDelay(200);
+		osDelay(2000);
+
+		//MyMsg_t* msg = MyMsg_CreateString(BIKE_BATTERY_LEVEL_ID, &MotorControl.ADC_I[0], sizeof(uint16_t));
+		//xQueueSend(xQueueTX, (void * ) &msg, (TickType_t ) 0);
 
 		if (processUserBtn) {
 
@@ -69,7 +73,7 @@ void MotorControlThread(void const * argument) // MotorControlThread function
 				ChangePWMSwitchingSequence(Regeneration);
 
 			HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
-			osDelay(200);
+			osDelay(2000);
 
 			processUserBtn = 0;
 		}
@@ -131,15 +135,9 @@ void OnVBAT_ADC_Measured(ADC_HandleTypeDef* hadc) {
 		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_RESET);*/
 }
 
-extern QueueHandle_t xQueueTX;
-#include "Bluetooth_Msg.h"
-uint16_t clickCount = 0;
 void OnButtonClick(void) {
 	processUserBtn = 1;
-	clickCount++;
 
-	MyMsg_t* msg = MyMsg_CreateString(BIKE_BATTERY_LEVEL_ID, &clickCount, sizeof(uint16_t));
-	xQueueSendFromISR(xQueueTX, (void * ) &msg, (TickType_t ) 0);
 }
 
 static uint32_t GetActualBEMF() {

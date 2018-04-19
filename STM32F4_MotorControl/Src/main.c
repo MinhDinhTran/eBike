@@ -107,7 +107,55 @@ extern void Start_USB_Task(void);
 extern void TurnAllPWMsOFF(void);
 extern void Start_SDCard_Task(void);
 /* USER CODE END PFP */
+#include "MyMsg.h"
+void Test_MyMsg()
+{
 
+	char* res;
+	char res2;
+	for (int i = 0; i < 10000000; i++)
+        {
+		MyMsg_CacheStringPiece_ISR((char)0);
+		MyMsg_CacheStringPiece_ISR((char)0x0A);
+		MyMsg_CacheStringPiece_ISR((char)0x0D);
+		MyMsg_CacheStringPiece_ISR((char)14);
+		MyMsg_CacheStringPiece_ISR((char)0x00);
+		MyMsg_CacheStringPiece_ISR((char)0x00);
+		MyMsg_CacheStringPiece_ISR((char)0x00);
+		MyMsg_CacheStringPiece_ISR((char)0x01);
+		MyMsg_CacheStringPiece_ISR((char)0x01);
+		MyMsg_CacheStringPiece_ISR((char)0x02);
+		MyMsg_CacheStringPiece_ISR((char)0x03);
+		MyMsg_CacheStringPiece_ISR((char)0x04);
+		MyMsg_CacheStringPiece_ISR((char)0x05);
+		MyMsg_CacheStringPiece_ISR((char)0x0A);
+		MyMsg_CacheStringPiece_ISR((char)0x0D);
+		MyMsg_CacheStringPiece_ISR((char)0);
+		MyMsg_t* msg = MyMsg_ProcessCache();
+		if (msg != NULL)
+			res = (char*) msg->pData;
+		else
+			while(1);
+
+		res2 = *res;
+		if (res2 != 1)
+			while(1);
+		res++;
+		res2 = *res;
+		if (res2 != 2)
+			while(1);
+		res++;
+		res2 = *res;
+		if (res2 != 3)
+			while(1);
+		res++;
+		res2 = *res;
+		if (res2 != 4)
+			while(1);
+		free(msg->pData);
+		free(msg);
+	}
+}
 /* USER CODE BEGIN 0 */
 /* USER CODE END 0 */
 
@@ -119,6 +167,7 @@ extern void Start_SDCard_Task(void);
 int main(void) {
 	/* USER CODE BEGIN 1 */
 
+	 Test_MyMsg();
 	/* USER CODE END 1 */
 
 	/* MCU Configuration----------------------------------------------------------*/

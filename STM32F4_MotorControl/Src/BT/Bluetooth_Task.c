@@ -41,7 +41,7 @@ static void BT_Task(void *pvParameters) {
 	for (;;) {
 
 		if (xQueueReceive(xQueueTX, &(msgToSend), (TickType_t ) 5)) {
-			BT_UART_Driver.Send((uint8_t*) msgToSend->pData, msgToSend->length);
+			BT_UART_Driver.Send((uint8_t*) msgToSend->pData, msgToSend->length +1 );
 			free(msgToSend->pData);
 			free(msgToSend);
 		}

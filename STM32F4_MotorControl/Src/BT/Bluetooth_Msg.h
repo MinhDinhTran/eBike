@@ -24,6 +24,7 @@ struct UART_Driver
 };
 
 
+extern QueueHandle_t xQueueTX;
 extern UART_Driver BT_UART_Driver;
 void Init_BT_UART_Driver(void);
 

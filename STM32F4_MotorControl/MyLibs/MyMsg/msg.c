@@ -9,13 +9,7 @@
 #ifndef CC2541
 #include "main.h" // for MyMsg_Error_Handler();
 #endif
-void MyMsg_Error_Handler() {
-#ifndef CC2541
-	Error_Handler();
-#else
-	printf("MyMsg Error");
-#endif
-}
+
 
 #define UUID_SIZE 1
 #define AFFIX_SIZE 2
@@ -24,8 +18,9 @@ void MyMsg_Error_Handler() {
 #define AFFIX 0x0A0D
 #define MSG_LEN_INDICATOR_SIZE 4
 
-#define MYMSG_CACHE_FRAGMENT_SIZE 32
-#define MYMSG_CACHE_AFFIX_LOC_CNT_PER_FRAG 8
+#define MYMSG_CACHE_FRAGMENT_SIZE 16
+#define MYMSG_CACHE_AFFIX_LOC_CNT_PER_FRAG 4
+static void DeleteFirstFragment();
 
 typedef struct MyMsgCache_t MyMsgCache_t;
 struct MyMsgCache_t {
@@ -40,20 +35,28 @@ static MyMsgCache_t* _pLastFragment = NULL;
 static uint8_t flag_AffixSearch = 0;
 static MyMsgCache_t* flag_NewAffixHead = NULL;
 static uint8_t count_AffixesFound = 0;
-
+void MyMsg_Error_Handler() {
+#ifndef CC2541
+	Error_Handler();
+#else
+	printf("MyMsg Error\n");
+#endif
+}
 static MyMsgCache_t* CreateCacheFragment() {
 	MyMsgCache_t* fragment = malloc(sizeof(MyMsgCache_t));
 	if (fragment == NULL)
-		return NULL;
+	{
+            MyMsg_Error_Handler();
+            return NULL;
+        }
 	fragment->dataCount = 0;
 	memset(fragment->AffixLocs, -1, MYMSG_CACHE_AFFIX_LOC_CNT_PER_FRAG);
 	fragment->NextFragment = NULL;
 	return fragment;
 }
-static void DeleteFirstFragment() {
+static void DeleteFirstFragment() {   
 	if (_pCache->NextFragment != NULL) {
 		MyMsgCache_t* pNextFrag = _pCache->NextFragment;
-
 		free(_pCache);
 		if (pNextFrag == NULL)
 			_pCache = CreateCacheFragment();
@@ -70,7 +73,6 @@ void MyMsg_CacheStringPiece_ISR(char s) {
 		_pCache = CreateCacheFragment();
 		_pLastFragment = _pCache;
 	}
-
 	_pLastFragment->data[_pLastFragment->dataCount++] = s;
 	switch (flag_AffixSearch) {
 	case 0:
@@ -120,6 +122,11 @@ void MyMsg_CacheStringPiece_ISR(char s) {
 	if (_pLastFragment->dataCount >= MYMSG_CACHE_FRAGMENT_SIZE) {
 		_pLastFragment->NextFragment = CreateCacheFragment();
 		_pLastFragment = _pLastFragment->NextFragment;
+                if (_pLastFragment == NULL)
+                {
+                    MyMsg_Error_Handler();
+                    return ;
+                }
 	}
 }
 
@@ -154,7 +161,7 @@ MyMsg_t* MyMsg_ProcessCache() {
 
 	// message can occupie more than 2 fragments?
 	uint8_t fragCount = 0;
-	if (*affix2_Loc == 0) {
+	if (affix2_Loc == NULL) {
 		MyMsgCache_t* pNextFrag = _pCache->NextFragment;
 		while (cache_MsgTail == NULL) {
 			if (pNextFrag == NULL)
@@ -187,7 +194,10 @@ MyMsg_t* MyMsg_ProcessCache() {
 	MyMsg_t* result = NULL;
 	result = malloc(sizeof(MyMsg_t));
 	if (result == NULL)
-		return (MyMsg_t*) NULL;
+        {
+            MyMsg_Error_Handler();
+            return  NULL;
+        }
 
 	if (cache_MsgTail == NULL) {
 		memcpy(&result->length, &_pCache->data[*affix1_Loc + AFFIX_SIZE], MSG_LEN_INDICATOR_SIZE);
@@ -200,7 +210,10 @@ MyMsg_t* MyMsg_ProcessCache() {
 		}
 		result->pData = malloc(result->length);
 		if (result->pData == NULL)
-			MyMsg_Error_Handler();
+                {
+                    MyMsg_Error_Handler();
+                    return NULL;
+                }
 		memcpy(result->pData, &_pCache->data[*affix1_Loc + AFFIX_SIZE + MSG_LEN_INDICATOR_SIZE + UUID_SIZE], result->length);
 		if (*affix1_Loc + 2 * AFFIX_SIZE + MSG_LEN_INDICATOR_SIZE + UUID_SIZE + result->length > MYMSG_CACHE_FRAGMENT_SIZE)
 			DeleteFirstFragment();
@@ -279,7 +292,10 @@ MyMsg_t* MyMsg_ProcessCache() {
 		//TODO: MyMsg data can occupie more than 2 fragments. need add check
 		result->pData = malloc(result->length);
 		if (result->pData == NULL)
-			MyMsg_Error_Handler();
+		{
+                    MyMsg_Error_Handler();
+                    return NULL;
+                }
 		uint32_t dataCopied = 0;
 		uint8_t dataInThisFrag = &_pCache->data[MYMSG_CACHE_FRAGMENT_SIZE] - tail;
 		if (dataInThisFrag > result->length)
@@ -305,13 +321,19 @@ MyMsg_t* MyMsg_ProcessCache() {
 MyMsg_t* MyMsg_ParseFragments(char* str, uint32_t len, uint8_t containsAffix) {
 	MyMsg_t* msg = malloc(sizeof(MyMsg_t));
 	if (msg == NULL)
-		return (MyMsg_t*) NULL;
+	{
+            MyMsg_Error_Handler();
+            return NULL;
+        }
 
 	memcpy(&msg->length, &str[AFFIX_SIZE], sizeof(uint32_t));
 	msg->UUID = str[AFFIX_SIZE + MSG_LEN_INDICATOR_SIZE];
 	msg->pData = malloc(msg->length);
 	if (msg->pData == NULL)
-		MyMsg_Error_Handler();
+	{
+            MyMsg_Error_Handler();
+            return NULL;
+        }
 	memcpy(msg->pData, &str[AFFIX_SIZE + MSG_LEN_INDICATOR_SIZE + UUID_SIZE], msg->length);
 
 	return msg;
@@ -322,7 +344,10 @@ MyMsg_t* MyMsg_CreateString(uint8_t UUID, void* pData, uint32_t len) {
 	char* str = (char*) pData;
 	uint32_t* locations = malloc(sizeof(uint32_t));
 	if (locations == NULL)
-		return 0;
+	{
+            MyMsg_Error_Handler();
+            return NULL;
+        }
 	uint32_t locationsCount = 0;
 
 	char* pAffix = memchr(str, AFFIX, len);
@@ -340,9 +365,9 @@ MyMsg_t* MyMsg_CreateString(uint8_t UUID, void* pData, uint32_t len) {
 	uint32_t wholeMsgLen = len + MSG_LEN_INDICATOR_SIZE + UUID_SIZE + (AFFIX_SIZE * (locationsCount + 2));
 	char* pStr = malloc(wholeMsgLen + 1);
 	if (pStr == NULL) {
-		free(locations);
-		return NULL;
-	}
+            MyMsg_Error_Handler();
+            return NULL;
+        }
 	pStr[0] = AFFIX_1;
 	pStr[1] = AFFIX_2;
 	memcpy(&pStr[2], &wholeMsgLen, 4);
@@ -373,6 +398,10 @@ MyMsg_t* MyMsg_CreateString(uint8_t UUID, void* pData, uint32_t len) {
 	pStrTail[2] = 0; // will be checksum or something. also need at least 1 char after msg
 	free(locations);
 	MyMsg_t* msg = malloc(sizeof(MyMsg_t));
+        if (msg == NULL){
+            MyMsg_Error_Handler();
+            return NULL;
+        }
 	msg->UUID = 0xFF;
 	msg->length = wholeMsgLen;
 	msg->pData = pStr;
