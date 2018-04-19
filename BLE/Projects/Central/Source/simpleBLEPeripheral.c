@@ -352,11 +352,17 @@ void SimpleBLEPeripheral_Init( uint8 task_id )
     uint8 pwmDutyCycleValue = 0;
     uint32 vthrValue = 0;
     uint32 batValue = 0;
+    uint32 currentValue = 0;
+    //uint32 speedValue = 0;
+    //uint32 flagsValue = 0;
     
     SimpleProfile_SetParameter( MODE_ID, MODE_LEN, &modeValue );
     SimpleProfile_SetParameter( PWM_DUTY_CYCLE_ID, PWM_DUTY_CYCLE_LEN, &pwmDutyCycleValue );
     SimpleProfile_SetParameter( V_THRESHOLD_ID, V_THRESHOLD_LEN, &vthrValue );
     SimpleProfile_SetParameter( BIKE_BATTERY_LEVEL_ID, BIKE_BATTERY_LEVEL_LEN, &batValue );
+    SimpleProfile_SetParameter( CURRENT_ID, CURRENT_LEN, &currentValue );
+    //SimpleProfile_SetParameter( BIKE_SPEED_ID, BIKE_SPEED_LEN, &speedValue );
+    //SimpleProfile_SetParameter( BIKE_FLAGS_ID, BIKE_FLAGS_LEN, &flagsValue );
   }
 
 
@@ -764,14 +770,22 @@ static void peripheralStateNotificationCB( gaprole_States_t newState )
  * @return  none
  */
 extern uint8 _PWM_DUTY_CYCLE_Value;
+extern int32 _V_THRESHOLD_Value;
 MyMsg_t* msg = NULL;
 bool _PWM_DUTY_CYCLE_Value_Changed = false;
+bool _V_THRESHOLD_Value_Changed = false;
 static void performPeriodicTask( void )
 {
   if (_PWM_DUTY_CYCLE_Value_Changed && msg == NULL)
   {
       _PWM_DUTY_CYCLE_Value_Changed = false;
       msg = MyMsg_CreateString(PWM_DUTY_CYCLE_ID, &_PWM_DUTY_CYCLE_Value, PWM_DUTY_CYCLE_LEN);
+     // printf("%d\n", _PWM_DUTY_CYCLE_Value);
+  }
+  else if (_V_THRESHOLD_Value_Changed && msg == NULL)
+  {
+      _V_THRESHOLD_Value_Changed = false;
+      msg = MyMsg_CreateString(V_THRESHOLD_ID, &_V_THRESHOLD_Value, V_THRESHOLD_LEN);
      // printf("%d\n", _PWM_DUTY_CYCLE_Value);
   }
   else if (msg != NULL)
@@ -803,9 +817,7 @@ static void performPeriodicTask( void )
 static void simpleProfileChangeCB( uint8 paramID )
 {
   uint8 newValue;
-  int32 newValue32[10];
-  char buf[50];
-  int i = 0;
+  uint32 newValue32;
   switch( paramID )
   {
     case MODE_ID:
@@ -814,18 +826,12 @@ static void simpleProfileChangeCB( uint8 paramID )
 
     case PWM_DUTY_CYCLE_ID:
       SimpleProfile_GetParameter( PWM_DUTY_CYCLE_ID, &newValue );
-      _PWM_DUTY_CYCLE_Value_Changed = true;
-      
+      _PWM_DUTY_CYCLE_Value_Changed = true; 
       break;
       
     case V_THRESHOLD_ID:
       SimpleProfile_GetParameter( V_THRESHOLD_ID, &newValue32);
-      buf[0] = 8;
-      buf[1] = V_THRESHOLD_ID;
-      memcpy(&buf[2], &newValue32, 4);
-      buf[6] = '\r';
-      buf[7] = '\n';
-      NPI_WriteTransport((uint8 *)buf, 8 );
+      _V_THRESHOLD_Value_Changed = true;
       break;
     case BIKE_BATTERY_LEVEL_ID:
       SimpleProfile_GetParameter( BIKE_BATTERY_LEVEL_ID, &newValue);

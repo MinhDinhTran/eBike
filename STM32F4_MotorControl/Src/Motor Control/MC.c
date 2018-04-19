@@ -20,19 +20,12 @@ extern ADC_HandleTypeDef ADC_INSTANCE_V2;
 extern ADC_HandleTypeDef ADC_INSTANCE_V3;
 extern TIM_HandleTypeDef TIM_MC_WATCHDOG;
 
-MotorControl_t MotorControl = {
-		.ADC_V = { 0, 0, 0 },
-		.DutyCycle = 20,
-		.Wanted_DutyCycle = 20,
-		.Integral = 0,
-		.Limits = { .Integral = 2500 },
-		.Flags = { .ClosedLoop = 0 },
-		.PWM_Switching = {
-				.IsRisingFront = 1,
-				.ActiveSequence = PWMSequencesNotInit,
-				.UseComplementaryPWM = 0,
-				.UsePWMOnPWMN = 0 },
-		.pwmCountToChangePhase = 250, //355;
+MotorControl_t MotorControl = { .ADC_V = { 0, 0, 0 }, .DutyCycle = 20, .Wanted_DutyCycle = 20, .Integral = 0, .Limits = {
+		.Integral = 5000 }, .Flags = { .ClosedLoop = 1 }, .PWM_Switching = {
+		.IsRisingFront = 1,
+		.ActiveSequence = PWMSequencesNotInit,
+		.UseComplementaryPWM = 0,
+		.UsePWMOnPWMN = 0 }, .pwmCountToChangePhase = 25, //355;
 		.PID = { .Kp = 200, .Ki = 500, .Kd = 1 } };
 
 static uint32_t GetActualBEMF();
@@ -53,7 +46,7 @@ void Start_MotorControlThread(void) {
 
 void MotorControlThread(void const * argument) // MotorControlThread function
 {
-	HAL_DAC_Start(&hdac,DAC_CHANNEL_2);
+	HAL_DAC_Start(&hdac, DAC_CHANNEL_2);
 	arm_pid_init_q31(&MotorControl.PID, 0);
 	UNUSED(argument);
 	HAL_ADC_Start_IT(&ADC_INSTANCE_VBAT);
@@ -133,7 +126,6 @@ void OnVBAT_ADC_Measured(ADC_HandleTypeDef* hadc) {
 	 HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_RESET);*/
 }
 
-
 void OnButtonClick(void) {
 	processUserBtn = 1;
 
@@ -166,20 +158,22 @@ static uint32_t GetActualBEMF() {
 }
 
 static void Integrate() {
-	uint16_t midPoint = (uint16_t) (MotorControl.ADC_VBAT / 2);
-	uint32_t PWM_Lv = GetActualBEMF();
-	if (PWM_Lv < 40)
-		return;
-	if (midPoint < 200)
-		return;
-	if (MotorControl.pwmCountThisPhase > 1000) {
-		ChangePhase();
-		return;
-	}
+	uint16_t midPoint = 0;
+	uint32_t PWM_Lv = 0;
 	switch (MotorControl.PWM_Switching.ActiveSequence) {
 	case PWMSequencesNotInit:
 		break;
 	case ForwardCommutation:
+		midPoint = (uint16_t) (MotorControl.ADC_VBAT / 2);
+		PWM_Lv = GetActualBEMF();
+		if (PWM_Lv < 40)
+			return;
+		if (midPoint < 200)
+			return;
+		if (MotorControl.pwmCountThisPhase > 300) {
+			ChangePhase();
+			return;
+		}
 		if (MotorControl.PWM_Switching.IsRisingFront && PWM_Lv > midPoint) {
 			MotorControl.Integral += (uint64_t) (PWM_Lv - midPoint);
 		} else if (!MotorControl.PWM_Switching.IsRisingFront && PWM_Lv < midPoint) {
@@ -195,6 +189,7 @@ static void Integrate() {
 	case FreeWheeling:
 		break;
 	case Regeneration:
+
 		break;
 	default:
 		break;
@@ -221,12 +216,12 @@ void OnPhaseChanged() {
 
 		}
 
-		if (!MotorControl.Flags.ClosedLoop) {
+		/*if (!MotorControl.Flags.ClosedLoop) {
 			phaseSwitchCount++;
 
-			if (phaseSwitchCount > 3)
+			if (phaseSwitchCount > 10)
 				MotorControl.Flags.ClosedLoop = 1;
-		}
+		}*/
 		// Check if ready to switch to closed loop.
 		/*if (!MotorControl.Flags.ClosedLoop) {
 		 if (MotorControl.Integral >= MotorControl.Limits.Integral / 4) {
@@ -249,7 +244,7 @@ void OnPhaseChanged() {
 	//HAL_DAC_SetValue(&hdac, DAC_CHANNEL_2, DAC_ALIGN_12B_R, MotorControl.pwm_phase * 600);
 
 	MotorControl.Integral = 0;
-	MotorControl.PWM_Switching.IsRisingFront = !(MotorControl.pwm_phase%2);
+	MotorControl.PWM_Switching.IsRisingFront = !(MotorControl.pwm_phase % 2);
 	if (MotorControl.PWM_Switching.IsRisingFront)
 		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_SET);
 	else

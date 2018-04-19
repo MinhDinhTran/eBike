@@ -147,7 +147,7 @@ void ChangePWMSwitchingSequence(PWMSequences newSequences) {
 		MotorControl.PWM_Switching.UsePWMOnPWMN = 0;
 		ChangePWMPinType();
 		ActiveSequence = &ForwardCommutationSequence;
-		MotorControl.Flags.ClosedLoop = 0;
+		//MotorControl.Flags.ClosedLoop = 0;
 		break;
 	case Regeneration:
 		//	__HAL_TIM_SET_PRESCALER(&PWM_INSTANCE, 150);

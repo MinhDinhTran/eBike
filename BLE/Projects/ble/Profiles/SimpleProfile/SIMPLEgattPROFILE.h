@@ -68,7 +68,7 @@ extern "C"
 #define BIKE_BATTERY_LEVEL_ID           3
 #define CURRENT_ID                      4
 #define BIKE_SPEED_ID                   5
-#define OVERCURRENT_PROTECTION_ID       6
+#define BIKE_FLAGS_ID                   6
   
 // Simple Profile Service UUID
 #define SIMPLEPROFILE_SERV_UUID         0xFFF0

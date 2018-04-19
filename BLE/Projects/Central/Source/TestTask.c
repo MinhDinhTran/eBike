@@ -42,9 +42,9 @@ uint16 TestTask_ProcessEvent( uint8 task_id, uint16 events )
 {
    osal_start_reload_timer( TestTask_ID, TestTask_MeasureADC, TestTask_MeasureADC_Period );
 
-   uint32 data = 123;
+  /* uint32 data = 123;
     SimpleProfile_SetParameter( BIKE_BATTERY_LEVEL_ID, BIKE_BATTERY_LEVEL_LEN, &data );
-    SimpleProfile_SetParameter( CURRENT_ID, CURRENT_LEN, &data );
+    SimpleProfile_SetParameter( CURRENT_ID, CURRENT_LEN, &data );*/
     
 
   

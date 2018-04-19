@@ -127,7 +127,7 @@ uint8 _PWM_DUTY_CYCLE_Value = 0;
 static uint8 _PWM_DUTY_CYCLE_Desc[] = "PWM duty cycle";
 
 static uint8 _V_THRESHOLD_Props = GATT_PROP_READ|GATT_PROP_WRITE;
-static int32 _V_THRESHOLD_Value = 0;
+int32 _V_THRESHOLD_Value = 0;
 static uint8 _V_THRESHOLD_Desc[] = "V Threshold";
 
 static uint8 _BIKE_BATTERY_LEVEL_Props = GATT_PROP_READ|GATT_PROP_NOTIFY;
