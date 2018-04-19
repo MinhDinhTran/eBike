@@ -138,7 +138,7 @@ void ChangePWMSwitchingSequence(PWMSequences newSequences) {
 
 	MotorControl.PWM_Switching.IsChangingSequence = 1;
 
-	ChangePWMDutyCycle(15, 100);
+	//ChangePWMDutyCycle(20, 100);
 
 	MotorControl.PWM_Switching.ActiveSequence = newSequences;
 	switch (newSequences) {
@@ -188,24 +188,9 @@ void ChangePhase(void) {
 	else if ((*ActiveSequence)[pwm_phase][2] == OffH || (*ActiveSequence)[pwm_phase][2] == OffL)
 		Enable_State((*ActiveSequence)[pwm_phase][2], TIM_CHANNEL_3);
 
-	__NOP();
-	__NOP();
-	__NOP();
-	__NOP();
-	__NOP();
-	__NOP();
-	__NOP();
-	__NOP();
-	__NOP();
-	__NOP();
-	__NOP();
-	__NOP();
-	__NOP();
-	__NOP();
-	__NOP();
-	__NOP();
-	__NOP();
-	__NOP();
+	for(int i = 500; i>0;i--)
+		__NOP();
+
 
 	if ((*ActiveSequence)[pwm_phase][0] == OnH || (*ActiveSequence)[pwm_phase][0] == OnL)
 		Enable_State((*ActiveSequence)[pwm_phase][0], TIM_CHANNEL_1);

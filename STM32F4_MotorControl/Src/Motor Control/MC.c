@@ -7,7 +7,9 @@
 #include <stdint.h>
 #include "InstDefs.h"
 #include "MC.h"
-#include "Bluetooth_Msg.h"
+
+extern QueueHandle_t xQueueTX;
+extern DAC_HandleTypeDef hdac;
 
 osThreadId MotorControlThreadHandle;
 
@@ -21,6 +23,7 @@ extern TIM_HandleTypeDef TIM_MC_WATCHDOG;
 MotorControl_t MotorControl = {
 		.ADC_V = { 0, 0, 0 },
 		.DutyCycle = 20,
+		.Wanted_DutyCycle = 20,
 		.Integral = 0,
 		.Limits = { .Integral = 2500 },
 		.Flags = { .ClosedLoop = 0 },
@@ -30,10 +33,7 @@ MotorControl_t MotorControl = {
 				.UseComplementaryPWM = 0,
 				.UsePWMOnPWMN = 0 },
 		.pwmCountToChangePhase = 250, //355;
-		.PID = {
-				.Kp = 200,
-				.Ki = 500,
-				.Kd = 1 } };
+		.PID = { .Kp = 200, .Ki = 500, .Kd = 1 } };
 
 static uint32_t GetActualBEMF();
 static void Integrate();
@@ -41,7 +41,7 @@ static void Integrate();
 extern void ChangePhase(void);
 static void MotorControlThread(void const * argument);
 
-uint8_t processUserBtn = 0;
+static uint8_t processUserBtn = 0;
 
 void Start_MotorControlThread(void) {
 	osThreadDef(MotorControlThread, MotorControlThread, osPriorityHigh, 0, 128); // definition and creation of MotorControlThread
@@ -53,6 +53,7 @@ void Start_MotorControlThread(void) {
 
 void MotorControlThread(void const * argument) // MotorControlThread function
 {
+	HAL_DAC_Start(&hdac,DAC_CHANNEL_2);
 	arm_pid_init_q31(&MotorControl.PID, 0);
 	UNUSED(argument);
 	HAL_ADC_Start_IT(&ADC_INSTANCE_VBAT);
@@ -60,10 +61,7 @@ void MotorControlThread(void const * argument) // MotorControlThread function
 	ChangePWMSwitchingSequence(Regeneration);
 	for (;;) {
 		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
-		osDelay(2000);
-
-		//MyMsg_t* msg = MyMsg_CreateString(BIKE_BATTERY_LEVEL_ID, &MotorControl.ADC_I[0], sizeof(uint16_t));
-		//xQueueSend(xQueueTX, (void * ) &msg, (TickType_t ) 0);
+		osDelay(200);
 
 		if (processUserBtn) {
 
@@ -73,7 +71,7 @@ void MotorControlThread(void const * argument) // MotorControlThread function
 				ChangePWMSwitchingSequence(Regeneration);
 
 			HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
-			osDelay(2000);
+			osDelay(200);
 
 			processUserBtn = 0;
 		}
@@ -83,7 +81,7 @@ void MotorControlThread(void const * argument) // MotorControlThread function
 void Tim10PulseFinished() {
 	if (HAL_TIM_OC_Stop_IT(&TIM_MC_WATCHDOG, TIM_MC_WATCHDOG_CHN) != HAL_OK)
 		Error_Handler();
-	MotorControl.Flags.ClosedLoop = 0;
+	//MotorControl.Flags.ClosedLoop = 0;
 }
 
 void Tim9PulseFinished(void) {
@@ -129,15 +127,27 @@ void OnPWM_ADC_Measured(ADC_HandleTypeDef* hadc) {
 void OnVBAT_ADC_Measured(ADC_HandleTypeDef* hadc) {
 	MotorControl.ADC_VBAT = HAL_ADC_GetValue(hadc);
 
-/*	if (MotorControl.ADC_VBAT > 2743) //2743=42V | 2600 = +/-40V
-		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_SET);
-	else
-		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_RESET);*/
+	/*if (MotorControl.ADC_VBAT > 2743) //2743=42V | 2600 = +/-40V
+	 HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_SET);
+	 else
+	 HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_RESET);*/
 }
+
 
 void OnButtonClick(void) {
 	processUserBtn = 1;
 
+	/*	if (xQueueTX != NULL)
+	 {
+
+	 HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
+	 Bluetooth_MSG_t *msg = malloc(sizeof(*msg) + sizeof(msg->MSG[0]));
+	 msg->UUID = BIKE_BATTERY_LEVEL_ID;
+	 msg->length = 1;
+	 msg->MSG[0] = MotorControl.ADC_VBAT;
+
+	 xQueueSendFromISR(xQueueTX, (void * ) &msg, (TickType_t ) 0);
+	 }*/
 }
 
 static uint32_t GetActualBEMF() {
@@ -156,28 +166,45 @@ static uint32_t GetActualBEMF() {
 }
 
 static void Integrate() {
-	uint16_t midPoint = MotorControl.ADC_VBAT / 2;
+	uint16_t midPoint = (uint16_t) (MotorControl.ADC_VBAT / 2);
 	uint32_t PWM_Lv = GetActualBEMF();
 	if (PWM_Lv < 40)
 		return;
 	if (midPoint < 200)
 		return;
-
-	if (MotorControl.PWM_Switching.IsRisingFront && PWM_Lv > midPoint)
-		MotorControl.Integral += PWM_Lv - midPoint;
-	else if (!MotorControl.PWM_Switching.IsRisingFront && PWM_Lv < midPoint)
-		MotorControl.Integral += midPoint - PWM_Lv;
-
-	if (MotorControl.Flags.ClosedLoop) {
-		if (MotorControl.Integral >= MotorControl.Limits.Integral) {
-			ChangePhase();
+	if (MotorControl.pwmCountThisPhase > 1000) {
+		ChangePhase();
+		return;
+	}
+	switch (MotorControl.PWM_Switching.ActiveSequence) {
+	case PWMSequencesNotInit:
+		break;
+	case ForwardCommutation:
+		if (MotorControl.PWM_Switching.IsRisingFront && PWM_Lv > midPoint) {
+			MotorControl.Integral += (uint64_t) (PWM_Lv - midPoint);
+		} else if (!MotorControl.PWM_Switching.IsRisingFront && PWM_Lv < midPoint) {
+			MotorControl.Integral += (uint64_t) (midPoint - PWM_Lv);
 		}
+
+		if (MotorControl.Flags.ClosedLoop) {
+			if (MotorControl.Integral >= MotorControl.Limits.Integral) {
+				ChangePhase();
+			}
+		}
+		break;
+	case FreeWheeling:
+		break;
+	case Regeneration:
+		break;
+	default:
+		break;
 	}
 }
 
 q31_t output = 0;
 uint32_t phaseSwitchCount = 0;
 void OnPhaseChanged() {
+
 	switch (MotorControl.PWM_Switching.ActiveSequence) {
 	case PWMSequencesNotInit:
 		break;
@@ -190,51 +217,62 @@ void OnPhaseChanged() {
 			htim10.Instance->CNT = 0;
 			if (HAL_TIM_OC_Start_IT(&TIM_MC_WATCHDOG, TIM_MC_WATCHDOG_CHN) != HAL_OK)
 				Error_Handler();
-			output = arm_pid_q31(&MotorControl.PID, (q31_t) MotorControl.RPM);
+			//output = arm_pid_q31(&MotorControl.PID, (q31_t) MotorControl.RPM);
 
-			if (MotorControl.Flags.ClosedLoop && MotorControl.Wanted_DutyCycle != MotorControl.DutyCycle)
-				ChangePWMDutyCycle(MotorControl.Wanted_DutyCycle, 3);
 		}
 
-		// Check if ready to switch to closed loop.
 		if (!MotorControl.Flags.ClosedLoop) {
-			if (MotorControl.Integral >= MotorControl.Limits.Integral / 4) {
-				phaseSwitchCount++;
-			} else
-				phaseSwitchCount = 0;
+			phaseSwitchCount++;
+
 			if (phaseSwitchCount > 3)
 				MotorControl.Flags.ClosedLoop = 1;
 		}
+		// Check if ready to switch to closed loop.
+		/*if (!MotorControl.Flags.ClosedLoop) {
+		 if (MotorControl.Integral >= MotorControl.Limits.Integral / 4) {
+		 phaseSwitchCount++;
+		 } else
+		 phaseSwitchCount = 0;
+		 if (phaseSwitchCount > 3)
+		 MotorControl.Flags.ClosedLoop = 1;
+		 }*/
 		break;
 	case FreeWheeling:
 		break;
 	case Regeneration:
-		if (MotorControl.Wanted_DutyCycle != MotorControl.DutyCycle)
-			ChangePWMDutyCycle(MotorControl.Wanted_DutyCycle, 5);
+		/*if (MotorControl.Wanted_DutyCycle != MotorControl.DutyCycle)
+		 ChangePWMDutyCycle(MotorControl.Wanted_DutyCycle, 5);*/
 		break;
 	default:
 		break;
 	}
+	//HAL_DAC_SetValue(&hdac, DAC_CHANNEL_2, DAC_ALIGN_12B_R, MotorControl.pwm_phase * 600);
+
 	MotorControl.Integral = 0;
-	MotorControl.PWM_Switching.IsRisingFront = !MotorControl.PWM_Switching.IsRisingFront;
+	MotorControl.PWM_Switching.IsRisingFront = !(MotorControl.pwm_phase%2);
+	if (MotorControl.PWM_Switching.IsRisingFront)
+		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_SET);
+	else
+		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_RESET);
 	MotorControl.pwmCountThisPhase = 0;
 }
 
 void ChangePWMDutyCycle(uint8_t newDutyCycle, int8_t maxStep) {
-	if (MotorControl.DutyCycle == newDutyCycle)
+	if (MotorControl.DutyCycle == newDutyCycle) {
 		return;
+	}
 	if (newDutyCycle < 5)
 		newDutyCycle = 5;
 	if (newDutyCycle > 95)
 		newDutyCycle = 95;
-	int8_t diff = newDutyCycle - MotorControl.DutyCycle;
-	if (diff > maxStep)
-		diff = maxStep;
-	else if (diff < -maxStep)
-		diff = -maxStep;
+	/*int8_t diff = newDutyCycle - MotorControl.DutyCycle;
+	 if (diff > 0 && diff > maxStep)
+	 diff = maxStep;
+	 else if (diff < 0 && diff < -maxStep)
+	 diff = -maxStep;
 
-	uint8_t dutyCycleToSet = MotorControl.DutyCycle + diff;
-
+	 uint8_t dutyCycleToSet = MotorControl.DutyCycle + diff;*/
+	uint8_t dutyCycleToSet = newDutyCycle;
 	__HAL_TIM_SET_COMPARE(&PWM_INSTANCE, TIM_CHANNEL_1, dutyCycleToSet * 10);
 	__HAL_TIM_SET_COMPARE(&PWM_INSTANCE, TIM_CHANNEL_2, dutyCycleToSet * 10);
 	__HAL_TIM_SET_COMPARE(&PWM_INSTANCE, TIM_CHANNEL_3, dutyCycleToSet * 10);

@@ -14,7 +14,10 @@ void ProccesReceivedMessage(MyMsg_t *msg) {
 	HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_13);
 	switch (msg->UUID) {
 	case PWM_DUTY_CYCLE_ID:
-		//MotorControl.Wanted_DutyCycle = (uint8_t) (msg->pMsg >> 16);
+		MotorControl.Wanted_DutyCycle = *(uint8_t*)msg->pData;
+
+
+		ChangePWMDutyCycle(MotorControl.Wanted_DutyCycle, 100);
 		break;
 	case V_THRESHOLD_ID:
 		//MotorControl.V_Treshold = msg->pMsg;
