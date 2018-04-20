@@ -7,8 +7,8 @@
 #include <stdint.h>
 #include "InstDefs.h"
 #include "MC.h"
+#include "Bluetooth_Msg.h"
 
-extern QueueHandle_t xQueueTX;
 extern DAC_HandleTypeDef hdac;
 
 osThreadId MotorControlThreadHandle;
@@ -21,12 +21,13 @@ extern ADC_HandleTypeDef ADC_INSTANCE_V3;
 extern TIM_HandleTypeDef TIM_MC_WATCHDOG;
 
 MotorControl_t MotorControl = { .ADC_V = { 0, 0, 0 }, .DutyCycle = 20, .Wanted_DutyCycle = 20, .Integral = 0, .Limits = {
-		.Integral = 5000 }, .Flags = { .ClosedLoop = 1 }, .PWM_Switching = {
+		.Integral = 3000 // su ~50% duty cycle testuota
+}, .Flags = { .ClosedLoop = 1 }, .PWM_Switching = {
 		.IsRisingFront = 1,
 		.ActiveSequence = PWMSequencesNotInit,
 		.UseComplementaryPWM = 0,
 		.UsePWMOnPWMN = 0 }, .pwmCountToChangePhase = 25, //355;
-		.PID = { .Kp = 200, .Ki = 500, .Kd = 1 } };
+		.PID = { .Kp = -0.5, .Ki = -0.1, .Kd = -0.5 } };
 
 static uint32_t GetActualBEMF();
 static void Integrate();
@@ -37,24 +38,28 @@ static void MotorControlThread(void const * argument);
 static uint8_t processUserBtn = 0;
 
 void Start_MotorControlThread(void) {
+
+
 	osThreadDef(MotorControlThread, MotorControlThread, osPriorityHigh, 0, 128); // definition and creation of MotorControlThread
 	MotorControlThreadHandle = osThreadCreate(osThread(MotorControlThread), NULL);
 
 	if (MotorControlThreadHandle == NULL)
 		Error_Handler();
 }
+uint16_t data1 = 1;
+uint16_t data2 = 2;
 
 void MotorControlThread(void const * argument) // MotorControlThread function
 {
+	arm_pid_init_f32(&MotorControl.PID, 1);
 	HAL_DAC_Start(&hdac, DAC_CHANNEL_2);
-	arm_pid_init_q31(&MotorControl.PID, 0);
 	UNUSED(argument);
 	HAL_ADC_Start_IT(&ADC_INSTANCE_VBAT);
-	osDelay(10);
+	osDelay(1000);
 	ChangePWMSwitchingSequence(Regeneration);
 	for (;;) {
 		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
-		osDelay(200);
+		osDelay(20);
 
 		if (processUserBtn) {
 
@@ -68,6 +73,15 @@ void MotorControlThread(void const * argument) // MotorControlThread function
 
 			processUserBtn = 0;
 		}
+
+
+		data1++;
+		data2++;
+		 MyMsg_t *msg = MyMsg_CreateString(BIKE_BATTERY_LEVEL_ID, &data1, 2);
+		 xQueueSendFromISR(xQueueTX, (void * ) &msg, (TickType_t ) 0);
+			osDelay(1000);
+		 MyMsg_t *msg2 = MyMsg_CreateString(CURRENT_ID, &data2, 2);
+		 xQueueSendFromISR(xQueueTX, (void * ) &msg2, (TickType_t ) 0);
 	}
 }
 
@@ -128,18 +142,6 @@ void OnVBAT_ADC_Measured(ADC_HandleTypeDef* hadc) {
 
 void OnButtonClick(void) {
 	processUserBtn = 1;
-
-	/*	if (xQueueTX != NULL)
-	 {
-
-	 HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
-	 Bluetooth_MSG_t *msg = malloc(sizeof(*msg) + sizeof(msg->MSG[0]));
-	 msg->UUID = BIKE_BATTERY_LEVEL_ID;
-	 msg->length = 1;
-	 msg->MSG[0] = MotorControl.ADC_VBAT;
-
-	 xQueueSendFromISR(xQueueTX, (void * ) &msg, (TickType_t ) 0);
-	 }*/
 }
 
 static uint32_t GetActualBEMF() {
@@ -196,8 +198,9 @@ static void Integrate() {
 	}
 }
 
-q31_t output = 0;
+float32_t output = 0;
 uint32_t phaseSwitchCount = 0;
+int newDutyCycle;
 void OnPhaseChanged() {
 
 	switch (MotorControl.PWM_Switching.ActiveSequence) {
@@ -207,21 +210,29 @@ void OnPhaseChanged() {
 		if (MotorControl.pwm_phase == 0) {
 			if (HAL_TIM_OC_Stop_IT(&TIM_MC_WATCHDOG, TIM_MC_WATCHDOG_CHN) != HAL_OK)
 				Error_Handler();
-			MotorControl.RPM = (float) 1 / TIM_MC_WATCHDOG.Instance->CNT * 200000 * 60 / 24;
+			MotorControl.RPM = (float) 4200/TIM_MC_WATCHDOG.Instance->CNT * 60 / 24;
 
 			htim10.Instance->CNT = 0;
 			if (HAL_TIM_OC_Start_IT(&TIM_MC_WATCHDOG, TIM_MC_WATCHDOG_CHN) != HAL_OK)
 				Error_Handler();
-			//output = arm_pid_q31(&MotorControl.PID, (q31_t) MotorControl.RPM);
+			output = arm_pid_f32(&MotorControl.PID, (float32_t)  MotorControl.RPM  - 100 );
 
+			//output = MotorControl.DutyCycle + output/100;
+			newDutyCycle = (int)output;
+
+			if (newDutyCycle < 5)
+				newDutyCycle = 5;
+			if (newDutyCycle > 95)
+				newDutyCycle = 95;
+			ChangePWMDutyCycle((uint8_t)newDutyCycle, 0);
 		}
 
 		/*if (!MotorControl.Flags.ClosedLoop) {
-			phaseSwitchCount++;
+		 phaseSwitchCount++;
 
-			if (phaseSwitchCount > 10)
-				MotorControl.Flags.ClosedLoop = 1;
-		}*/
+		 if (phaseSwitchCount > 10)
+		 MotorControl.Flags.ClosedLoop = 1;
+		 }*/
 		// Check if ready to switch to closed loop.
 		/*if (!MotorControl.Flags.ClosedLoop) {
 		 if (MotorControl.Integral >= MotorControl.Limits.Integral / 4) {

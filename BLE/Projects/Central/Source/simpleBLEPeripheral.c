@@ -145,7 +145,7 @@
 /*********************************************************************
  * GLOBAL VARIABLES
  */
-
+bool Connected = false;
 /*********************************************************************
  * EXTERNAL VARIABLES
  */
@@ -610,6 +610,7 @@ static void peripheralStateNotificationCB( gaprole_States_t newState )
 
     case GAPROLE_ADVERTISING:
       {
+        Connected = false;
         #if (defined DEBUGGING)
           printf("Advertising.\n");
         #endif
@@ -642,6 +643,7 @@ static void peripheralStateNotificationCB( gaprole_States_t newState )
       
     case GAPROLE_CONNECTED:
       {   
+        Connected = true;
         #if (defined DEBUGGING)
           printf("c\n");
         #endif
@@ -688,6 +690,7 @@ static void peripheralStateNotificationCB( gaprole_States_t newState )
       break;      
     case GAPROLE_WAITING:
       {
+        Connected = false;
         #if (defined DEBUGGING)
           printf("D.\n");
         #endif

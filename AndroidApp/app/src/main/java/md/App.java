@@ -18,7 +18,6 @@ import md.ble.BleManagerService;
 public class App extends Application {
     private boolean _bleWasEnabled = true;
 
-
     public static final DeviceDefCollection DEVICE_DEF_COLLECTION;
     public static SensorDataController sensorDataController = null;
     static {
@@ -31,7 +30,6 @@ public class App extends Application {
         };
         DEVICE_DEF_COLLECTION.register(AppConfig.DEF_DEVICE_NAME);
     }
-
 
     @Override
     public void onCreate() {

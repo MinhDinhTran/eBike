@@ -19,12 +19,12 @@
 #include "SIMPLEgattPROFILE.h"
 
 #define TestTask_MeasureADC                               0x0001
-#define TestTask_MeasureADC_Period                        200
+#define TestTask_MeasureADC_Period                        20
 
 //--------------- UART defs/vars
 static void SetParameter(MyMsg_t* msg);
 //---------------
-
+extern bool Connected;
 extern bStatus_t SimpleProfile_SetParameter( uint8 param, uint8 len, void *value );
 uint8 TestTask_ID;
 void npiCBack ( uint8 port, uint8 event );
@@ -37,17 +37,34 @@ void TestTask_Init( uint8 task_id )
   osal_start_reload_timer( TestTask_ID, TestTask_MeasureADC, TestTask_MeasureADC_Period );
  
 }
-
+void processUART()
+{  
+  uint16 len = NPI_RxBufLen();
+  if (len != 0) 
+  {
+    char tempBuffer[NPI_UART_RX_BUF_SIZE];
+    if (tempBuffer != NULL)
+    {
+      len = NPI_ReadTransport((uint8*)tempBuffer, NPI_UART_RX_BUF_SIZE );
+      for (uint8 i = 0; i< len; i++){
+        MyMsg_CacheStringPiece_ISR(tempBuffer[i]);
+      }
+      
+      MyMsg_t* msg = MyMsg_ProcessCache();
+      if (msg != NULL)
+      {
+        SetParameter(msg);
+        free(msg->pData);
+        free(msg);
+      }
+    }
+  }
+}
 uint16 TestTask_ProcessEvent( uint8 task_id, uint16 events )
 {
    osal_start_reload_timer( TestTask_ID, TestTask_MeasureADC, TestTask_MeasureADC_Period );
 
-  /* uint32 data = 123;
-    SimpleProfile_SetParameter( BIKE_BATTERY_LEVEL_ID, BIKE_BATTERY_LEVEL_LEN, &data );
-    SimpleProfile_SetParameter( CURRENT_ID, CURRENT_LEN, &data );*/
-    
-
-  
+  //processUART();
    events = ( events ^ TestTask_MeasureADC);
    return events;//( events ^ TestTask_MeasureADC);
 }
@@ -62,48 +79,26 @@ uint16 TestTask_ProcessEvent( uint8 task_id, uint16 events )
 
 void npiCBack ( uint8 port, uint8 event )
 {  
-  uint16 len = NPI_RxBufLen();
-  if (len == 0) 
-    return;
-  char* tempBuffer = malloc (len);
-  if (tempBuffer == NULL)
-    return;
-  
-  
-  len = NPI_ReadTransport((uint8*)tempBuffer, len );
-  for (uint8 i = 0; i< len; i++){
-    MyMsg_CacheStringPiece_ISR(*tempBuffer);
-    tempBuffer++;
-  }
-  free(tempBuffer);
-  
-  
-  MyMsg_t* msg = MyMsg_ProcessCache();
-  if (msg != NULL)
-  {
-    printf("%d\n",msg->pData);
-    //SetParameter(msg);
-    free(msg->pData);
-    free(msg);
-  }
+processUART();
 }
 
 
 
 static void SetParameter(MyMsg_t* msg)
 {
-  int32 u32;
+  if (!Connected) return ;
+  uint32 u32;
   switch(msg->UUID)
   {
   case BIKE_BATTERY_LEVEL_ID:
-    u32 = *(int32*)(msg->pData);
+    u32 = *(uint16*)(msg->pData);
     
-   printf("%d\n",u32);
+ //  printf("%d\n",u32);
     SimpleProfile_SetParameter( BIKE_BATTERY_LEVEL_ID, BIKE_BATTERY_LEVEL_LEN, &u32 );
    // printf("%li \n", u32);
     break;
   case CURRENT_ID:
-    u32 = *(int32*)(msg->pData);
+    u32 =  *(uint16*)(msg->pData);
     SimpleProfile_SetParameter( CURRENT_ID, CURRENT_LEN, &u32 );
     break;
   }

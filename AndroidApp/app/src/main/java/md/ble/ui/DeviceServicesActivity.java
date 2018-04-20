@@ -23,6 +23,7 @@ import com.github.mikephil.charting.data.LineDataSet;
 import java.util.ArrayList;
 import java.util.List;
 
+import md.App;
 import md.ble.BLE_Services.BLEConst;
 import md.ble.BLE_Services.InfoService;
 import md.ble.BLE_Services.MyCustomService;
@@ -36,21 +37,15 @@ public class DeviceServicesActivity extends Activity
         implements
         BleServicesAdapter.OnServiceItemClickListener,
         EnterValueDialog.ValueEnterDialogListener,
-        SeekBar.OnSeekBarChangeListener {
+        SeekBar.OnSeekBarChangeListener,
+        BleManagerService.BleStateListener {
     /**
      * Log tag.
      */
     @SuppressWarnings("UnusedDeclaration")
     private final static String TAG = DeviceServicesActivity.class.getSimpleName();
 
-    /**
-     * Data output field for active sensor.
-     */
-    private TextView dataCharacteristic;
-    /**
-     * Data output field for active sensor.
-     */
-    private TextView dataValue;
+
     /**
      * Services list.
      */
@@ -77,7 +72,7 @@ public class DeviceServicesActivity extends Activity
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.device_services_activity);
-
+        BleManagerService.getInstance().setBleStateListener(this);
         /*final ActionBar actionBar = getSupportActionBar();
         final String deviceName = getDeviceName();
         if (TextUtils.isEmpty(deviceName)) {
@@ -90,11 +85,10 @@ public class DeviceServicesActivity extends Activity
         }
         actionBar.setDisplayHomeAsUpEnabled(true);*/
 
-
-        final SeekBar seekBar = (SeekBar)findViewById(R.id.seekBar_pwm);
+        final SeekBar seekBar = (SeekBar) findViewById(R.id.seekBar_pwm);
         seekBar.setOnSeekBarChangeListener(this);
 
-        final SeekBar seekBar2 = (SeekBar)findViewById(R.id.seekBar_vthr);
+        final SeekBar seekBar2 = (SeekBar) findViewById(R.id.seekBar_vthr);
         seekBar2.setOnSeekBarChangeListener(this);
 
         final LineChart chart = (LineChart) findViewById(R.id.chart);
@@ -109,6 +103,11 @@ public class DeviceServicesActivity extends Activity
         chart.invalidate(); // refresh
     }
 
+    @Override
+    protected void onDestroy() {
+        BleManagerService.getInstance().setBleStateListener(null);
+        super.onDestroy();
+    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -119,60 +118,61 @@ public class DeviceServicesActivity extends Activity
         }
         return super.onOptionsItemSelected(item);
     }
-/*
-    @Override
-    public void onDisconnected(final String name, final String address) {
-        super.onDisconnected(name, address);
-        finish();
-    }
 
-    @Override
-    public void onServiceDiscovered(final String name, final String address) {
-        super.onServiceDiscovered(name, address);
-    }
-
-    @Override
-    public void onCharacteristicChanged(final String name, final String address,
-                                        final String serviceUuid,
-                                        final String characteristicUuid) {
-        super.onCharacteristicChanged(name, address, serviceUuid, characteristicUuid);
-        final Sensor<?> sensor = (Sensor<?>) getBleManager().getDeviceDefCollection()
-                .get(name, address).getSensor(serviceUuid);
-        if (sensor == null)
-            return;
-        String dataString = "";
-        if (sensor instanceof InfoService) {
-            final InfoService<?> infoSensor = (InfoService<?>) sensor;
-            dataString = infoSensor.getValue();
-        } else {
-            final Object data = sensor.getData();
-            dataString = String.valueOf(data);
-        }
-        switch (serviceUuid) {
-            case MyCustomService.UUID_SERVICE:
-                switch (characteristicUuid) {
-                    case MyCustomService.UUID_PWM_DUTY_CYCLE_ID:
-
-                        final SeekBar et = (SeekBar) findViewById(R.id.seekBar_pwm);
-                        et.setVerticalScrollbarPosition(Integer.parseInt(dataString));
-                        break;
-                    case MyCustomService.UUID_BIKE_BATTERY_LEVEL_ID:
-
-                        final LineChart chart = (LineChart) findViewById(R.id.chart);
-                        chart.getLineData().addEntry(new Entry(entryNo++, ((MyCustomService) sensor).getIntValue()), 0);
-                        if (countToRefreshChart++ > 10) {
-                            chart.notifyDataSetChanged();
-                            //chart.getLineData().addEntry(new Entry(entryNo++, ((MyCustomService)sensor).getIntValue()), 0);
-                            chart.invalidate(); // refresh
-                            countToRefreshChart = 0;
-                        }
-                        break;
-                }
-                break;
+    /*
+        @Override
+        public void onDisconnected(final String name, final String address) {
+            super.onDisconnected(name, address);
+            finish();
         }
 
-    }
-*/
+        @Override
+        public void onServiceDiscovered(final String name, final String address) {
+            super.onServiceDiscovered(name, address);
+        }
+
+        @Override
+        public void onCharacteristicChanged(final String name, final String address,
+                                            final String serviceUuid,
+                                            final String characteristicUuid) {
+            super.onCharacteristicChanged(name, address, serviceUuid, characteristicUuid);
+            final Sensor<?> sensor = (Sensor<?>) getBleManager().getDeviceDefCollection()
+                    .get(name, address).getSensor(serviceUuid);
+            if (sensor == null)
+                return;
+            String dataString = "";
+            if (sensor instanceof InfoService) {
+                final InfoService<?> infoSensor = (InfoService<?>) sensor;
+                dataString = infoSensor.getValue();
+            } else {
+                final Object data = sensor.getData();
+                dataString = String.valueOf(data);
+            }
+            switch (serviceUuid) {
+                case MyCustomService.UUID_SERVICE:
+                    switch (characteristicUuid) {
+                        case MyCustomService.UUID_PWM_DUTY_CYCLE_ID:
+
+                            final SeekBar et = (SeekBar) findViewById(R.id.seekBar_pwm);
+                            et.setVerticalScrollbarPosition(Integer.parseInt(dataString));
+                            break;
+                        case MyCustomService.UUID_BIKE_BATTERY_LEVEL_ID:
+
+                            final LineChart chart = (LineChart) findViewById(R.id.chart);
+                            chart.getLineData().addEntry(new Entry(entryNo++, ((MyCustomService) sensor).getIntValue()), 0);
+                            if (countToRefreshChart++ > 10) {
+                                chart.notifyDataSetChanged();
+                                //chart.getLineData().addEntry(new Entry(entryNo++, ((MyCustomService)sensor).getIntValue()), 0);
+                                chart.invalidate(); // refresh
+                                countToRefreshChart = 0;
+                            }
+                            break;
+                    }
+                    break;
+            }
+
+        }
+    */
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
         SendData(seekBar, false);
     }
@@ -197,7 +197,7 @@ public class DeviceServicesActivity extends Activity
         Bundle bundle = new Bundle();
         bundle.putString(BLEConst.DATA, value);
 
-        BleManagerService.getInstance().update( (MyCustomService) activeSensor, characteristic.getUuid().toString(), bundle);
+        BleManagerService.getInstance().update((MyCustomService) activeSensor, characteristic.getUuid().toString(), bundle);
         // getBleManager().read(address, sensor, characteristic.getUuid().toString());
     }
 
@@ -208,8 +208,7 @@ public class DeviceServicesActivity extends Activity
         if (progress_PWMDutyCycle == progress)
             return;
 
-        if (!ignoreTimestamp)
-        {
+        if (!ignoreTimestamp) {
             Long tsLong = System.currentTimeMillis();
             if (tsLong - lastChanged_PWMDutyCycle < 100)
                 return;
@@ -223,16 +222,39 @@ public class DeviceServicesActivity extends Activity
 
         switch (seekBar.getId()) {
             case R.id.seekBar_pwm:
-                final TextView tvPwm = (TextView)findViewById(R.id.textView_pwmdutycycle);
+                final TextView tvPwm = (TextView) findViewById(R.id.textView_pwmdutycycle);
                 tvPwm.setText("PWM Duty Cycle = " + progress);
                 BleManagerService.getInstance().update((MyCustomService) sensor, MyCustomService.UUID_PWM_DUTY_CYCLE_ID, bundle);
                 break;
             case R.id.seekBar_vthr:
-                final TextView tvVthr = (TextView)findViewById(R.id.textView_vthr);
+                final TextView tvVthr = (TextView) findViewById(R.id.textView_vthr);
                 tvVthr.setText("V Threshold = " + progress);
 
                 BleManagerService.getInstance().update((MyCustomService) sensor, MyCustomService.UUID_V_THRESHOLD_ID, bundle);
                 break;
         }
+    }
+
+    @Override
+    public void onBleStateChange(BleManagerService.bleState state) {
+        final BleManagerService.bleState s = state;
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                final TextView textview = ((TextView) findViewById(R.id.data_characteristic_uuid));
+                switch (s) {
+                    case connected:
+                        textview.setText("Connected");
+                        break;
+                    case disconnected:
+                        textview.setText("Disconnected");
+                        break;
+                    case connectionFailed:
+                        textview.setText("Connection Failed");
+                        break;
+                }
+                textview.refreshDrawableState();
+            }
+        });
     }
 }

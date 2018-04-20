@@ -296,6 +296,7 @@
                 </option>
                 <option>
                     <name>CCDefines</name>
+                    <state>INT_HEAP_LEN=3072</state>
                     <state>HALNODEBUG</state>
                     <state>OSAL_CBTIMER_NUM_TASKS=2</state>
                     <state>HAL_AES_DMA=TRUE</state>
@@ -377,7 +378,7 @@
                 </option>
                 <option>
                     <name>CCMultibyteSupport</name>
-                    <state>0</state>
+                    <state>1</state>
                 </option>
                 <option>
                     <name>CCMigrationPreprocExtentions</name>
@@ -527,7 +528,7 @@
                 <option>
                     <name>CCOptStrategy</name>
                     <version>0</version>
-                    <state>1</state>
+                    <state>0</state>
                 </option>
                 <option>
                     <name>CCOptLevelSlave</name>
@@ -564,7 +565,7 @@
                 </option>
                 <option>
                     <name>IccFloatSemantics</name>
-                    <state>0</state>
+                    <state>1</state>
                 </option>
                 <option>
                     <name>NoSizeConstraints</name>
@@ -582,7 +583,7 @@
                 <option>
                     <name>CCOptStrategySlave</name>
                     <version>0</version>
-                    <state>1</state>
+                    <state>0</state>
                 </option>
             </data>
         </settings>

@@ -55,6 +55,7 @@ static MyMsgCache_t* CreateCacheFragment() {
 	return fragment;
 }
 static void DeleteFirstFragment() {   
+        if (_pCache == NULL) return;
 	if (_pCache->NextFragment != NULL) {
 		MyMsgCache_t* pNextFrag = _pCache->NextFragment;
 		free(_pCache);
@@ -73,6 +74,8 @@ void MyMsg_CacheStringPiece_ISR(char s) {
 		_pCache = CreateCacheFragment();
 		_pLastFragment = _pCache;
 	}
+        if (_pCache == NULL)
+          return;
 	_pLastFragment->data[_pLastFragment->dataCount++] = s;
 	switch (flag_AffixSearch) {
 	case 0:

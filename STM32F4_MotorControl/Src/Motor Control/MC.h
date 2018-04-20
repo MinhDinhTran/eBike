@@ -58,7 +58,7 @@ struct MotorControl_t
     float Wanted_RPM;
     float RPM;
 
-    arm_pid_instance_q31 PID;
+    arm_pid_instance_f32 PID;
 };
 
 extern MotorControl_t MotorControl;

@@ -97,9 +97,9 @@ extern "C"
 #define NPI_UART_FC                    FALSE
 #endif // !NPI_UART_FC
 
-#define NPI_UART_FC_THRESHOLD          48
-#define NPI_UART_RX_BUF_SIZE           256
-#define NPI_UART_TX_BUF_SIZE           256
+#define NPI_UART_FC_THRESHOLD          16
+#define NPI_UART_RX_BUF_SIZE           32
+#define NPI_UART_TX_BUF_SIZE           32
 #define NPI_UART_IDLE_TIMEOUT          16
 #define NPI_UART_INT_ENABLE            TRUE
 

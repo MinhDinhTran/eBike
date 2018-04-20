@@ -7,6 +7,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.chimeraiot.android.ble.BleManager;
@@ -24,6 +25,15 @@ import md.ble.BLE_Services.MyCustomService;
 
 public class BleManagerService extends com.chimeraiot.android.ble.BleService
         implements ScanProcessor.ScanProcessorListener {
+    public enum bleState {
+        connected,
+        disconnected,
+        connectionFailed
+    }
+
+    public interface BleStateListener {
+        void onBleStateChange(bleState state);
+    }
 
     private static final String TAG = BleManagerService.class.getSimpleName();
     private static final String RECORD_DEVICE_NAME = "BLEPeripheral";
@@ -32,6 +42,7 @@ public class BleManagerService extends com.chimeraiot.android.ble.BleService
     private static BleManagerService INSTANCE = null;
     private String adress = null;
     private String deviceName = null;
+    private BleStateListener _bleStateListener = null;
 
     public static BleManagerService getInstance() {
         if (INSTANCE == null) {
@@ -40,6 +51,9 @@ public class BleManagerService extends com.chimeraiot.android.ble.BleService
         return (INSTANCE);
     }
 
+    public void setBleStateListener(BleStateListener listener) {
+        _bleStateListener = listener;
+    }
 
     @Override
     public void onCreate() {
@@ -89,26 +103,31 @@ public class BleManagerService extends com.chimeraiot.android.ble.BleService
     @Override
     public void onConnected(final String name, final String address) {
         super.onConnected(name, address);
+        if (_bleStateListener != null)
+            _bleStateListener.onBleStateChange(bleState.connected);
         //Log.d(TAG, "Connected");
         final InfoService<?> sensor = (InfoService<?>) getBleManager().getDeviceDefCollection()
                 .get(name, address).getSensor(SENSOR_TO_READ);
         if (sensor instanceof MyCustomService) {
             getBleManager().listen(address, sensor, MyCustomService.UUID_BIKE_BATTERY_LEVEL_ID);
-           // getBleManager().listen(address, sensor, MyCustomService.UUID_CURRENT_ID);
+             getBleManager().listen(address, sensor, MyCustomService.UUID_CURRENT_ID);
         }
     }
 
     @Override
     public void onDisconnected(final String name, final String address) {
         super.onDisconnected(name, address);
-        Log.d(TAG, "Disconnected");
+        if (_bleStateListener != null)
+            _bleStateListener.onBleStateChange(bleState.disconnected);
         scanner.StartScan(RECORD_DEVICE_NAME);
     }
 
     @Override
     public void onConnectionFailed(String name, String address, int status, int state) {
         super.onConnectionFailed(name, address, status, state);
-        //getBleManager().disconnect();
+        if (_bleStateListener != null)
+            _bleStateListener.onBleStateChange(bleState.connectionFailed);
+        getBleManager().reset(address);
         scanner.StartScan(RECORD_DEVICE_NAME);
     }
 
@@ -154,10 +173,9 @@ public class BleManagerService extends com.chimeraiot.android.ble.BleService
 
 
     public DeviceDef getDeviceDef() {
-        return new BaseDef<>((Void)null);
+        return new BaseDef<>((Void) null);
        /*if (adress != null && deviceName != null)
             return null;
         return getBleManager().getDeviceDefCollection().get(deviceName, adress);*/
     }
-
 }

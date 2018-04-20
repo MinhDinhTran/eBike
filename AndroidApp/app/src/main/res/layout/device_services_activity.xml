@@ -28,71 +28,163 @@
             android:id="@+id/data_characteristic_value"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
             android:layout_marginLeft="16dp"
             android:layout_marginRight="16dp"
-            android:layout_marginBottom="8dp"
             android:text="@string/no_data_characteristic"
-            android:textAppearance="@style/CodeTextAppearance"/>
+            android:textAppearance="@style/CodeTextAppearance" />
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:background="@color/primary2"
             android:orientation="vertical">
 
 
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-
-                <TextView
-                    android:id="@+id/textView_pwmdutycycle"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentStart="true"
-                    android:text="PWM Duty Cycle ="
-                    android:textColor="@color/text" />
-            </RelativeLayout>
-
-            <SeekBar
-                android:id="@+id/seekBar_pwm"
-                style="@style/tallerBarStyle"
+            <ToggleButton
+                android:id="@+id/toggleButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                android:layout_alignParentStart="true" />
+                android:layout_weight="1"
+                android:text="ToggleButton" />
 
-            <RelativeLayout
+            <TextView
+                android:id="@+id/textView_vthr"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:layout_weight="1"
+                android:text="V Threshold ="
+                android:textColor="@color/text" />
 
-                <TextView
-                    android:id="@+id/textView_vthr"
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/button_vthr_down"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentStart="true"
+                    android:layout_weight="1"
+                    android:text="-"
+                    android:textSize="18sp" />
+
+                <SeekBar
+                    android:id="@+id/seekBar_vthr"
+                    style="@style/tallerBarStyle"
+                    android:layout_width="338dp"
+                    android:layout_height="match_parent"
+                    android:layout_alignParentEnd="true"
                     android:layout_alignParentTop="true"
-                    android:text="V Threshold ="
-                    android:textColor="@color/text" />
+                    android:layout_toEndOf="@+id/textView_vthr"
+                    android:layout_weight="1" />
 
-            </RelativeLayout>
+                <Button
+                    android:id="@+id/button_vthr_up"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="+" />
 
-            <SeekBar
-                android:id="@+id/seekBar_vthr"
-                style="@style/tallerBarStyle"
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/textView_pwmdutycycle"
                 android:layout_width="match_parent"
-                android:layout_height="34dp"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentTop="true"
-                android:layout_toEndOf="@+id/textView_vthr" />
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_weight="1"
+                android:text="PWM Duty Cycle ="
+                android:textColor="@color/text" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/button_pwm_down"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="-"
+                    android:textSize="18sp" />
+
+                <SeekBar
+                    android:id="@+id/seekBar_pwm"
+                    style="@style/tallerBarStyle"
+                    android:layout_width="338dp"
+                    android:layout_height="match_parent"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentTop="true"
+                    android:layout_toEndOf="@+id/textView_vthr"
+                    android:layout_weight="1" />
+
+                <Button
+                    android:id="@+id/button_pwm_up"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="+" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/textView_speeed"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="KM/H (RPM)"
+                    android:textAlignment="center"
+                    android:textColor="@android:color/black" />
+
+                <TextView
+                    android:id="@+id/textView_srove"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Srove"
+                    android:textAlignment="center"
+                    android:textColor="@android:color/black" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/textView4"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="TextView" />
+
+                <TextView
+                    android:id="@+id/textView5"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="TextView" />
+            </LinearLayout>
 
             <com.github.mikephil.charting.charts.LineChart
                 android:id="@+id/chart"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="144dp"
                 android:layout_alignParentStart="true"
-                android:layout_below="@+id/seekBar_vthr">
+                android:layout_below="@+id/seekBar_vthr"
+                android:visibility="visible">
 
             </com.github.mikephil.charting.charts.LineChart>
 
