@@ -91,16 +91,6 @@ public class DeviceServicesActivity extends Activity
         final SeekBar seekBar2 = (SeekBar) findViewById(R.id.seekBar_vthr);
         seekBar2.setOnSeekBarChangeListener(this);
 
-        final LineChart chart = (LineChart) findViewById(R.id.chart);
-        entries.add(new Entry(entryNo++, 0));
-        LineDataSet dataSet = new LineDataSet(entries, "Label"); // add entries to dataset
-        dataSet.setColor(R.color.text);
-        dataSet.setValueTextColor(R.color.text);
-        dataSet.setDrawValues(false);
-
-        LineData lineData = new LineData(dataSet);
-        chart.setData(lineData);
-        chart.invalidate(); // refresh
     }
 
     @Override
