@@ -1,51 +1,3 @@
-/******************************************************************************
-
- @file  simpleBLEPeripheral.c
-
- @brief This file contains the Simple BLE Peripheral sample application for use
-        with the CC2540 Bluetooth Low Energy Protocol Stack.
-
- Group: WCS, BTS
- Target Device: CC2540, CC2541
-
- ******************************************************************************
- 
- Copyright (c) 2010-2016, Texas Instruments Incorporated
- All rights reserved.
-
- IMPORTANT: Your use of this Software is limited to those specific rights
- granted under the terms of a software license agreement between the user
- who downloaded the software, his/her employer (which must be your employer)
- and Texas Instruments Incorporated (the "License"). You may not use this
- Software unless you agree to abide by the terms of the License. The License
- limits your use, and you acknowledge, that the Software may not be modified,
- copied or distributed unless embedded on a Texas Instruments microcontroller
- or used solely and exclusively in conjunction with a Texas Instruments radio
- frequency transceiver, which is integrated into your product. Other than for
- the foregoing purpose, you may not use, reproduce, copy, prepare derivative
- works of, modify, distribute, perform, display or sell this Software and/or
- its documentation for any purpose.
-
- YOU FURTHER ACKNOWLEDGE AND AGREE THAT THE SOFTWARE AND DOCUMENTATION ARE
- PROVIDED “AS IS” WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED,
- INCLUDING WITHOUT LIMITATION, ANY WARRANTY OF MERCHANTABILITY, TITLE,
- NON-INFRINGEMENT AND FITNESS FOR A PARTICULAR PURPOSE. IN NO EVENT SHALL
- TEXAS INSTRUMENTS OR ITS LICENSORS BE LIABLE OR OBLIGATED UNDER CONTRACT,
- NEGLIGENCE, STRICT LIABILITY, CONTRIBUTION, BREACH OF WARRANTY, OR OTHER
- LEGAL EQUITABLE THEORY ANY DIRECT OR INDIRECT DAMAGES OR EXPENSES
- INCLUDING BUT NOT LIMITED TO ANY INCIDENTAL, SPECIAL, INDIRECT, PUNITIVE
- OR CONSEQUENTIAL DAMAGES, LOST PROFITS OR LOST DATA, COST OF PROCUREMENT
- OF SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
- (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF), OR OTHER SIMILAR COSTS.
-
- Should you have any questions regarding your right to use this Software,
- contact Texas Instruments Incorporated at www.TI.com.
-
- ******************************************************************************
- Release Name: ble_sdk_1.4.2.2
- Release Date: 2016-06-09 06:57:10
- *****************************************************************************/
-
 /*********************************************************************
  * INCLUDES
  */
@@ -68,10 +20,6 @@
 #include "gattservapp.h"
 #include "devinfoservice.h"
 #include "simpleGATTprofile.h"
-
-#if defined( CC2540_MINIDK )
-  #include "simplekeys.h"
-#endif
 
 #include "peripheral.h"
 
@@ -103,7 +51,7 @@
  */
 
 // How often to perform periodic event
-#define SBP_PERIODIC_EVT_PERIOD                   200
+#define SBP_PERIODIC_EVT_PERIOD                   50
 
 // What is the advertising interval when device is discoverable (units of 625us, 160=100ms)
 #define DEFAULT_ADVERTISING_INTERVAL          160
@@ -128,10 +76,10 @@
 #define DEFAULT_ENABLE_UPDATE_REQUEST         FALSE//TRUE
 
 // Connection Pause Peripheral time value (in seconds)
-#define DEFAULT_CONN_PAUSE_PERIPHERAL         6
+#define DEFAULT_CONN_PAUSE_PERIPHERAL         1
 
-// Company Identifier: Texas Instruments Inc. (13)
-#define TI_COMPANY_ID                         0x000D
+// Company Identifier: 
+#define TI_COMPANY_ID                         0x0001
 
 #define INVALID_CONNHANDLE                    0xFFFF
 
@@ -165,21 +113,16 @@ static gaprole_States_t gapProfileState = GAPROLE_INIT;
 static uint8 scanRspData[] =
 {
   // complete name
-  14,   // length of this data
+  9,   // length of this data
   GAP_ADTYPE_LOCAL_NAME_COMPLETE,
+  'e',
   'B',
-  'L',
-  'E',
-  'P',
-  'e',
-  'r',
   'i',
-  'p',
-  'h',
+  'k',
   'e',
-  'r',
-  'a',
-  'l',
+  ' ',
+  'M',
+  'C',
 
   // connection interval range
   5,   // length of this data
@@ -216,7 +159,7 @@ static uint8 advertData[] =
 };
 
 // GAP GATT Attributes
-static uint8 attDeviceName[GAP_DEVICE_NAME_LEN] = "BLE Peripheral";
+static uint8 attDeviceName[GAP_DEVICE_NAME_LEN] = "eBike MC";
 
 /*********************************************************************
  * LOCAL FUNCTIONS
@@ -350,19 +293,19 @@ void SimpleBLEPeripheral_Init( uint8 task_id )
   {
     uint8 modeValue = 0;
     uint8 pwmDutyCycleValue = 0;
-    uint32 vthrValue = 0;
-    uint32 batValue = 0;
-    uint32 currentValue = 0;
-    //uint32 speedValue = 0;
-    //uint32 flagsValue = 0;
+    uint16 vthrValue = 0;
+    uint16 batValue = 0;
+    uint16 currentValue = 0;
+    float speedValue = 0;
+    uint32 flagsValue = 0;
     
     SimpleProfile_SetParameter( MODE_ID, MODE_LEN, &modeValue );
     SimpleProfile_SetParameter( PWM_DUTY_CYCLE_ID, PWM_DUTY_CYCLE_LEN, &pwmDutyCycleValue );
     SimpleProfile_SetParameter( V_THRESHOLD_ID, V_THRESHOLD_LEN, &vthrValue );
     SimpleProfile_SetParameter( BIKE_BATTERY_LEVEL_ID, BIKE_BATTERY_LEVEL_LEN, &batValue );
     SimpleProfile_SetParameter( CURRENT_ID, CURRENT_LEN, &currentValue );
-    //SimpleProfile_SetParameter( BIKE_SPEED_ID, BIKE_SPEED_LEN, &speedValue );
-    //SimpleProfile_SetParameter( BIKE_FLAGS_ID, BIKE_FLAGS_LEN, &flagsValue );
+    SimpleProfile_SetParameter( BIKE_SPEED_ID, BIKE_SPEED_LEN, &speedValue );
+    SimpleProfile_SetParameter( BIKE_FLAGS_ID, BIKE_FLAGS_LEN, &flagsValue );
   }
 
 
@@ -460,13 +403,6 @@ static void simpleBLEPeripheral_ProcessOSALMsg( osal_event_hdr_t *pMsg )
 {
   switch ( pMsg->event )
   {     
-  #if defined( CC2540_MINIDK )
-    case KEY_CHANGE:
-      simpleBLEPeripheral_HandleKeys( ((keyChange_t *)pMsg)->state, 
-                                      ((keyChange_t *)pMsg)->keys );
-      break;
-  #endif // #if defined( CC2540_MINIDK )
- 
     case GATT_MSG_EVENT:
       // Process GATT message
       simpleBLEPeripheral_ProcessGATTMsg( (gattMsgEvent_t *)pMsg );
@@ -477,72 +413,6 @@ static void simpleBLEPeripheral_ProcessOSALMsg( osal_event_hdr_t *pMsg )
       break;
   }
 }
-
-#if defined( CC2540_MINIDK )
-/*********************************************************************
- * @fn      simpleBLEPeripheral_HandleKeys
- *
- * @brief   Handles all key events for this device.
- *
- * @param   shift - true if in shift/alt.
- * @param   keys - bit field for key events. Valid entries:
- *                 HAL_KEY_SW_2
- *                 HAL_KEY_SW_1
- *
- * @return  none
- */
-static void simpleBLEPeripheral_HandleKeys( uint8 shift, uint8 keys )
-{
-  uint8 SK_Keys = 0;
-
-  VOID shift;  // Intentionally unreferenced parameter
-
-  if ( keys & HAL_KEY_SW_1 )
-  {
-    SK_Keys |= SK_KEY_LEFT;
-  }
-
-  if ( keys & HAL_KEY_SW_2 )
-  {
-
-    SK_Keys |= SK_KEY_RIGHT;
-
-    // if device is not in a connection, pressing the right key should toggle
-    // advertising on and off
-    // Note:  If PLUS_BROADCASTER is define this condition is ignored and
-    //        Device may advertise during connections as well. 
-#ifndef PLUS_BROADCASTER  
-    if( gapProfileState != GAPROLE_CONNECTED )
-    {
-#endif // PLUS_BROADCASTER
-      uint8 current_adv_enabled_status;
-      uint8 new_adv_enabled_status;
-
-      //Find the current GAP advertisement status
-      GAPRole_GetParameter( GAPROLE_ADVERT_ENABLED, &current_adv_enabled_status );
-
-      if( current_adv_enabled_status == FALSE )
-      {
-        new_adv_enabled_status = TRUE;
-      }
-      else
-      {
-        new_adv_enabled_status = FALSE;
-      }
-
-      //change the GAP advertisement status to opposite of current status
-      GAPRole_SetParameter( GAPROLE_ADVERT_ENABLED, sizeof( uint8 ), &new_adv_enabled_status );
-#ifndef PLUS_BROADCASTER
-    }
-#endif // PLUS_BROADCASTER
-  }
-
-  // Set the value of the keys state to the Simple Keys Profile;
-  // This will send out a notification of the keys state if enabled
-  SK_SetParameter( SK_KEY_ATTR, sizeof ( uint8 ), &SK_Keys );
-}
-#endif // #if defined( CC2540_MINIDK )
-
 /*********************************************************************
  * @fn      simpleBLEPeripheral_ProcessGATTMsg
  *
@@ -597,14 +467,8 @@ static void peripheralStateNotificationCB( gaprole_States_t newState )
         DevInfo_SetParameter(DEVINFO_SYSTEM_ID, DEVINFO_SYSTEM_ID_LEN, systemId);
         
         #if (defined DEBUGGING)
-          printf("Initialized. Own adress: %s \n", bdAddr2Str( ownAddress ));
+          printf("adress: %s \n", bdAddr2Str( ownAddress ));
         #endif
-          
-        #if (defined HAL_LCD) && (HAL_LCD == TRUE)
-          // Display device address
-          HalLcdWriteString( bdAddr2Str( ownAddress ),  HAL_LCD_LINE_2 );
-          HalLcdWriteString( "Initialized",  HAL_LCD_LINE_3 );
-        #endif // (defined HAL_LCD) && (HAL_LCD == TRUE)
       }
       break;
 
@@ -612,12 +476,8 @@ static void peripheralStateNotificationCB( gaprole_States_t newState )
       {
         Connected = false;
         #if (defined DEBUGGING)
-          printf("Advertising.\n");
+          printf("Adv.\n");
         #endif
-          
-        #if (defined HAL_LCD) && (HAL_LCD == TRUE)
-          HalLcdWriteString( "Advertising",  HAL_LCD_LINE_3 );
-        #endif // (defined HAL_LCD) && (HAL_LCD == TRUE)
       }
       break;
 
@@ -648,9 +508,6 @@ static void peripheralStateNotificationCB( gaprole_States_t newState )
           printf("c\n");
         #endif
           
-        #if (defined HAL_LCD) && (HAL_LCD == TRUE)
-          HalLcdWriteString( "Connected",  HAL_LCD_LINE_3 );
-        #endif // (defined HAL_LCD) && (HAL_LCD == TRUE)
           
 #ifdef PLUS_BROADCASTER
         // Only turn advertising on for this state when we first connect
@@ -683,9 +540,6 @@ static void peripheralStateNotificationCB( gaprole_States_t newState )
           printf("Connected Advertising.\n");
         #endif
           
-        #if (defined HAL_LCD) && (HAL_LCD == TRUE)
-          HalLcdWriteString( "Connected Advertising",  HAL_LCD_LINE_3 );
-        #endif // (defined HAL_LCD) && (HAL_LCD == TRUE)
       }
       break;      
     case GAPROLE_WAITING:
@@ -732,17 +586,11 @@ static void peripheralStateNotificationCB( gaprole_States_t newState )
           printf("Error.\n");
         #endif
           
-        #if (defined HAL_LCD) && (HAL_LCD == TRUE)
-          HalLcdWriteString( "Error",  HAL_LCD_LINE_3 );
-        #endif // (defined HAL_LCD) && (HAL_LCD == TRUE)
       }
       break;
 
     default:
       {
-        #if (defined HAL_LCD) && (HAL_LCD == TRUE)
-          HalLcdWriteString( "",  HAL_LCD_LINE_3 );
-        #endif // (defined HAL_LCD) && (HAL_LCD == TRUE)
       }
       break;
 
@@ -750,12 +598,7 @@ static void peripheralStateNotificationCB( gaprole_States_t newState )
 
   gapProfileState = newState;
 
-#if !defined( CC2540_MINIDK )
   VOID gapProfileState;     // added to prevent compiler warning with
-                            // "CC2540 Slave" configurations
-#endif
-
-
 }
 
 /*********************************************************************
@@ -773,31 +616,38 @@ static void peripheralStateNotificationCB( gaprole_States_t newState )
  * @return  none
  */
 extern uint8 _PWM_DUTY_CYCLE_Value;
-extern int32 _V_THRESHOLD_Value;
+extern uint32 _V_THRESHOLD_Value;
+extern uint8 _MODE_Value;
 MyMsg_t* msg = NULL;
 bool _PWM_DUTY_CYCLE_Value_Changed = false;
 bool _V_THRESHOLD_Value_Changed = false;
+bool _MODE_Value_Changed = false;
 static void performPeriodicTask( void )
 {
-  if (_PWM_DUTY_CYCLE_Value_Changed && msg == NULL)
-  {
-      _PWM_DUTY_CYCLE_Value_Changed = false;
-      msg = MyMsg_CreateString(PWM_DUTY_CYCLE_ID, &_PWM_DUTY_CYCLE_Value, PWM_DUTY_CYCLE_LEN);
-     // printf("%d\n", _PWM_DUTY_CYCLE_Value);
-  }
-  else if (_V_THRESHOLD_Value_Changed && msg == NULL)
-  {
-      _V_THRESHOLD_Value_Changed = false;
-      msg = MyMsg_CreateString(V_THRESHOLD_ID, &_V_THRESHOLD_Value, V_THRESHOLD_LEN);
-     // printf("%d\n", _PWM_DUTY_CYCLE_Value);
-  }
-  else if (msg != NULL)
+  if (msg != NULL)
   {
       NPI_WriteTransport(msg->pData, msg->length+1);
+      
       free(msg->pData);
       free(msg);
       msg = NULL;
   }
+  if (_PWM_DUTY_CYCLE_Value_Changed && msg == NULL)
+  {
+      msg = MyMsg_CreateString(PWM_DUTY_CYCLE_ID, &_PWM_DUTY_CYCLE_Value, PWM_DUTY_CYCLE_LEN);
+      _PWM_DUTY_CYCLE_Value_Changed = false;
+  }
+  else if (_V_THRESHOLD_Value_Changed && msg == NULL)
+  {
+      msg = MyMsg_CreateString(V_THRESHOLD_ID, &_V_THRESHOLD_Value, V_THRESHOLD_LEN);
+      _V_THRESHOLD_Value_Changed = false;
+  }
+  else if (_MODE_Value_Changed && msg == NULL)
+  {
+      msg = MyMsg_CreateString(MODE_ID, &_MODE_Value, MODE_LEN);
+      _MODE_Value_Changed = false;
+  }
+ 
   /*uint8 valueToCopy;
   uint8 stat;
   stat = SimpleProfile_GetParameter( SIMPLEPROFILE_CHAR3, &valueToCopy);
@@ -819,27 +669,18 @@ static void performPeriodicTask( void )
  */
 static void simpleProfileChangeCB( uint8 paramID )
 {
-  uint8 newValue;
-  uint32 newValue32;
   switch( paramID )
   {
     case MODE_ID:
-      SimpleProfile_GetParameter( MODE_ID, &newValue );
+      _MODE_Value_Changed = true;
       break;
-
     case PWM_DUTY_CYCLE_ID:
-      SimpleProfile_GetParameter( PWM_DUTY_CYCLE_ID, &newValue );
       _PWM_DUTY_CYCLE_Value_Changed = true; 
       break;
       
     case V_THRESHOLD_ID:
-      SimpleProfile_GetParameter( V_THRESHOLD_ID, &newValue32);
       _V_THRESHOLD_Value_Changed = true;
       break;
-    case BIKE_BATTERY_LEVEL_ID:
-      SimpleProfile_GetParameter( BIKE_BATTERY_LEVEL_ID, &newValue);
-      break;
-      
     default:
       // should not reach here!
       break;

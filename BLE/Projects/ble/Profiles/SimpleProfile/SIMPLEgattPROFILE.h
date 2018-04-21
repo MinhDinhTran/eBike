@@ -79,6 +79,8 @@ extern "C"
 #define UUID_V_THRESHOLD_ID             0xFFF3
 #define UUID_BIKE_BATTERY_LEVEL_ID      0xFFF4
 #define UUID_CURRENT_ID                 0xFFF5
+#define UUID_BIKE_SPEED_ID              0xFFF6
+#define UUID_BIKE_FLAGS_ID              0xFFF7
     
 // Simple Keys Profile Services bit fields
 #define SIMPLEPROFILE_SERVICE               0x00000001
@@ -86,8 +88,10 @@ extern "C"
 #define MODE_LEN                        1  
 #define PWM_DUTY_CYCLE_LEN              1 
 #define V_THRESHOLD_LEN                 4
-#define BIKE_BATTERY_LEVEL_LEN          4
-#define CURRENT_LEN                     4
+#define BIKE_BATTERY_LEVEL_LEN          2
+#define CURRENT_LEN                     2
+#define BIKE_SPEED_LEN                  4
+#define BIKE_FLAGS_LEN                  4
 
 /*********************************************************************
  * TYPEDEFS

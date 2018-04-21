@@ -14,6 +14,7 @@ typedef struct MotorControlFlags_t MotorControlFlags_t;
 struct MotorControlFlags_t
 {
 	uint8_t ClosedLoop:1;
+	uint8_t OverCurrent:1;
 };
 
 typedef struct MotorControlLimits_t MotorControlLimits_t;

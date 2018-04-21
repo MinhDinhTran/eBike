@@ -1,51 +1,3 @@
-/******************************************************************************
-
- @file  simpleGATTprofile.c
-
- @brief This file contains the Simple GATT profile sample GATT service profile
-        for use with the BLE sample application.
-
- Group: WCS, BTS
- Target Device: CC2540, CC2541
-
- ******************************************************************************
- 
- Copyright (c) 2010-2016, Texas Instruments Incorporated
- All rights reserved.
-
- IMPORTANT: Your use of this Software is limited to those specific rights
- granted under the terms of a software license agreement between the user
- who downloaded the software, his/her employer (which must be your employer)
- and Texas Instruments Incorporated (the "License"). You may not use this
- Software unless you agree to abide by the terms of the License. The License
- limits your use, and you acknowledge, that the Software may not be modified,
- copied or distributed unless embedded on a Texas Instruments microcontroller
- or used solely and exclusively in conjunction with a Texas Instruments radio
- frequency transceiver, which is integrated into your product. Other than for
- the foregoing purpose, you may not use, reproduce, copy, prepare derivative
- works of, modify, distribute, perform, display or sell this Software and/or
- its documentation for any purpose.
-
- YOU FURTHER ACKNOWLEDGE AND AGREE THAT THE SOFTWARE AND DOCUMENTATION ARE
- PROVIDED “AS IS” WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED,
- INCLUDING WITHOUT LIMITATION, ANY WARRANTY OF MERCHANTABILITY, TITLE,
- NON-INFRINGEMENT AND FITNESS FOR A PARTICULAR PURPOSE. IN NO EVENT SHALL
- TEXAS INSTRUMENTS OR ITS LICENSORS BE LIABLE OR OBLIGATED UNDER CONTRACT,
- NEGLIGENCE, STRICT LIABILITY, CONTRIBUTION, BREACH OF WARRANTY, OR OTHER
- LEGAL EQUITABLE THEORY ANY DIRECT OR INDIRECT DAMAGES OR EXPENSES
- INCLUDING BUT NOT LIMITED TO ANY INCIDENTAL, SPECIAL, INDIRECT, PUNITIVE
- OR CONSEQUENTIAL DAMAGES, LOST PROFITS OR LOST DATA, COST OF PROCUREMENT
- OF SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
- (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF), OR OTHER SIMILAR COSTS.
-
- Should you have any questions regarding your right to use this Software,
- contact Texas Instruments Incorporated at www.TI.com.
-
- ******************************************************************************
- Release Name: ble_sdk_1.4.2.2
- Release Date: 2016-06-09 06:57:10
- *****************************************************************************/
-
 /*********************************************************************
  * INCLUDES
  */
@@ -64,7 +16,6 @@
 
 #include "simpleGATTprofile.h"
         
-#include "hal_key.h"
 #include "hal_adc.h"
 /*********************************************************************
  * MACROS
@@ -74,7 +25,7 @@
  * CONSTANTS
  */
 
-#define SERVAPP_NUM_ATTR_SUPPORTED      19
+#define SERVAPP_NUM_ATTR_SUPPORTED      27
 
 /*********************************************************************
  * TYPEDEFS
@@ -95,6 +46,8 @@ createUUID(UUID_PWM_DUTY_CYCLE_ID);
 createUUID(UUID_V_THRESHOLD_ID);
 createUUID(UUID_BIKE_BATTERY_LEVEL_ID);
 createUUID(UUID_CURRENT_ID);
+createUUID(UUID_BIKE_SPEED_ID);
+createUUID(UUID_BIKE_FLAGS_ID);
 
 /*********************************************************************
  * EXTERNAL VARIABLES
@@ -119,27 +72,36 @@ static simpleProfileCBs_t *simpleProfile_AppCBs = NULL;
 static CONST gattAttrType_t simpleProfileService = { ATT_BT_UUID_SIZE, simpleProfileServUUID };
 
 static uint8 _MODE_Props = GATT_PROP_READ|GATT_PROP_WRITE;
-static uint8 _MODE_Value = 0;
-static uint8 _MODE_Desc[] = "Working mode";
+uint8 _MODE_Value = 0;
+static uint8 _MODE_Desc[] = "Mode";
 
 static uint8 _PWM_DUTY_CYCLE_Props = GATT_PROP_READ|GATT_PROP_WRITE;
 uint8 _PWM_DUTY_CYCLE_Value = 0;
-static uint8 _PWM_DUTY_CYCLE_Desc[] = "PWM duty cycle";
+static uint8 _PWM_DUTY_CYCLE_Desc[] = "PWM";
 
 static uint8 _V_THRESHOLD_Props = GATT_PROP_READ|GATT_PROP_WRITE;
-int32 _V_THRESHOLD_Value = 0;
+uint32 _V_THRESHOLD_Value = 0;
 static uint8 _V_THRESHOLD_Desc[] = "V Threshold";
 
 static uint8 _BIKE_BATTERY_LEVEL_Props = GATT_PROP_READ|GATT_PROP_NOTIFY;
-static uint32 _BIKE_BATTERY_LEVEL_Value = 0;
-static uint8 _BIKE_BATTERY_LEVEL_Desc[] = "Bike battery level";
+static uint16 _BIKE_BATTERY_LEVEL_Value = 0;
+static uint8 _BIKE_BATTERY_LEVEL_Desc[] = "U_BAT";
 static gattCharCfg_t* _BIKE_BATTERY_LEVEL_NotiConfig;
 
 static uint8 _CURRENT_Props = GATT_PROP_READ|GATT_PROP_NOTIFY;
-static uint32 _CURRENT_Value = 0;
-static uint8 _CURRENT_Desc[] = "Electric current level";
+static uint16 _CURRENT_Value = 0;
+static uint8 _CURRENT_Desc[] = "I";
 static gattCharCfg_t* _CURRENT_NotiConfig;
 
+static uint8 _BIKE_SPEED_Props = GATT_PROP_READ|GATT_PROP_NOTIFY;
+static float _BIKE_SPEED_Value = 0;
+static uint8 _BIKE_SPEED_Desc[] = "Speed";
+static gattCharCfg_t* _BIKE_SPEED_NotiConfig;
+
+static uint8 _BIKE_FLAGS_Props = GATT_PROP_READ|GATT_PROP_NOTIFY;
+static uint32 _BIKE_FLAGS_Value = 0;
+static uint8 _BIKE_FLAGS_Desc[] = ".";
+static gattCharCfg_t* _BIKE_FLAGS_NotiConfig;
 /*********************************************************************
  * Profile Attributes - Table
  */
@@ -179,7 +141,17 @@ static gattAttribute_t simpleProfileAttrTbl[SERVAPP_NUM_ATTR_SUPPORTED] =
    ATT_Declaration(GATT_PERMIT_READ,          &_CURRENT_Props)
    ATT_Value_Declaration(GATT_PERMIT_READ,    &_CURRENT_Value, _UUID_CURRENT_ID )
    ATT_Desc_Declaration(GATT_PERMIT_READ,     _CURRENT_Desc)
-   ATT_Noti_Declaration(                      &_CURRENT_NotiConfig)    
+   ATT_Noti_Declaration(                      &_CURRENT_NotiConfig)  
+     
+   ATT_Declaration(GATT_PERMIT_READ,          &_BIKE_SPEED_Props)
+   ATT_Value_Declaration(GATT_PERMIT_READ,    &_BIKE_SPEED_Value, _UUID_BIKE_SPEED_ID )
+   ATT_Desc_Declaration(GATT_PERMIT_READ,     _BIKE_SPEED_Desc)
+   ATT_Noti_Declaration(                      &_BIKE_SPEED_NotiConfig)  
+     
+   ATT_Declaration(GATT_PERMIT_READ,          &_BIKE_FLAGS_Props)
+   ATT_Value_Declaration(GATT_PERMIT_READ,    &_BIKE_FLAGS_Value, _UUID_BIKE_FLAGS_ID )
+   ATT_Desc_Declaration(GATT_PERMIT_READ,     _BIKE_FLAGS_Desc)
+   ATT_Noti_Declaration(                      &_BIKE_FLAGS_NotiConfig)  
 };
 
 /*********************************************************************
@@ -227,7 +199,15 @@ bStatus_t SimpleProfile_AddService( uint32 services )
                                                               linkDBNumConns );
   _CURRENT_NotiConfig = (gattCharCfg_t *)osal_mem_alloc( sizeof(gattCharCfg_t) *
                                                               linkDBNumConns );
-  if ( _BIKE_BATTERY_LEVEL_NotiConfig == NULL || _CURRENT_NotiConfig == NULL )
+  
+  _BIKE_SPEED_NotiConfig = (gattCharCfg_t *)osal_mem_alloc( sizeof(gattCharCfg_t) *
+                                                              linkDBNumConns );
+  
+  _BIKE_FLAGS_NotiConfig = (gattCharCfg_t *)osal_mem_alloc( sizeof(gattCharCfg_t) *
+                                                              linkDBNumConns );
+  
+  if ( _BIKE_BATTERY_LEVEL_NotiConfig == NULL || _CURRENT_NotiConfig == NULL 
+      || _BIKE_SPEED_NotiConfig == NULL || _BIKE_FLAGS_NotiConfig == NULL)
   {     
     return ( bleMemAllocError );
   }
@@ -237,6 +217,8 @@ bStatus_t SimpleProfile_AddService( uint32 services )
   // Initialize Client Characteristic Configuration attributes
   GATTServApp_InitCharCfg( INVALID_CONNHANDLE, _BIKE_BATTERY_LEVEL_NotiConfig );
   GATTServApp_InitCharCfg( INVALID_CONNHANDLE, _CURRENT_NotiConfig );
+  GATTServApp_InitCharCfg( INVALID_CONNHANDLE, _BIKE_SPEED_NotiConfig );
+  GATTServApp_InitCharCfg( INVALID_CONNHANDLE, _BIKE_FLAGS_NotiConfig );
   
   if ( services & SIMPLEPROFILE_SERVICE )
   {
@@ -307,25 +289,40 @@ bStatus_t SimpleProfile_SetParameter( uint8 param, uint8 len, void *value )
       break;
       
     case V_THRESHOLD_ID:
-      SetValue(int32, _V_THRESHOLD_Value)
+      SetValue(uint32, _V_THRESHOLD_Value)
       break;
       
     case BIKE_BATTERY_LEVEL_ID:
-      SetValue(uint32, _BIKE_BATTERY_LEVEL_Value);
-      
+      SetValue(uint16, _BIKE_BATTERY_LEVEL_Value);      
      if ( GATTServApp_ProcessCharCfg( _BIKE_BATTERY_LEVEL_NotiConfig, ((uint8*)&_BIKE_BATTERY_LEVEL_Value), FALSE,
                                   simpleProfileAttrTbl, GATT_NUM_ATTRS( simpleProfileAttrTbl ),
                                   INVALID_TASK_ID, simpleProfile_ReadAttrCB ) != SUCCESS)
-       printf("WTF SimpleProfile_SetParameter\n");
+       printf("WTF\n");
 
       break;
     case CURRENT_ID:
-      SetValue(uint32, _CURRENT_Value);
-      
+      SetValue(uint16, _CURRENT_Value);      
      if ( GATTServApp_ProcessCharCfg( _CURRENT_NotiConfig, ((uint8*)&_CURRENT_Value), FALSE,
                                   simpleProfileAttrTbl, GATT_NUM_ATTRS( simpleProfileAttrTbl ),
                                   INVALID_TASK_ID, simpleProfile_ReadAttrCB ) != SUCCESS)
-       printf("WTF SimpleProfile_SetParameter\n");
+       printf("WTF\n");
+
+      break;
+    case BIKE_SPEED_ID:
+      SetValue(float, _BIKE_SPEED_Value);
+      
+     if ( GATTServApp_ProcessCharCfg( _BIKE_SPEED_NotiConfig, ((uint8*)&_BIKE_SPEED_Value), FALSE,
+                                  simpleProfileAttrTbl, GATT_NUM_ATTRS( simpleProfileAttrTbl ),
+                                  INVALID_TASK_ID, simpleProfile_ReadAttrCB ) != SUCCESS)
+       printf("WTF\n");
+
+      break;
+    case BIKE_FLAGS_ID:
+      SetValue(uint32, _BIKE_FLAGS_Value);      
+     if ( GATTServApp_ProcessCharCfg( _BIKE_FLAGS_NotiConfig, ((uint8*)&_BIKE_FLAGS_Value), FALSE,
+                                  simpleProfileAttrTbl, GATT_NUM_ATTRS( simpleProfileAttrTbl ),
+                                  INVALID_TASK_ID, simpleProfile_ReadAttrCB ) != SUCCESS)
+       printf("WTF\n");
 
       break;
     default:
@@ -372,6 +369,12 @@ bStatus_t SimpleProfile_GetParameter( uint8 param, void *value )
     case CURRENT_ID:
       VOID memcpy( value, &_CURRENT_Value, CURRENT_LEN );
       break;
+    case BIKE_SPEED_ID:
+      VOID memcpy( value, &_BIKE_SPEED_Value, BIKE_SPEED_LEN );
+      break;
+    case BIKE_FLAGS_ID:
+      VOID memcpy( value, &_BIKE_FLAGS_Value, BIKE_FLAGS_LEN );
+      break;
     default:
       ret = INVALIDPARAMETER;
       break;
@@ -398,12 +401,7 @@ bStatus_t SimpleProfile_GetParameter( uint8 param, void *value )
 static bStatus_t simpleProfile_ReadAttrCB( uint16 connHandle, gattAttribute_t *pAttr, 
                                            uint8 *pValue, uint8 *pLen, uint16 offset,
                                            uint8 maxLen, uint8 method )
-{
-  
-  //printf("ReadAttr\n");
-    
-     
-     
+{   
   bStatus_t status = SUCCESS;
 
   // If attribute permissions require authorization to read, return error
@@ -444,6 +442,14 @@ static bStatus_t simpleProfile_ReadAttrCB( uint16 connHandle, gattAttribute_t *p
       case UUID_CURRENT_ID:
         *pLen = CURRENT_LEN;
         VOID memcpy( pValue, pAttr->pValue, CURRENT_LEN );
+        break;
+      case UUID_BIKE_SPEED_ID:
+        *pLen = BIKE_SPEED_LEN;
+        VOID memcpy( pValue, pAttr->pValue, BIKE_SPEED_LEN );
+        break;
+      case UUID_BIKE_FLAGS_ID:
+        *pLen = BIKE_FLAGS_LEN;
+        VOID memcpy( pValue, pAttr->pValue, BIKE_FLAGS_LEN );
         break;
       default:
         // Should never get here! (characteristics 3 and 4 do not have read permissions)
@@ -494,7 +500,6 @@ static bStatus_t simpleProfile_WriteAttrCB( uint16 connHandle, gattAttribute_t *
     // Insufficient authorization
     return ( ATT_ERR_INSUFFICIENT_AUTHOR );
   }
-  
   if ( pAttr->type.len == ATT_BT_UUID_SIZE )
   {
     // 16-bit UUID
@@ -502,21 +507,39 @@ static bStatus_t simpleProfile_WriteAttrCB( uint16 connHandle, gattAttribute_t *
     switch ( uuid )
     {
       case UUID_MODE_ID:
+        if ( offset == 0 && len == MODE_LEN )
+        {
+          memcpy (pAttr->pValue, pValue, len );
+          notifyApp = MODE_ID;
+        }
+        break;
         break;
       case UUID_PWM_DUTY_CYCLE_ID:
-        if ( offset == 0 && len == 1 )
+        if ( offset == 0 && len == PWM_DUTY_CYCLE_LEN )
         {
           memcpy (pAttr->pValue, pValue, len );
           notifyApp = PWM_DUTY_CYCLE_ID;
         }
         break;
       case UUID_V_THRESHOLD_ID:
-        if ( offset == 0 && len == 4 )
+        if ( offset == 0 && len == V_THRESHOLD_LEN )
         {
-           int32 *pCurValue = (int32 *)pAttr->pValue;    
-            *pCurValue = ((int32*)pValue)[0];
-        //  memcpy (pAttr->pValue, pValue, len );
+          memcpy (pAttr->pValue, pValue, len );
           notifyApp = V_THRESHOLD_ID;
+        }
+        break;
+      case UUID_BIKE_SPEED_ID:
+        if ( offset == 0 && len == BIKE_SPEED_LEN )
+        {
+          memcpy (pAttr->pValue, pValue, len );
+          notifyApp = BIKE_SPEED_ID;
+        }
+        break;
+      case UUID_BIKE_FLAGS_ID:
+        if ( offset == 0 && len == BIKE_FLAGS_ID )
+        {
+          memcpy (pAttr->pValue, pValue, len );
+          notifyApp = BIKE_FLAGS_ID;
         }
         break;
       case GATT_CLIENT_CHAR_CFG_UUID:

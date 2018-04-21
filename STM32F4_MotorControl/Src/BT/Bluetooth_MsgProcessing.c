@@ -25,6 +25,13 @@ void ProccesReceivedMessage(MyMsg_t *msg) {
 			MotorControl.V_Treshold = 100;
 		MotorControl.Limits.Integral = MotorControl.V_Treshold * 100;
 		break;
+
+	case MODE_ID:
+		if (*(uint8_t*) msg->pData)
+			ChangePWMSwitchingSequence(ForwardCommutation);
+		else
+			ChangePWMSwitchingSequence(Regeneration);
+		break;
 	}
 }
 

@@ -1,10 +1,3 @@
-/**
-* UART Message structure 
-* 1 byte(uint8)	- 1 bytes(uint8)	- x bytes	- 2 bytes  [ sum of bytes ==  msg length ]
-* msg length    - msg UUID  		- message 	- \r\n
-* 
-* !!! whole msg should not contain terminating null-characters
-*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -19,7 +12,7 @@
 #include "SIMPLEgattPROFILE.h"
 
 #define TestTask_MeasureADC                               0x0001
-#define TestTask_MeasureADC_Period                        20
+#define TestTask_MeasureADC_Period                        50
 
 //--------------- UART defs/vars
 static void SetParameter(MyMsg_t* msg);
@@ -87,23 +80,30 @@ processUART();
 static void SetParameter(MyMsg_t* msg)
 {
   if (!Connected) return ;
-  uint32 u32;
   switch(msg->UUID)
   {
   case BIKE_BATTERY_LEVEL_ID:
-    u32 = *(uint16*)(msg->pData);
-    
- //  printf("%d\n",u32);
-    SimpleProfile_SetParameter( BIKE_BATTERY_LEVEL_ID, BIKE_BATTERY_LEVEL_LEN, &u32 );
-   // printf("%li \n", u32);
+    if (msg->length != 11)
+      printf("BIKE_BAT %d\n",msg->length);
+    SimpleProfile_SetParameter( BIKE_BATTERY_LEVEL_ID, BIKE_BATTERY_LEVEL_LEN, (uint16*)(msg->pData) );
     break;
   case CURRENT_ID:
-    u32 =  *(uint16*)(msg->pData);
-    SimpleProfile_SetParameter( CURRENT_ID, CURRENT_LEN, &u32 );
+    if (msg->length != 11)
+      printf("CUR %d\n",msg->length);
+    SimpleProfile_SetParameter( CURRENT_ID, CURRENT_LEN, (uint16*)(msg->pData) );
+    break;
+  case BIKE_SPEED_ID:
+    if (msg->length != 13)
+      printf("BIKE_SPE %d\n",msg->length);
+    SimpleProfile_SetParameter( BIKE_SPEED_ID, BIKE_SPEED_LEN, (float*)(msg->pData) );
+    break;
+  case BIKE_FLAGS_ID:
+    if (msg->length != 13)
+      printf("BIKE_FLA %d\n",msg->length);
+    SimpleProfile_SetParameter( BIKE_FLAGS_ID, BIKE_FLAGS_LEN, (uint32*)(msg->pData) );
     break;
   }
 }
-
 
 	
 	

@@ -27,7 +27,7 @@ MotorControl_t MotorControl = { .ADC_V = { 0, 0, 0 }, .DutyCycle = 20, .Wanted_D
 		.ActiveSequence = PWMSequencesNotInit,
 		.UseComplementaryPWM = 0,
 		.UsePWMOnPWMN = 0 }, .pwmCountToChangePhase = 25, //355;
-		.PID = { .Kp = -0.5, .Ki = -0.1, .Kd = -0.5 } };
+		.PID = { .Kp = 0.5, .Ki = 0.01, .Kd = -0.1 } };
 
 static uint32_t GetActualBEMF();
 static void Integrate();
@@ -39,16 +39,12 @@ static uint8_t processUserBtn = 0;
 
 void Start_MotorControlThread(void) {
 
-
 	osThreadDef(MotorControlThread, MotorControlThread, osPriorityHigh, 0, 128); // definition and creation of MotorControlThread
 	MotorControlThreadHandle = osThreadCreate(osThread(MotorControlThread), NULL);
 
 	if (MotorControlThreadHandle == NULL)
 		Error_Handler();
 }
-uint16_t data1 = 1;
-uint16_t data2 = 2;
-
 void MotorControlThread(void const * argument) // MotorControlThread function
 {
 	arm_pid_init_f32(&MotorControl.PID, 1);
@@ -59,7 +55,7 @@ void MotorControlThread(void const * argument) // MotorControlThread function
 	ChangePWMSwitchingSequence(Regeneration);
 	for (;;) {
 		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
-		osDelay(20);
+		osDelay(500);
 
 		if (processUserBtn) {
 
@@ -73,15 +69,21 @@ void MotorControlThread(void const * argument) // MotorControlThread function
 
 			processUserBtn = 0;
 		}
+		MyMsg_t *msg = MyMsg_CreateString(BIKE_BATTERY_LEVEL_ID, &MotorControl.ADC_VBAT, BIKE_BATTERY_LEVEL_LEN);
+		xQueueSendFromISR(xQueueTX, (void * ) &msg, (TickType_t ) 0);
+
+		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
+		osDelay(500);
 
 
-		data1++;
-		data2++;
-		 MyMsg_t *msg = MyMsg_CreateString(BIKE_BATTERY_LEVEL_ID, &data1, 2);
-		 xQueueSendFromISR(xQueueTX, (void * ) &msg, (TickType_t ) 0);
-			osDelay(1000);
-		 MyMsg_t *msg2 = MyMsg_CreateString(CURRENT_ID, &data2, 2);
-		 xQueueSendFromISR(xQueueTX, (void * ) &msg2, (TickType_t ) 0);
+		msg = MyMsg_CreateString(CURRENT_ID, &MotorControl.ADC_I[0], CURRENT_LEN);
+		xQueueSendFromISR(xQueueTX, (void * ) &msg, (TickType_t ) 0);
+
+		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
+		osDelay(500);
+		MotorControl.RPM = 13.1;
+		msg = MyMsg_CreateString(BIKE_SPEED_ID, &MotorControl.RPM, BIKE_SPEED_LEN);
+		xQueueSendFromISR(xQueueTX, (void * ) &msg, (TickType_t ) 0);
 	}
 }
 
@@ -201,6 +203,9 @@ static void Integrate() {
 float32_t output = 0;
 uint32_t phaseSwitchCount = 0;
 int newDutyCycle;
+float32_t buf[4096] = { 0 };
+float buf2[4096] = { 0 };
+int counttt = 0;
 void OnPhaseChanged() {
 
 	switch (MotorControl.PWM_Switching.ActiveSequence) {
@@ -210,21 +215,30 @@ void OnPhaseChanged() {
 		if (MotorControl.pwm_phase == 0) {
 			if (HAL_TIM_OC_Stop_IT(&TIM_MC_WATCHDOG, TIM_MC_WATCHDOG_CHN) != HAL_OK)
 				Error_Handler();
-			MotorControl.RPM = (float) 4200/TIM_MC_WATCHDOG.Instance->CNT * 60 / 24;
+			MotorControl.RPM = (float) 4200 / TIM_MC_WATCHDOG.Instance->CNT * 60 / 24;
 
 			htim10.Instance->CNT = 0;
 			if (HAL_TIM_OC_Start_IT(&TIM_MC_WATCHDOG, TIM_MC_WATCHDOG_CHN) != HAL_OK)
 				Error_Handler();
-			output = arm_pid_f32(&MotorControl.PID, (float32_t)  MotorControl.RPM  - 100 );
+			if (MotorControl.RPM > 1000 || MotorControl.RPM < 0)
+				MotorControl.RPM = 0;
+			/*output = arm_pid_f32(&MotorControl.PID, (float32_t) MotorControl.RPM - 100);
+			buf[counttt] = MotorControl.RPM;
+			buf2[counttt] = output;
+			counttt++;
+			if (counttt >= 4096) {
+				TurnAllPWMsOFF();
 
+				counttt = 0;
+			}
 			//output = MotorControl.DutyCycle + output/100;
-			newDutyCycle = (int)output;
+			newDutyCycle = (int) output;
 
-			if (newDutyCycle < 5)
-				newDutyCycle = 5;
+			if (newDutyCycle < 25)
+				newDutyCycle = 25;
 			if (newDutyCycle > 95)
 				newDutyCycle = 95;
-			ChangePWMDutyCycle((uint8_t)newDutyCycle, 0);
+			ChangePWMDutyCycle((uint8_t) newDutyCycle, 0);*/
 		}
 
 		/*if (!MotorControl.Flags.ClosedLoop) {

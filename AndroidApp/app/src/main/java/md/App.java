@@ -19,13 +19,15 @@ public class App extends Application {
     private boolean _bleWasEnabled = true;
 
     public static final DeviceDefCollection DEVICE_DEF_COLLECTION;
+    public static final DeviceDef DEVICE_DEF = new BaseDef<>((Void)null);
     public static SensorDataController sensorDataController = null;
+
     static {
         DEVICE_DEF_COLLECTION = new DeviceDefCollection() {
             @Nullable
             @Override
             public DeviceDef create(String name, String address) {
-                return new BaseDef<>((Void)null);
+                return DEVICE_DEF;
             }
         };
         DEVICE_DEF_COLLECTION.register(AppConfig.DEF_DEVICE_NAME);

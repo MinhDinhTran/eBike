@@ -1,5 +1,6 @@
 #include "cmsis_os.h"                                           // CMSIS RTOS header file
 #include "stm32f4xx_hal.h"
+#include "MC.h"
 
 __weak void OnButtonClick(void) {
 }
@@ -11,6 +12,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 		OnButtonClick();
 		break;
 	case GPIO_PIN_1:
+		MotorControl.Flags.OverCurrent = HAL_GPIO_ReadPin(GPIOD, GPIO_PIN_1) == GPIO_PIN_SET;
 		if (HAL_GPIO_ReadPin(GPIOD, GPIO_PIN_1) == GPIO_PIN_SET)
 			HAL_GPIO_WritePin(GPIOD, GPIO_PIN_13, GPIO_PIN_SET);
 		else

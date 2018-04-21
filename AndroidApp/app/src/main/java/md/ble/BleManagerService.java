@@ -36,7 +36,7 @@ public class BleManagerService extends com.chimeraiot.android.ble.BleService
     }
 
     private static final String TAG = BleManagerService.class.getSimpleName();
-    private static final String RECORD_DEVICE_NAME = "BLEPeripheral";
+    private static final String RECORD_DEVICE_NAME = "eBike MC";
     private ScanProcessor scanner;
     private static final String SENSOR_TO_READ = MyCustomService.UUID_SERVICE;
     private static BleManagerService INSTANCE = null;
@@ -110,7 +110,10 @@ public class BleManagerService extends com.chimeraiot.android.ble.BleService
                 .get(name, address).getSensor(SENSOR_TO_READ);
         if (sensor instanceof MyCustomService) {
             getBleManager().listen(address, sensor, MyCustomService.UUID_BIKE_BATTERY_LEVEL_ID);
-             getBleManager().listen(address, sensor, MyCustomService.UUID_CURRENT_ID);
+            getBleManager().listen(address, sensor, MyCustomService.UUID_CURRENT_ID);
+            getBleManager().listen(address, sensor, MyCustomService.UUID_BIKE_SPEED_ID);
+            getBleManager().listen(address, sensor, MyCustomService.UUID_BIKE_FLAGS_ID);
+
         }
     }
 
@@ -127,7 +130,7 @@ public class BleManagerService extends com.chimeraiot.android.ble.BleService
         super.onConnectionFailed(name, address, status, state);
         if (_bleStateListener != null)
             _bleStateListener.onBleStateChange(bleState.connectionFailed);
-        getBleManager().reset(address);
+       // getBleManager().reset(address);
         scanner.StartScan(RECORD_DEVICE_NAME);
     }
 
@@ -171,11 +174,4 @@ public class BleManagerService extends com.chimeraiot.android.ble.BleService
             getBleManager().update(adress, sensor, uuid, data);
     }
 
-
-    public DeviceDef getDeviceDef() {
-        return new BaseDef<>((Void) null);
-       /*if (adress != null && deviceName != null)
-            return null;
-        return getBleManager().getDeviceDefCollection().get(deviceName, adress);*/
-    }
 }
