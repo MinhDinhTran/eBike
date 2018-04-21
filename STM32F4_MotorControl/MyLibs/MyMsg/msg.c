@@ -39,7 +39,7 @@ static MyMsgCache_t* flag_NewAffixHead = NULL;
 static uint8_t count_AffixesFound = 0;
 void MyMsg_Error_Handler() {
 #ifndef CC2541
-	Error_Handler();
+	//Error_Handler();
 #else
 	printf("MyMsg Error\n");
         Error_Handler();

@@ -45,7 +45,7 @@ static void BT_Task(void *pvParameters) {
 			free(msgToSend->pData);
 			free(msgToSend);
 		}
-		osDelay(50);
+		osDelay(1);
 		MyMsg_t *msg = MyMsg_ProcessCache();
 		if (msg != NULL) {
 			ProccesReceivedMessage(msg);

@@ -73,5 +73,4 @@ void ChangePWMDutyCycle(uint8_t newDutyCycle, int8_t maxStep);
 
 
 #define POLIU_SKAICIUS 24
-//const float TIM10_SPEED_CALC_DEVIDER = POLIU_SKAICIUS * 200000 * 60;// (96000000/TIM10_SPEED_CALC_DIV) * 60 * POLIU_SKAICIUS;
 #endif /* MOTOR_CONTROL_MC_H_ */

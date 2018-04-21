@@ -1338,19 +1338,19 @@
         </file>
     </group>
     <group>
-        <name>MyLibs</name>
-        <group>
-            <name>MyMsg</name>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\..\STM32F4_MotorControl\MyLibs\MyMsg\msg.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\..\STM32F4_MotorControl\MyLibs\MyMsg\MyMsg.h</name>
-            </file>
-        </group>
-    </group>
-    <group>
         <name>NPI</name>
+        <group>
+            <name>MyLibs</name>
+            <group>
+                <name>MyMsg</name>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\..\STM32F4_MotorControl\MyLibs\MyMsg\msg.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\..\STM32F4_MotorControl\MyLibs\MyMsg\MyMsg.h</name>
+                </file>
+            </group>
+        </group>
         <file>
             <name>$PROJ_DIR$\..\..\ble\common\npi\npi_np\npi.c</name>
         </file>

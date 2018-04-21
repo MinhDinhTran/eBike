@@ -138,7 +138,7 @@ void ChangePWMSwitchingSequence(PWMSequences newSequences) {
 
 	MotorControl.PWM_Switching.IsChangingSequence = 1;
 
-	//ChangePWMDutyCycle(20, 100);
+	ChangePWMDutyCycle(20, 100);
 
 	MotorControl.PWM_Switching.ActiveSequence = newSequences;
 	switch (newSequences) {

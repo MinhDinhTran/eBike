@@ -1,7 +1,7 @@
 [PreviousGenFiles]
-HeaderPath=E:/Atollic/TrueSTUDIO/STM32_workspace_9.0/STM32F4_2/Inc
+HeaderPath=E:/Desktop/MD_eBike/STM32F4_MotorControl/Inc
 HeaderFiles=stm32f4xx_it.h;stm32f4xx_hal_conf.h;main.h;FreeRTOSConfig.h;usb_device.h;usbd_conf.h;usbd_desc.h;usbd_cdc_if.h;ffconf.h;user_diskio.h;fatfs.h;
-SourcePath=E:/Atollic/TrueSTUDIO/STM32_workspace_9.0/STM32F4_2/Src
+SourcePath=E:/Desktop/MD_eBike/STM32F4_MotorControl/Src
 SourceFiles=stm32f4xx_it.h;stm32f4xx_hal_conf.h;main.h;stm32f4xx_it.c;stm32f4xx_hal_msp.c;main.c;FreeRTOSConfig.h;freertos.c;stm32f4xx_hal_timebase_TIM.c;usb_device.c;usbd_conf.c;usbd_desc.c;usbd_cdc_if.c;user_diskio.c;fatfs.c;
 
 [PreviousLibFiles]

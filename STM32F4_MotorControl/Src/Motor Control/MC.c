@@ -27,7 +27,7 @@ MotorControl_t MotorControl = { .ADC_V = { 0, 0, 0 }, .DutyCycle = 20, .Wanted_D
 		.ActiveSequence = PWMSequencesNotInit,
 		.UseComplementaryPWM = 0,
 		.UsePWMOnPWMN = 0 }, .pwmCountToChangePhase = 25, //355;
-		.PID = { .Kp = 0.5, .Ki = 0.01, .Kd = -0.1 } };
+		.PID = { .Kp = 0.35, .Ki = -0.01, .Kd = -0.05 } };
 
 static uint32_t GetActualBEMF();
 static void Integrate();
@@ -81,7 +81,6 @@ void MotorControlThread(void const * argument) // MotorControlThread function
 
 		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
 		osDelay(500);
-		MotorControl.RPM = 13.1;
 		msg = MyMsg_CreateString(BIKE_SPEED_ID, &MotorControl.RPM, BIKE_SPEED_LEN);
 		xQueueSendFromISR(xQueueTX, (void * ) &msg, (TickType_t ) 0);
 	}
@@ -200,12 +199,6 @@ static void Integrate() {
 	}
 }
 
-float32_t output = 0;
-uint32_t phaseSwitchCount = 0;
-int newDutyCycle;
-float32_t buf[4096] = { 0 };
-float buf2[4096] = { 0 };
-int counttt = 0;
 void OnPhaseChanged() {
 
 	switch (MotorControl.PWM_Switching.ActiveSequence) {
@@ -215,30 +208,14 @@ void OnPhaseChanged() {
 		if (MotorControl.pwm_phase == 0) {
 			if (HAL_TIM_OC_Stop_IT(&TIM_MC_WATCHDOG, TIM_MC_WATCHDOG_CHN) != HAL_OK)
 				Error_Handler();
-			MotorControl.RPM = (float) 4200 / TIM_MC_WATCHDOG.Instance->CNT * 60 / 24;
+			MotorControl.RPM = (float) 2500000 / TIM_MC_WATCHDOG.Instance->CNT;// (168MHz/168) / x * 60 / 24;
 
 			htim10.Instance->CNT = 0;
 			if (HAL_TIM_OC_Start_IT(&TIM_MC_WATCHDOG, TIM_MC_WATCHDOG_CHN) != HAL_OK)
 				Error_Handler();
 			if (MotorControl.RPM > 1000 || MotorControl.RPM < 0)
 				MotorControl.RPM = 0;
-			/*output = arm_pid_f32(&MotorControl.PID, (float32_t) MotorControl.RPM - 100);
-			buf[counttt] = MotorControl.RPM;
-			buf2[counttt] = output;
-			counttt++;
-			if (counttt >= 4096) {
-				TurnAllPWMsOFF();
 
-				counttt = 0;
-			}
-			//output = MotorControl.DutyCycle + output/100;
-			newDutyCycle = (int) output;
-
-			if (newDutyCycle < 25)
-				newDutyCycle = 25;
-			if (newDutyCycle > 95)
-				newDutyCycle = 95;
-			ChangePWMDutyCycle((uint8_t) newDutyCycle, 0);*/
 		}
 
 		/*if (!MotorControl.Flags.ClosedLoop) {
@@ -301,3 +278,27 @@ void ChangePWMDutyCycle(uint8_t newDutyCycle, int8_t maxStep) {
 
 }
 
+
+
+void PID(int RPM_avg)
+{
+	if (MotorControl.PWM_Switching.ActiveSequence != ForwardCommutation)
+		return;
+
+	/*rpm[countCache++] = (int)MotorControl.RPM;
+	if (countCache >=1000)
+	{
+		TurnAllPWMsOFF();
+		countCache = 0;
+	}*/
+	float32_t output = arm_pid_f32(&MotorControl.PID, (float32_t) MotorControl.RPM - RPM_avg);
+	//output = MotorControl.DutyCycle + output/100;
+	int newDutyCycle = (int) output;
+
+	//rpm_PID[countCache] = newDutyCycle;
+	if (newDutyCycle < 25)
+		newDutyCycle = 25;
+	if (newDutyCycle > 95)
+		newDutyCycle = 95;
+	ChangePWMDutyCycle((uint8_t) newDutyCycle, 0);
+}

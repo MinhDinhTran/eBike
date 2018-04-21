@@ -13,7 +13,7 @@
 #include "gatt_uuid.h"
 #include "gattservapp.h"
 #include "gapbondmgr.h"
-
+#include "OnBoard.h"
 #include "simpleGATTprofile.h"
         
 #include "hal_adc.h"
@@ -297,16 +297,20 @@ bStatus_t SimpleProfile_SetParameter( uint8 param, uint8 len, void *value )
      if ( GATTServApp_ProcessCharCfg( _BIKE_BATTERY_LEVEL_NotiConfig, ((uint8*)&_BIKE_BATTERY_LEVEL_Value), FALSE,
                                   simpleProfileAttrTbl, GATT_NUM_ATTRS( simpleProfileAttrTbl ),
                                   INVALID_TASK_ID, simpleProfile_ReadAttrCB ) != SUCCESS)
+     {
        printf("WTF\n");
-
+       SystemReset();
+     }
       break;
     case CURRENT_ID:
       SetValue(uint16, _CURRENT_Value);      
      if ( GATTServApp_ProcessCharCfg( _CURRENT_NotiConfig, ((uint8*)&_CURRENT_Value), FALSE,
                                   simpleProfileAttrTbl, GATT_NUM_ATTRS( simpleProfileAttrTbl ),
                                   INVALID_TASK_ID, simpleProfile_ReadAttrCB ) != SUCCESS)
+     {
        printf("WTF\n");
-
+       SystemReset();
+     }
       break;
     case BIKE_SPEED_ID:
       SetValue(float, _BIKE_SPEED_Value);
@@ -314,16 +318,20 @@ bStatus_t SimpleProfile_SetParameter( uint8 param, uint8 len, void *value )
      if ( GATTServApp_ProcessCharCfg( _BIKE_SPEED_NotiConfig, ((uint8*)&_BIKE_SPEED_Value), FALSE,
                                   simpleProfileAttrTbl, GATT_NUM_ATTRS( simpleProfileAttrTbl ),
                                   INVALID_TASK_ID, simpleProfile_ReadAttrCB ) != SUCCESS)
+     {
        printf("WTF\n");
-
+       SystemReset();
+     }
       break;
     case BIKE_FLAGS_ID:
       SetValue(uint32, _BIKE_FLAGS_Value);      
      if ( GATTServApp_ProcessCharCfg( _BIKE_FLAGS_NotiConfig, ((uint8*)&_BIKE_FLAGS_Value), FALSE,
                                   simpleProfileAttrTbl, GATT_NUM_ATTRS( simpleProfileAttrTbl ),
                                   INVALID_TASK_ID, simpleProfile_ReadAttrCB ) != SUCCESS)
+     {
        printf("WTF\n");
-
+       SystemReset();
+     }
       break;
     default:
       ret = INVALIDPARAMETER;

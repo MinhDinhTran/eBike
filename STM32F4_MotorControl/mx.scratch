@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Project>
-<ProjectName>E:\Atollic\TrueSTUDIO\STM32_workspace_9.0\STM32F4_2\\STM32F407VG</ProjectName>
+<ProjectName>E:\Desktop\MD_eBike\STM32F4_MotorControl\\STM32F407VG</ProjectName>
 <ProjectNature>C</ProjectNature> 
 <CMSIS>..\Drivers\CMSIS</CMSIS>
 <HAL_Driver>C:\Users\jonas\STM32Cube\Repository\STM32Cube_FW_F4_V1.21.0\Drivers\CMSIS</HAL_Driver>

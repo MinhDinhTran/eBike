@@ -9,12 +9,13 @@
 #include "InstDefs.h"
 
 //extern TIM_HandleTypeDef htim9;
-
+extern void CruiseControl_Reset();
 void ProccesReceivedMessage(MyMsg_t *msg) {
 	HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_13);
 	switch (msg->UUID) {
 	case PWM_DUTY_CYCLE_ID:
 		MotorControl.Wanted_DutyCycle = *(uint8_t*) msg->pData;
+		CruiseControl_Reset();
 		ChangePWMDutyCycle(MotorControl.Wanted_DutyCycle, 100);
 		break;
 	case V_THRESHOLD_ID:

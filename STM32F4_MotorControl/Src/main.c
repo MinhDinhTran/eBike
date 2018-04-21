@@ -151,7 +151,6 @@ int main(void) {
 	MX_DAC_Init();
 	/* USER CODE BEGIN 2 */
 
-
 	/* USER CODE END 2 */
 
 	/* USER CODE BEGIN RTOS_MUTEX */
@@ -636,7 +635,7 @@ static void MX_TIM10_Init(void) {
 	TIM_OC_InitTypeDef sConfigOC;
 
 	htim10.Instance = TIM10;
-	htim10.Init.Prescaler = 65535;
+	htim10.Init.Prescaler = 168;
 	htim10.Init.CounterMode = TIM_COUNTERMODE_UP;
 	htim10.Init.Period = 65535;
 	htim10.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
@@ -763,6 +762,15 @@ static void MX_GPIO_Init(void) {
 }
 
 /* USER CODE BEGIN 4 */
+#define CruiseControl_RPM_Toleration 3
+extern void PID();
+uint8_t CruiseControl_Count = 0;
+int CruiseControl_RPM = 0;
+uint8_t CruiseControl_IsActive = 0;
+void CruiseControl_Reset() {
+	CruiseControl_Count = 0;
+	CruiseControl_IsActive = 0;
+}
 /* USER CODE END 4 */
 
 /* StartDefaultTask function */
@@ -777,10 +785,27 @@ void StartDefaultTask(void const * argument) {
 	HAL_DAC_SetValue(&hdac, DAC_CHANNEL_2, DAC_ALIGN_12B_R, 3000);
 	/* Infinite loop */
 	for (;;) {
-		osDelay(1);
-		//Log.WriteByUUID(integ_UUID, (int32_t)integral);
+		osDelay(10);
+
+		if (CruiseControl_IsActive) {
+			PID(CruiseControl_RPM);
+		} else {
+			int rpm = (int) MotorControl.RPM;
+			if (rpm == 0 || rpm > CruiseControl_RPM + CruiseControl_RPM_Toleration || rpm < CruiseControl_RPM - CruiseControl_RPM_Toleration) {
+				CruiseControl_Count = 0;
+				CruiseControl_RPM = rpm;
+			} else {
+				if (CruiseControl_Count < 100) {
+					CruiseControl_Count++;
+					if (CruiseControl_Count == 100) {
+						arm_pid_reset_f32(&MotorControl.PID);
+						CruiseControl_IsActive = 1;
+					}
+				}
+			}
+		}
+		/* USER CODE END 5 */
 	}
-	/* USER CODE END 5 */
 }
 
 /**
