@@ -29,10 +29,10 @@ void Start_BT_Task(void) {
 
 static void BT_Task(void *pvParameters) {
 	UNUSED(pvParameters);
-	xQueueTX = xQueueCreate(10, sizeof(MyMsg_t*));
+	xQueueTX = xQueueCreate(20, sizeof(MyMsg_t*));
 	if (xQueueTX == NULL)
 		Error_Handler();
-	xQueueRX = xQueueCreate(5, sizeof(MyMsg_t*));
+	xQueueRX = xQueueCreate(20, sizeof(MyMsg_t*));
 	if (xQueueRX == NULL)
 		Error_Handler();
 

@@ -8,6 +8,8 @@
 
 #ifndef CC2541
 #include "main.h" // for MyMsg_Error_Handler();
+#else
+extern void Error_Handler();
 #endif
 
 
@@ -40,6 +42,7 @@ void MyMsg_Error_Handler() {
 	Error_Handler();
 #else
 	printf("MyMsg Error\n");
+        Error_Handler();
 #endif
 }
 static MyMsgCache_t* CreateCacheFragment() {

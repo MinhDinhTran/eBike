@@ -8,6 +8,7 @@
 #include "OSAL.h"
 #include "npi.h"
 #include "MyMsg.h"
+#include "OnBoard.h"
 
 #include "SIMPLEgattPROFILE.h"
 
@@ -78,33 +79,28 @@ processUART();
 
 
 static void SetParameter(MyMsg_t* msg)
-{
+{ 
   if (!Connected) return ;
   switch(msg->UUID)
   {
   case BIKE_BATTERY_LEVEL_ID:
-    if (msg->length != 11)
-      printf("BIKE_BAT %d\n",msg->length);
     SimpleProfile_SetParameter( BIKE_BATTERY_LEVEL_ID, BIKE_BATTERY_LEVEL_LEN, (uint16*)(msg->pData) );
     break;
   case CURRENT_ID:
-    if (msg->length != 11)
-      printf("CUR %d\n",msg->length);
     SimpleProfile_SetParameter( CURRENT_ID, CURRENT_LEN, (uint16*)(msg->pData) );
     break;
   case BIKE_SPEED_ID:
-    if (msg->length != 13)
-      printf("BIKE_SPE %d\n",msg->length);
     SimpleProfile_SetParameter( BIKE_SPEED_ID, BIKE_SPEED_LEN, (float*)(msg->pData) );
     break;
   case BIKE_FLAGS_ID:
-    if (msg->length != 13)
-      printf("BIKE_FLA %d\n",msg->length);
     SimpleProfile_SetParameter( BIKE_FLAGS_ID, BIKE_FLAGS_LEN, (uint32*)(msg->pData) );
     break;
   }
 }
 
-	
+void Error_Handler()
+{
+  SystemReset();
+}
 	
 
