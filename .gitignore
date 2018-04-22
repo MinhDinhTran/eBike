@@ -35,3 +35,8 @@
 *.wsdt
 *.pbd
 *.xcl
+*.d51
+*.hex
+*.map
+*.pbi
+*.xcl

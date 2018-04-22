@@ -53,6 +53,13 @@
 
 /* USER CODE BEGIN Includes */
 #include "MC.h"
+#define vPortSVCHandler SVC_Handler
+
+
+#define xPortPendSVHandler PendSV_Handler
+
+
+#define xPortSysTickHandler SysTick_Handler
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
@@ -106,6 +113,7 @@ extern void Start_BT_Task(void);
 extern void Start_USB_Task(void);
 extern void TurnAllPWMsOFF(void);
 extern void Start_SDCard_Task(void);
+extern void CruiseControl_Start(void);
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
@@ -176,6 +184,7 @@ int main(void) {
 	Start_USB_Task();
 	Start_BT_Task();
 	Start_MotorControlThread();
+	CruiseControl_Start();
 	/* USER CODE END RTOS_THREADS */
 
 	/* USER CODE BEGIN RTOS_QUEUES */
@@ -762,15 +771,7 @@ static void MX_GPIO_Init(void) {
 }
 
 /* USER CODE BEGIN 4 */
-#define CruiseControl_RPM_Toleration 3
-extern void PID();
-uint8_t CruiseControl_Count = 0;
-int CruiseControl_RPM = 0;
-uint8_t CruiseControl_IsActive = 0;
-void CruiseControl_Reset() {
-	CruiseControl_Count = 0;
-	CruiseControl_IsActive = 0;
-}
+
 /* USER CODE END 4 */
 
 /* StartDefaultTask function */
@@ -779,31 +780,14 @@ void StartDefaultTask(void const * argument) {
 	MX_USB_DEVICE_Init();
 
 	/* USER CODE BEGIN 5 */
+	UNUSED(argument);
 	if (HAL_DAC_Start(&hdac, DAC_CHANNEL_2) != HAL_OK) {
 		_Error_Handler(__FILE__, __LINE__);
 	}
-	HAL_DAC_SetValue(&hdac, DAC_CHANNEL_2, DAC_ALIGN_12B_R, 3000);
+	//HAL_DAC_SetValue(&hdac, DAC_CHANNEL_2, DAC_ALIGN_12B_R, 3000);
 	/* Infinite loop */
 	for (;;) {
-		osDelay(10);
-
-		if (CruiseControl_IsActive) {
-			PID(CruiseControl_RPM);
-		} else {
-			int rpm = (int) MotorControl.RPM;
-			if (rpm == 0 || rpm > CruiseControl_RPM + CruiseControl_RPM_Toleration || rpm < CruiseControl_RPM - CruiseControl_RPM_Toleration) {
-				CruiseControl_Count = 0;
-				CruiseControl_RPM = rpm;
-			} else {
-				if (CruiseControl_Count < 100) {
-					CruiseControl_Count++;
-					if (CruiseControl_Count == 100) {
-						arm_pid_reset_f32(&MotorControl.PID);
-						CruiseControl_IsActive = 1;
-					}
-				}
-			}
-		}
+		osDelay(1000);
 		/* USER CODE END 5 */
 	}
 }

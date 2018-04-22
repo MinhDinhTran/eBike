@@ -27,7 +27,7 @@ MotorControl_t MotorControl = { .ADC_V = { 0, 0, 0 }, .DutyCycle = 20, .Wanted_D
 		.ActiveSequence = PWMSequencesNotInit,
 		.UseComplementaryPWM = 0,
 		.UsePWMOnPWMN = 0 }, .pwmCountToChangePhase = 25, //355;
-		.PID = { .Kp = 0.35, .Ki = -0.01, .Kd = -0.05 } };
+		.PID = { .Kp = 0.35, .Ki = -0.01, .Kd = -0.05 } };//{ .Kp = 0.3, .Ki = -0.07, .Kd = -0.1
 
 static uint32_t GetActualBEMF();
 static void Integrate();
@@ -71,7 +71,6 @@ void MotorControlThread(void const * argument) // MotorControlThread function
 		}
 		MyMsg_t *msg = MyMsg_CreateString(BIKE_BATTERY_LEVEL_ID, &MotorControl.ADC_VBAT, BIKE_BATTERY_LEVEL_LEN);
 		xQueueSendFromISR(xQueueTX, (void * ) &msg, (TickType_t ) 0);
-
 		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
 		osDelay(500);
 
@@ -280,25 +279,4 @@ void ChangePWMDutyCycle(uint8_t newDutyCycle, int8_t maxStep) {
 
 
 
-void PID(int RPM_avg)
-{
-	if (MotorControl.PWM_Switching.ActiveSequence != ForwardCommutation)
-		return;
 
-	/*rpm[countCache++] = (int)MotorControl.RPM;
-	if (countCache >=1000)
-	{
-		TurnAllPWMsOFF();
-		countCache = 0;
-	}*/
-	float32_t output = arm_pid_f32(&MotorControl.PID, (float32_t) MotorControl.RPM - RPM_avg);
-	//output = MotorControl.DutyCycle + output/100;
-	int newDutyCycle = (int) output;
-
-	//rpm_PID[countCache] = newDutyCycle;
-	if (newDutyCycle < 25)
-		newDutyCycle = 25;
-	if (newDutyCycle > 95)
-		newDutyCycle = 95;
-	ChangePWMDutyCycle((uint8_t) newDutyCycle, 0);
-}

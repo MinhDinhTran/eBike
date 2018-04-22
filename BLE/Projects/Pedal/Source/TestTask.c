@@ -41,21 +41,36 @@ void npiCBack ( uint8 port, uint8 event );
 void TestTask_Init( uint8 task_id )
 {
   TestTask_ID = task_id;
-  //HalAdcSetReference ( HAL_ADC_REF_AVDD );//HAL_ADC_REF_125V );//
+  HalAdcSetReference ( HAL_ADC_REF_AVDD );//HAL_ADC_REF_AVDD );//
   osal_start_reload_timer( TestTask_ID, TestTask_MeasureADC, TestTask_MeasureADC_Period );
  
 }
 
 
 uint16 adc0;
-char adc[5];
 uint16 TestTask_ProcessEvent( uint8 task_id, uint16 events )
 {
    adc0 =  HalAdcRead ( HAL_ADC_CHANNEL_0, HAL_ADC_RESOLUTION_12);
-   ADCMeasureNo++;
-   buffer[bufferIndex++%5] = adc0;
+      printf ( "0-%d\n", adc0);
+   /*adc0 =  HalAdcRead ( HAL_ADC_CHANNEL_1, HAL_ADC_RESOLUTION_12);
+      printf ( "1-%d\n", adc0);
+   adc0 =  HalAdcRead ( HAL_ADC_CHANNEL_2, HAL_ADC_RESOLUTION_12);
+      printf ( "2-%d\n", adc0);
+   adc0 =  HalAdcRead ( HAL_ADC_CHANNEL_3, HAL_ADC_RESOLUTION_12);
+      printf ( "3-%d\n", adc0);
+   adc0 =  HalAdcRead ( HAL_ADC_CHANNEL_4, HAL_ADC_RESOLUTION_12);
+      printf ( "4-%d\n", adc0);
+   adc0 =  HalAdcRead ( HAL_ADC_CHANNEL_5, HAL_ADC_RESOLUTION_12);
+      printf ( "5-%d\n", adc0);
+   adc0 =  HalAdcRead ( HAL_ADC_CHANNEL_6, HAL_ADC_RESOLUTION_12);
+      printf ( "6-%d\n", adc0);
+   adc0 =  HalAdcRead ( HAL_ADC_CHANNEL_7, HAL_ADC_RESOLUTION_12);
+      printf ( "7-%d\n", adc0);*/
+   
+   
+
    //printf("%d, ", (buffer[0] + buffer[1] + buffer[2] + buffer[3] + buffer[4])/5);
-   printf ( "%d\n", adc0);
+
 
    events = ( events ^ TestTask_MeasureADC);
    osal_start_reload_timer( TestTask_ID, TestTask_MeasureADC, TestTask_MeasureADC_Period );
