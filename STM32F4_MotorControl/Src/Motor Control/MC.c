@@ -9,6 +9,7 @@
 #include "MC.h"
 #include "Bluetooth_Msg.h"
 
+extern void Log(uint16_t data);
 extern DAC_HandleTypeDef hdac;
 
 osThreadId MotorControlThreadHandle;
@@ -27,7 +28,7 @@ MotorControl_t MotorControl = { .ADC_V = { 0, 0, 0 }, .DutyCycle = 20, .Wanted_D
 		.ActiveSequence = PWMSequencesNotInit,
 		.UseComplementaryPWM = 0,
 		.UsePWMOnPWMN = 0 }, .pwmCountToChangePhase = 25, //355;
-		.PID = { .Kp = 0.35, .Ki = -0.01, .Kd = -0.05 } };//{ .Kp = 0.3, .Ki = -0.07, .Kd = -0.1
+		.PID = { .Kp = 0.35, .Ki = -0.01, .Kd = -0.05 } }; //{ .Kp = 0.3, .Ki = -0.07, .Kd = -0.1
 
 static uint32_t GetActualBEMF();
 static void Integrate();
@@ -74,7 +75,6 @@ void MotorControlThread(void const * argument) // MotorControlThread function
 		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
 		osDelay(500);
 
-
 		msg = MyMsg_CreateString(CURRENT_ID, &MotorControl.ADC_I[0], CURRENT_LEN);
 		xQueueSendFromISR(xQueueTX, (void * ) &msg, (TickType_t ) 0);
 
@@ -82,6 +82,7 @@ void MotorControlThread(void const * argument) // MotorControlThread function
 		osDelay(500);
 		msg = MyMsg_CreateString(BIKE_SPEED_ID, &MotorControl.RPM, BIKE_SPEED_LEN);
 		xQueueSendFromISR(xQueueTX, (void * ) &msg, (TickType_t ) 0);
+
 	}
 }
 
@@ -124,7 +125,6 @@ void OnPWMTriggeredEXT(void) {
 		Integrate();
 	}
 }
-
 void OnPWM_ADC_Measured(ADC_HandleTypeDef* hadc) {
 	uint8_t index = GetADCIndex(hadc->Instance);
 	MotorControl.ADC_V[index] = HAL_ADCEx_InjectedGetValue(hadc, ADC_V_INJ_RANK);
@@ -172,7 +172,7 @@ static void Integrate() {
 			return;
 		if (midPoint < 200)
 			return;
-		if (MotorControl.pwmCountThisPhase > 300) {
+		if (MotorControl.pwmCountThisPhase > 400) {
 			ChangePhase();
 			return;
 		}
@@ -207,7 +207,7 @@ void OnPhaseChanged() {
 		if (MotorControl.pwm_phase == 0) {
 			if (HAL_TIM_OC_Stop_IT(&TIM_MC_WATCHDOG, TIM_MC_WATCHDOG_CHN) != HAL_OK)
 				Error_Handler();
-			MotorControl.RPM = (float) 2500000 / TIM_MC_WATCHDOG.Instance->CNT;// (168MHz/168) / x * 60 / 24;
+			MotorControl.RPM = (float) 2500000 / TIM_MC_WATCHDOG.Instance->CNT; // (168MHz/168) / x * 60 / 24;
 
 			htim10.Instance->CNT = 0;
 			if (HAL_TIM_OC_Start_IT(&TIM_MC_WATCHDOG, TIM_MC_WATCHDOG_CHN) != HAL_OK)
@@ -252,7 +252,6 @@ void OnPhaseChanged() {
 		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_RESET);
 	MotorControl.pwmCountThisPhase = 0;
 }
-
 void ChangePWMDutyCycle(uint8_t newDutyCycle, int8_t maxStep) {
 	if (MotorControl.DutyCycle == newDutyCycle) {
 		return;
@@ -276,7 +275,4 @@ void ChangePWMDutyCycle(uint8_t newDutyCycle, int8_t maxStep) {
 	MotorControl.DutyCycle = dutyCycleToSet;
 
 }
-
-
-
 

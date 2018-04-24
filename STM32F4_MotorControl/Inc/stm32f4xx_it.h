@@ -53,6 +53,8 @@ void FLASH_IRQHandler(void);
 void RCC_IRQHandler(void);
 void EXTI0_IRQHandler(void);
 void EXTI1_IRQHandler(void);
+void DMA1_Stream3_IRQHandler(void);
+void DMA1_Stream4_IRQHandler(void);
 void ADC_IRQHandler(void);
 void TIM1_BRK_TIM9_IRQHandler(void);
 void TIM1_UP_TIM10_IRQHandler(void);
@@ -63,7 +65,9 @@ void USART3_IRQHandler(void);
 void EXTI15_10_IRQHandler(void);
 void RTC_Alarm_IRQHandler(void);
 void TIM8_TRG_COM_TIM14_IRQHandler(void);
+void TIM6_DAC_IRQHandler(void);
 void OTG_FS_IRQHandler(void);
+void FPU_IRQHandler(void);
 
 #ifdef __cplusplus
 }

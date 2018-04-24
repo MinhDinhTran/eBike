@@ -49,15 +49,14 @@
 #include "main.h"
 #include "stm32f4xx_hal.h"
 #include "cmsis_os.h"
+#include "fatfs.h"
 #include "usb_device.h"
 
 /* USER CODE BEGIN Includes */
 #include "MC.h"
 #define vPortSVCHandler SVC_Handler
 
-
 #define xPortPendSVHandler PendSV_Handler
-
 
 #define xPortSysTickHandler SysTick_Handler
 /* USER CODE END Includes */
@@ -72,6 +71,8 @@ DAC_HandleTypeDef hdac;
 RTC_HandleTypeDef hrtc;
 
 SPI_HandleTypeDef hspi2;
+DMA_HandleTypeDef hdma_spi2_rx;
+DMA_HandleTypeDef hdma_spi2_tx;
 
 TIM_HandleTypeDef htim1;
 TIM_HandleTypeDef htim9;
@@ -89,6 +90,7 @@ osThreadId defaultTaskHandle;
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
+static void MX_DMA_Init(void);
 static void MX_TIM1_Init(void);
 static void MX_RTC_Init(void);
 static void MX_SPI2_Init(void);
@@ -117,6 +119,7 @@ extern void CruiseControl_Start(void);
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
+
 /* USER CODE END 0 */
 
 /**
@@ -126,7 +129,6 @@ extern void CruiseControl_Start(void);
  */
 int main(void) {
 	/* USER CODE BEGIN 1 */
-
 	/* USER CODE END 1 */
 
 	/* MCU Configuration----------------------------------------------------------*/
@@ -147,6 +149,7 @@ int main(void) {
 
 	/* Initialize all configured peripherals */
 	MX_GPIO_Init();
+	MX_DMA_Init();
 	MX_TIM1_Init();
 	MX_RTC_Init();
 	MX_SPI2_Init();
@@ -180,16 +183,19 @@ int main(void) {
 
 	/* USER CODE BEGIN RTOS_THREADS */
 	/* add threads, ... */
-	//Start_SDCard_Task();
+	MX_FATFS_Init();
 	Start_USB_Task();
 	Start_BT_Task();
 	Start_MotorControlThread();
 	CruiseControl_Start();
+
+	Start_SDCard_Task();
 	/* USER CODE END RTOS_THREADS */
 
 	/* USER CODE BEGIN RTOS_QUEUES */
 	/* add queues, ... */
 
+//	NVIC_SetPriorityGrouping( 0 );
 	/* USER CODE END RTOS_QUEUES */
 
 	/* Start scheduler */
@@ -542,7 +548,7 @@ static void MX_SPI2_Init(void) {
 	hspi2.Init.CLKPolarity = SPI_POLARITY_LOW;
 	hspi2.Init.CLKPhase = SPI_PHASE_1EDGE;
 	hspi2.Init.NSS = SPI_NSS_SOFT;
-	hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_256;
+	hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
 	hspi2.Init.FirstBit = SPI_FIRSTBIT_MSB;
 	hspi2.Init.TIMode = SPI_TIMODE_DISABLE;
 	hspi2.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
@@ -683,6 +689,24 @@ static void MX_USART3_UART_Init(void) {
 
 }
 
+/** 
+ * Enable DMA controller clock
+ */
+static void MX_DMA_Init(void) {
+	/* DMA controller clock enable */
+	__HAL_RCC_DMA1_CLK_ENABLE()
+	;
+
+	/* DMA interrupt init */
+	/* DMA1_Stream3_IRQn interrupt configuration */
+	HAL_NVIC_SetPriority(DMA1_Stream3_IRQn, 9, 0);
+	HAL_NVIC_EnableIRQ(DMA1_Stream3_IRQn);
+	/* DMA1_Stream4_IRQn interrupt configuration */
+	HAL_NVIC_SetPriority(DMA1_Stream4_IRQn, 9, 0);
+	HAL_NVIC_EnableIRQ(DMA1_Stream4_IRQn);
+
+}
+
 /** Configure pins as 
  * Analog
  * Input
@@ -759,25 +783,27 @@ static void MX_GPIO_Init(void) {
 	HAL_GPIO_Init(OTG_FS_OverCurrent_GPIO_Port, &GPIO_InitStruct);
 
 	/* EXTI interrupt init*/
-	HAL_NVIC_SetPriority(EXTI0_IRQn, 5, 0);
+	HAL_NVIC_SetPriority(EXTI0_IRQn, 8, 0);
 	HAL_NVIC_EnableIRQ(EXTI0_IRQn);
 
-	HAL_NVIC_SetPriority(EXTI1_IRQn, 5, 0);
+	HAL_NVIC_SetPriority(EXTI1_IRQn, 8, 0);
 	HAL_NVIC_EnableIRQ(EXTI1_IRQn);
 
-	HAL_NVIC_SetPriority(EXTI15_10_IRQn, 5, 0);
+	HAL_NVIC_SetPriority(EXTI15_10_IRQn, 8, 0);
 	HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 
 }
 
 /* USER CODE BEGIN 4 */
-
 /* USER CODE END 4 */
 
 /* StartDefaultTask function */
 void StartDefaultTask(void const * argument) {
 	/* init code for USB_DEVICE */
 	MX_USB_DEVICE_Init();
+
+	/* init code for FATFS */
+	//MX_FATFS_Init();
 
 	/* USER CODE BEGIN 5 */
 	UNUSED(argument);
@@ -787,9 +813,10 @@ void StartDefaultTask(void const * argument) {
 	//HAL_DAC_SetValue(&hdac, DAC_CHANNEL_2, DAC_ALIGN_12B_R, 3000);
 	/* Infinite loop */
 	for (;;) {
-		osDelay(1000);
-		/* USER CODE END 5 */
+		osDelay(5);
+		//HAL_IWDG_Refresh(&hiwdg);
 	}
+	/* USER CODE END 5 */
 }
 
 /**

@@ -30,14 +30,15 @@ void SDCard_SPI_TxRxCpltCallback(void)
 }
 void SDCard_SPI_ErrorCallback(void)
 {
-
+	//SDCardNotify_Responce_FromISR();
+	Error_Handler();
 }
 
 
 void SD_SPI_Send(const unsigned char *data, unsigned int size)
 {
 	Before_SPI_Action();
-	if(HAL_SPI_Transmit_IT(&hspi2, (uint8_t*)data, size) != HAL_OK)
+	if(HAL_SPI_Transmit_DMA(&hspi2, (uint8_t*)data, size) != HAL_OK)
 	    Error_Handler();
 	After_SPI_Action();
 }
@@ -45,14 +46,14 @@ void SD_SPI_Receive(unsigned char *rxData, unsigned int size)
 {
 	Before_SPI_Action();
 	unsigned char txDataDummy[512] = {0xff};
-	if(HAL_SPI_TransmitReceive_IT(&hspi2, txDataDummy, rxData, size) != HAL_OK)
+	if(HAL_SPI_TransmitReceive_DMA(&hspi2, txDataDummy, rxData, size) != HAL_OK)
 	    Error_Handler();
 	After_SPI_Action();
 }
 void SD_SPI_TransmitReceive(unsigned char *txData, unsigned char *rxData, unsigned int size)
 {
 	Before_SPI_Action();
-	if(HAL_SPI_TransmitReceive_IT(&hspi2, txData, rxData, size) != HAL_OK)
+	if(HAL_SPI_TransmitReceive_DMA(&hspi2, txData, rxData, size) != HAL_OK)
 	    Error_Handler();
 	After_SPI_Action();
 }
@@ -62,15 +63,15 @@ void Before_SPI_Action(void)
 {
 	configASSERT( xTaskToNotify_FromSPI == NULL );
 	configASSERT( SDCard_Task_Handle != NULL );
-	xTaskToNotify_FromSPI = SDCard_Task_Handle;//xTaskGetCurrentTaskHandle();
+	xTaskToNotify_FromSPI =  SDCard_Task_Handle;//xTaskGetCurrentTaskHandle();//
 }
 void After_SPI_Action(void)
 {
-	ulTaskNotifyTake( pdTRUE, osWaitForever);// pdMS_TO_TICKS( 200 ) );
+	ulTaskNotifyTake( pdTRUE,  osWaitForever );
 }
 void SDCardNotify_Responce_FromISR()
 {
-	BaseType_t xHigherPriorityTaskWoken = pdTRUE;// pdFALSE;
+	BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 	configASSERT( xTaskToNotify_FromSPI != NULL );
 	vTaskNotifyGiveFromISR( xTaskToNotify_FromSPI, &xHigherPriorityTaskWoken );
 	xTaskToNotify_FromSPI = NULL;
