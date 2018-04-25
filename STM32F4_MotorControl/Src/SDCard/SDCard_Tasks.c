@@ -10,6 +10,9 @@
 #include "ff.h"
 #include "SDCard.h"
 
+#include "cJSON.h"
+#include "SDCard_Buffer.h"
+
 TaskHandle_t SDCard_Task_Handle = NULL;
 void Start_SDCard_Task(void);
 
@@ -23,27 +26,10 @@ FIL Fil;
 _Bool first = 1;
 
 
-
-
-SDCardList_t* Log(uint16_t data) {
-	SDCardList_t* SDCardList = malloc(sizeof(SDCardList_t));
-	if (SDCardList == NULL)
-		Error_Handler();
-	RTC_TimeTypeDef RTC_TimeStructure;
-	RTC_DateTypeDef RTC_DateStructure;
-	HAL_RTC_GetTime(&hrtc, &RTC_TimeStructure, RTC_FORMAT_BIN);
-	HAL_RTC_GetDate(&hrtc, &RTC_DateStructure, RTC_FORMAT_BIN);
-	SDCardList->Length = sprintf(SDCardList->Data, "[%04d-%02d-%02d %02d:%02d:%02d]", 2000 + RTC_DateStructure.Year, RTC_DateStructure.Month, RTC_DateStructure.Date, RTC_TimeStructure.Hours, RTC_TimeStructure.Minutes, RTC_TimeStructure.Seconds);
-
-	for (int i = 0; i < 100; i++)
-		SDCardList->Length += sprintf(&SDCardList->Data[SDCardList->Length], " ,%d", data + i);
-	SDCardList->Length += sprintf(&SDCardList->Data[SDCardList->Length], "\r\n");
-	return SDCardList;
-}
 void Start_SDCard_Task(void) {
 	xTaskCreate(SDCard_Task,     				// Function that implements the task.
 	"SDCard_Task",   				// Text name for the task.
-	configMINIMAL_STACK_SIZE * 10,      	// Stack size in words, not bytes.
+	configMINIMAL_STACK_SIZE * 5,      	// Stack size in words, not bytes.
 	(void *) 0,    				// Parameter passed into the task.
 	configMAX_PRIORITIES - 2,				// Priority at which the task is created.
 	&SDCard_Task_Handle);      	// Used to pass out the created task's handle.
@@ -81,22 +67,46 @@ void SDCard_Task(void * pvParameters) {
 	first = 0;
 
 	int a = 0;
+
+
 	for (;;) {
+		if (Buffer_CanRead()) {
+			//SDCardList_t* msg = Log();
+			a++;
+			osDelay(25);
+			char* out = Buffer_GetString();
+			int bytesToWrite = strlen(out);//msg->Length;
+			char* tail = out;//msg->Data;
+			if (out == NULL)
+				Error_Handler();
+			while (bytesToWrite >=500)
+			{
 
-		SDCardList_t* msg = Log(a++);
-		//a++;
-		osDelay(25);
-		res = f_write(&Fil, msg->Data, msg->Length, &bw);
-		if (res != FR_OK)
-			Error_Handler();
-		if (msg->Length != (int) bw)
-			Error_Handler();
+				res = f_write(&Fil, tail, 500, &bw);
+				if (res != FR_OK)
+					Error_Handler();
+				tail+= 500;
+				bytesToWrite-=500;
+			}
+			if (bytesToWrite > 0)
+			{
 
-		free(msg);
-		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
+				res = f_write(&Fil, tail, bytesToWrite, &bw);
+				if (res != FR_OK)
+					Error_Handler();
+			}
+			/*if (msg->Length != (int) bw)
+				Error_Handler();*/
 
-		if (a % 500 == 0)
-			ChangeFile();
+			free(out);
+
+			Buffer_OnReadFinish();
+			HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
+
+			if (a % 20 == 0)
+				ChangeFile();
+		}
+
 		osDelay(25);
 	}
 }

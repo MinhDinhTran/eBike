@@ -6,7 +6,7 @@
 typedef struct SDCardList_t SDCardList_t;
 struct SDCardList_t {
 	int Length;
-	char Data[550];
+	char Data[2048];
 };
 
 

@@ -9,6 +9,7 @@
 #include "MC.h"
 #include "Bluetooth_Msg.h"
 
+#include "SDCard_Buffer.h"
 extern DAC_HandleTypeDef hdac;
 
 osThreadId MotorControlThreadHandle;
@@ -22,7 +23,7 @@ extern TIM_HandleTypeDef TIM_MC_WATCHDOG;
 
 MotorControl_t MotorControl = { .ADC_V = { 0, 0, 0 }, .DutyCycle = 20, .Wanted_DutyCycle = 20, .Integral = 0, .Limits = {
 		.Integral = 3000 // su ~50% duty cycle testuota
-}, .Flags = { .ClosedLoop = 1 }, .PWM_Switching = {
+}, .Flags = { .ClosedLoop = 0 }, .PWM_Switching = {
 		.IsRisingFront = 1,
 		.ActiveSequence = PWMSequencesNotInit,
 		.UseComplementaryPWM = 0,
@@ -128,6 +129,8 @@ void OnPWM_ADC_Measured(ADC_HandleTypeDef* hadc) {
 	uint8_t index = GetADCIndex(hadc->Instance);
 	MotorControl.ADC_V[index] = HAL_ADCEx_InjectedGetValue(hadc, ADC_V_INJ_RANK);
 	MotorControl.ADC_I[index] = HAL_ADCEx_InjectedGetValue(hadc, ADC_I_INJ_RANK);
+
+	Buffer_AddValue(MotorControl.ADC_V[index], MotorControl.ADC_I[index]);
 }
 
 void OnVBAT_ADC_Measured(ADC_HandleTypeDef* hadc) {
@@ -196,8 +199,8 @@ static void Integrate() {
 		break;
 	}
 }
-
 void OnPhaseChanged() {
+	Buffer_Init();
 	switch (MotorControl.PWM_Switching.ActiveSequence) {
 	case PWMSequencesNotInit:
 		break;
