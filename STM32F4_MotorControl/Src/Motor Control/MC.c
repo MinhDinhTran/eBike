@@ -9,7 +9,6 @@
 #include "MC.h"
 #include "Bluetooth_Msg.h"
 
-extern void Log(uint16_t data);
 extern DAC_HandleTypeDef hdac;
 
 osThreadId MotorControlThreadHandle;
@@ -40,7 +39,7 @@ static uint8_t processUserBtn = 0;
 
 void Start_MotorControlThread(void) {
 
-	osThreadDef(MotorControlThread, MotorControlThread, osPriorityHigh, 0, 128); // definition and creation of MotorControlThread
+	osThreadDef(MotorControlThread, MotorControlThread, osPriorityHigh, 0, 512); // definition and creation of MotorControlThread
 	MotorControlThreadHandle = osThreadCreate(osThread(MotorControlThread), NULL);
 
 	if (MotorControlThreadHandle == NULL)
@@ -199,7 +198,6 @@ static void Integrate() {
 }
 
 void OnPhaseChanged() {
-
 	switch (MotorControl.PWM_Switching.ActiveSequence) {
 	case PWMSequencesNotInit:
 		break;

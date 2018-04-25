@@ -247,7 +247,8 @@ UINT btr /* Byte count (must be even number) */
 static bool xmit_datablock(const BYTE *buff, /* 512 byte data block to be transmitted */
 BYTE token /* Data/Stop token */
 ) {
-	BYTE resp, wc;
+	BYTE resp = 0;
+	BYTE wc = 0;
 	uint32_t i = 0;
 
 	if (wait_ready() != 0xFF)

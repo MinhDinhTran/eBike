@@ -8,11 +8,12 @@
 #include "Bluetooth_Msg.h"
 #include "InstDefs.h"
 
+ #include "stm32f4xx_hal_uart.h"
 UART_Driver BT_UART_Driver;
 extern UART_HandleTypeDef BT_UART;
 extern TaskHandle_t BT_Task_Handle;
 
-static const TickType_t xMaxBlockTime = pdMS_TO_TICKS( 200 );
+static const TickType_t xMaxBlockTime = osWaitForever;// pdMS_TO_TICKS( 200 );
 static uint8_t RxBuffer[3];
 
 
@@ -30,6 +31,7 @@ void Init_BT_UART_Driver(void)
 	BT_UART_Driver.Send = Send;
 
 	__HAL_UART_FLUSH_DRREGISTER(&BT_UART);
+	__HAL_UART_GET_FLAG(&BT_UART, UART_FLAG_RXNE);
 	Receive_TEST();
 
 }
@@ -47,9 +49,6 @@ static void BT_UART_RxCpltCallback()
 {
 	MyMsg_CacheStringPiece_ISR(RxBuffer[0]);
 	Receive_TEST();
-	//	MyMsg_t* msg = NULL;//MyMsg_ParseString((char*)RxBuffer, 8, 1);
-	//  xQueueSendFromISR(xQueueRX, (void * ) &msg, (TickType_t ) 0);
-
 }
 
 static uint32_t Send(uint8_t* data, uint16_t Size)

@@ -11,13 +11,19 @@
 #include "SDCard.h"
 
 TaskHandle_t SDCard_Task_Handle = NULL;
-TaskHandle_t SDCardTEST_Task_Handle = NULL;
-static FATFS FatFs;
-void SDCard_Task(void * pvParameters);
-void SDCardTEST_Task(void * pvParameters);
 void Start_SDCard_Task(void);
+
 extern RTC_HandleTypeDef hrtc;
-QueueHandle_t xQueue_SDCard;
+
+static FATFS FatFs;
+static void SDCard_Task(void * pvParameters);
+
+uint32_t fileCount = 0;
+FIL Fil;
+_Bool first = 1;
+
+
+
 
 SDCardList_t* Log(uint16_t data) {
 	SDCardList_t* SDCardList = malloc(sizeof(SDCardList_t));
@@ -27,14 +33,11 @@ SDCardList_t* Log(uint16_t data) {
 	RTC_DateTypeDef RTC_DateStructure;
 	HAL_RTC_GetTime(&hrtc, &RTC_TimeStructure, RTC_FORMAT_BIN);
 	HAL_RTC_GetDate(&hrtc, &RTC_DateStructure, RTC_FORMAT_BIN);
-	SDCardList->Length = sprintf(SDCardList->Data, "[%04d-%02d-%02d %02d:%02d:%02d] %d\r\n", 2000 + RTC_DateStructure.Year, RTC_DateStructure.Month, RTC_DateStructure.Date, RTC_TimeStructure.Hours, RTC_TimeStructure.Minutes, RTC_TimeStructure.Seconds, data);
+	SDCardList->Length = sprintf(SDCardList->Data, "[%04d-%02d-%02d %02d:%02d:%02d]", 2000 + RTC_DateStructure.Year, RTC_DateStructure.Month, RTC_DateStructure.Date, RTC_TimeStructure.Hours, RTC_TimeStructure.Minutes, RTC_TimeStructure.Seconds);
 
-	//xQueueSend(xQueue_SDCard, &SDCardList, osWaitForever);
-	/*BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-	 xQueueSendFromISR( xQueue_SDCard, &SDCardList, &xHigherPriorityTaskWoken );
-	 if (xHigherPriorityTaskWoken) {
-	 portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
-	 }*/
+	for (int i = 0; i < 100; i++)
+		SDCardList->Length += sprintf(&SDCardList->Data[SDCardList->Length], " ,%d", data + i);
+	SDCardList->Length += sprintf(&SDCardList->Data[SDCardList->Length], "\r\n");
 	return SDCardList;
 }
 void Start_SDCard_Task(void) {
@@ -47,15 +50,9 @@ void Start_SDCard_Task(void) {
 
 	if (SDCard_Task_Handle == NULL)
 		Error_Handler();
-	xQueue_SDCard = xQueueCreate(16, sizeof(SDCardList_t*));
-	if (xQueue_SDCard == NULL)
-		Error_Handler();
 
 }
 
-uint32_t fileCount = 0;
-FIL Fil;
-_Bool first = 1;
 void ChangeFile() {
 	FRESULT res;
 	if (!first) {
@@ -72,12 +69,12 @@ void ChangeFile() {
 	if (res != FR_OK)
 		Error_Handler();
 }
+
 void SDCard_Task(void * pvParameters) {
 	UNUSED(pvParameters);
-	configASSERT(SDCard_Task_Handle != NULL);
+	osDelay(1000);
 	if (f_mount(&FatFs, "", 0) != FR_OK)
 		Error_Handler();
-
 	FRESULT res = FR_OK;
 	UINT bw;
 	ChangeFile();
@@ -87,13 +84,12 @@ void SDCard_Task(void * pvParameters) {
 	for (;;) {
 
 		SDCardList_t* msg = Log(a++);
-
-		//if (xQueueReceive(xQueue_SDCard, &(msg), (TickType_t ) 50)) {
 		//a++;
+		osDelay(25);
 		res = f_write(&Fil, msg->Data, msg->Length, &bw);
 		if (res != FR_OK)
 			Error_Handler();
-		if (msg->Length != (int)bw)
+		if (msg->Length != (int) bw)
 			Error_Handler();
 
 		free(msg);
@@ -101,37 +97,7 @@ void SDCard_Task(void * pvParameters) {
 
 		if (a % 500 == 0)
 			ChangeFile();
-		//}
-		osDelay(5);
+		osDelay(25);
 	}
-}
-
-FRESULT scan_files(char* path) {
-	FRESULT res;
-	DIR dir;
-	UINT i;
-	static FILINFO fno;
-
-	res = f_opendir(&dir, path); /* Open the directory */
-	if (res == FR_OK) {
-		for (;;) {
-			res = f_readdir(&dir, &fno); /* Read a directory item */
-			if (res != FR_OK || fno.fname[0] == 0)
-				break; /* Break on error or end of dir */
-			if (fno.fattrib & AM_DIR) { /* It is a directory */
-				i = strlen(path);
-				sprintf(&path[i], "/%s", fno.fname);
-				res = scan_files(path); /* Enter the directory */
-				if (res != FR_OK)
-					break;
-				path[i] = 0;
-			} else { /* It is a file. */
-				printf("%s/%s\n", path, fno.fname);
-			}
-		}
-		f_closedir(&dir);
-	}
-
-	return res;
 }
 

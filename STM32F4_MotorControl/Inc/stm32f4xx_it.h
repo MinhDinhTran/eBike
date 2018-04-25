@@ -66,7 +66,6 @@ void EXTI15_10_IRQHandler(void);
 void RTC_Alarm_IRQHandler(void);
 void TIM8_TRG_COM_TIM14_IRQHandler(void);
 void TIM6_DAC_IRQHandler(void);
-void OTG_FS_IRQHandler(void);
 void FPU_IRQHandler(void);
 
 #ifdef __cplusplus
