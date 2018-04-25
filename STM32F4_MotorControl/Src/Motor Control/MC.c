@@ -5,11 +5,11 @@
 #include <stdbool.h>
 #include "stdio.h"
 #include <stdint.h>
+#include <SDCard_Buffer.h>
 #include "InstDefs.h"
 #include "MC.h"
 #include "Bluetooth_Msg.h"
 
-#include "SDCard_Buffer.h"
 extern DAC_HandleTypeDef hdac;
 
 osThreadId MotorControlThreadHandle;
@@ -200,12 +200,12 @@ static void Integrate() {
 	}
 }
 void OnPhaseChanged() {
-	Buffer_Init();
 	switch (MotorControl.PWM_Switching.ActiveSequence) {
 	case PWMSequencesNotInit:
 		break;
 	case ForwardCommutation:
 		if (MotorControl.pwm_phase == 0) {
+			Buffer_Init();
 			if (HAL_TIM_OC_Stop_IT(&TIM_MC_WATCHDOG, TIM_MC_WATCHDOG_CHN) != HAL_OK)
 				Error_Handler();
 			MotorControl.RPM = (float) 2500000 / TIM_MC_WATCHDOG.Instance->CNT; // (168MHz/168) / x * 60 / 24;
