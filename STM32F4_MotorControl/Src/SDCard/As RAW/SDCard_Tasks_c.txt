@@ -94,10 +94,10 @@ void SDCard_Task(void * pvParameters) {
 				Error_Handler();
 
 
+			int bytesCount = DataLimiter*2;
 
-
-			int bytesToWrite = DataLimiter*2;//msg->Length;
-			char* tail = u_data;//msg->Data;
+			int bytesToWrite = bytesCount;//msg->Length;
+			char* tail = (char*)u_data;//msg->Data;
 			//if (out == NULL)
 			//	Error_Handler();
 			while (bytesToWrite >=500)
@@ -105,7 +105,7 @@ void SDCard_Task(void * pvParameters) {
 				res = f_write(&Fil, tail, 500, &bw);
 				if (res != FR_OK)
 					Error_Handler();
-				tail+= 250;
+				tail+= 500;
 				bytesToWrite-=500;
 			}
 			if (bytesToWrite > 0)
@@ -118,8 +118,8 @@ void SDCard_Task(void * pvParameters) {
 
 
 
-			bytesToWrite = DataLimiter*2;//msg->Length;
-			tail = i_data;//msg->Data;
+			bytesToWrite = bytesCount;//msg->Length;
+			tail = (char*)i_data;//msg->Data;
 			//if (out == NULL)
 			//	Error_Handler();
 			while (bytesToWrite >=500)
@@ -127,7 +127,7 @@ void SDCard_Task(void * pvParameters) {
 				res = f_write(&Fil, tail, 500, &bw);
 				if (res != FR_OK)
 					Error_Handler();
-				tail+= 250;
+				tail+= 500;
 				bytesToWrite-=500;
 			}
 			if (bytesToWrite > 0)
@@ -142,11 +142,11 @@ void SDCard_Task(void * pvParameters) {
 
 			//free(out);
 
+			ChangeFile();
 			Buffer_OnReadFinish();
 			HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
 
-			if (a % 20 == 0)
-				ChangeFile();
+			//if (a % 20 == 0)
 		}
 
 		osDelay(25);

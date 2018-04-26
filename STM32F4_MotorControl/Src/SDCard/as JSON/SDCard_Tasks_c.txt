@@ -1,3 +1,4 @@
+#include <as JSON/SDCard_Buffer_h.txt>
 #include "cmsis_os.h"
 
 #include "stm32f4xx_hal.h"
@@ -11,7 +12,6 @@
 #include "SDCard.h"
 
 #include "cJSON.h"
-#include "SDCard_Buffer.h"
 
 TaskHandle_t SDCard_Task_Handle = NULL;
 void Start_SDCard_Task(void);
