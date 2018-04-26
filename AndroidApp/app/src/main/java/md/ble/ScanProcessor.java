@@ -1,33 +1,29 @@
 package md.ble;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.util.Log;
 
 import com.chimeraiot.android.ble.BleScanner;
-import java.util.HashMap;
-import java.util.Map;
+
+import java.util.Set;
 
 
 public class ScanProcessor implements BleScanner.BleScannerListener {
     public interface ScanProcessorListener {
-        void onAskedDeviceFound(BluetoothDevice device);
+        void onAskedDeviceFound(BluetoothDevice device, final int rssi);
     }
 
     private static final long SCAN_PERIOD = 3000L;
     private BleScanner scanner;
-    //private final Map<BluetoothDevice, Integer> scanMap = new HashMap<>();
-    private String _deviceToFind = "";
+    private Set<String> _devicesToFind = null;
     private ScanProcessorListener _listener = null;
-    private boolean _found = true;
     public ScanProcessor(ScanProcessorListener listener, BluetoothAdapter bluetoothAdapter) {
         _listener = listener;
         scanner = new BleScanner(bluetoothAdapter, this);
         scanner.setScanPeriod(SCAN_PERIOD);
     }
 
-    public void StartScan(String deviceToFind) {
-        _deviceToFind = deviceToFind;
-        _found = false;
+    public void FindDevice(Set<String> deviceToFind) {
+        _devicesToFind = deviceToFind;
         scanner.start();
     }
     public void Stop() {
@@ -53,24 +49,24 @@ public class ScanProcessor implements BleScanner.BleScannerListener {
     public void onLeScan(final BluetoothDevice device, final int rssi,
                          byte[] bytes) {
         if (device == null) return;
-        CheckIfAskedDeviceFound(device);
+        CheckIfAskedDeviceFound(device, rssi);
         //scanMap.put(device, rssi);
     }
 
-    private synchronized void CheckIfAskedDeviceFound(final BluetoothDevice device) {
-        if (_found) return;
+    private synchronized void CheckIfAskedDeviceFound(final BluetoothDevice device, final int rssi) {
+        if (_devicesToFind == null || _devicesToFind.size() == 0) return;
         if (device == null)
             return;
         final String devName = device.getName();
         if (devName == null)
             return;
 
-        if (devName.equals(_deviceToFind)) {
+        if (_devicesToFind.contains(devName)) {
             if (_listener != null)
-                _listener.onAskedDeviceFound(device);
-            if (scanner.isScanning())
+                _listener.onAskedDeviceFound(device, rssi);
+            _devicesToFind.remove(devName);
+            if (_devicesToFind.size() == 0 && scanner.isScanning())
                 scanner.stop();
-            _found = true;
         }
     }
 }

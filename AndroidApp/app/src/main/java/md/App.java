@@ -31,6 +31,7 @@ public class App extends Application {
             }
         };
         DEVICE_DEF_COLLECTION.register(AppConfig.DEF_DEVICE_NAME);
+        DEVICE_DEF_COLLECTION.register(AppConfig.DEF_MI_BAND2_DEVICE_NAME);
     }
 
     @Override

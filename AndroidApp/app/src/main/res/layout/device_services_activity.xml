@@ -34,6 +34,12 @@
             android:text="@string/no_data_characteristic"
             android:textAppearance="@style/CodeTextAppearance" />
 
+        <Button
+            android:id="@+id/button_MeasureHeartRate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Measure heart rate" />
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

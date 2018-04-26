@@ -1,44 +1,26 @@
 package md.ble.ui;
 
 import android.app.Activity;
-import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.PowerManager;
-import android.support.v7.app.ActionBar;
-import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ExpandableListView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
-import com.chimeraiot.android.ble.BleService;
-import com.chimeraiot.android.ble.BleServiceBindingActivity;
-import com.chimeraiot.android.ble.sensor.DeviceDef;
-import com.chimeraiot.android.ble.sensor.Sensor;
-import com.github.mikephil.charting.charts.LineChart;
-import com.github.mikephil.charting.data.Entry;
-import com.github.mikephil.charting.data.LineData;
-import com.github.mikephil.charting.data.LineDataSet;
-
-import java.security.AccessController;
-import java.util.ArrayList;
-import java.util.List;
-
 import md.App;
 import md.ble.BLE_Services.BLEConst;
 import md.ble.BLE_Services.InfoService;
+import md.ble.BLE_Services.MiBand2.HeartRateService;
 import md.ble.BLE_Services.MyCustomService;
 import md.ble.BleManagerService;
-import md.ble.BleSensorService;
 import md.apk.R;
 import md.ble.ui.adapters.BleServicesAdapter;
-import md.ble.ui.dialogs.EnterValueDialog;
 
 public class DeviceServicesActivity extends Activity
         implements
@@ -46,7 +28,8 @@ public class DeviceServicesActivity extends Activity
         SeekBar.OnSeekBarChangeListener,
         BleManagerService.BleStateListener,
         Button.OnClickListener,
-        MyCustomService.MyCustomServiceListener {
+        MyCustomService.MyCustomServiceListener,
+        HeartRateService.HeartRateServiceListener {
 
     protected PowerManager.WakeLock mWakeLock;
     @SuppressWarnings("UnusedDeclaration")
@@ -75,8 +58,10 @@ public class DeviceServicesActivity extends Activity
         button_vthr_up.setOnClickListener(this);
         final ToggleButton button_Start = (ToggleButton) findViewById(R.id.toggleButton_start);
         button_Start.setOnClickListener(this);
+        final Button button_measureHR = (Button) findViewById(R.id.button_MeasureHeartRate);
+        button_measureHR.setOnClickListener(this);
 
-        SubscribeMyCustomService();
+        SubscribeBLEServices();
         final PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
         this.mWakeLock = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, "My Tag");
         this.mWakeLock.acquire();
@@ -192,6 +177,12 @@ public class DeviceServicesActivity extends Activity
                 Bundle bundle = new Bundle();
                 bundle.putString(BLEConst.DATA, Integer.toString(button_Start.isChecked() ? 1 : 0));
                 BleManagerService.getInstance().update((MyCustomService) sensor, MyCustomService.UUID_MODE_ID, bundle);
+
+                break;
+            case R.id.button_MeasureHeartRate:
+
+                final InfoService<?> sensorHR = (InfoService<?>) App.DEVICE_DEF.getSensor(HeartRateService.UUID_SERVICE);
+                BleManagerService.getInstance().update((HeartRateService) sensorHR, HeartRateService.UUID_HEARTRATE_CONTROL_ID, null);
                 break;
             default:
                 break;
@@ -214,9 +205,13 @@ public class DeviceServicesActivity extends Activity
     }
 
 
-    private void SubscribeMyCustomService() {
+    private void SubscribeBLEServices() {
         final InfoService<?> sensor = (InfoService<?>) App.DEVICE_DEF.getSensor(MyCustomService.UUID_SERVICE);
-        ((MyCustomService) sensor).setMyCustomServiceListener(this);
+        ((MyCustomService) sensor).setServiceListener(this);
+
+
+        final InfoService<?> sensor2 = (InfoService<?>) App.DEVICE_DEF.getSensor(HeartRateService.UUID_SERVICE);
+        ((HeartRateService) sensor2).setServiceListener(this);
     }
 
     @Override
@@ -239,6 +234,11 @@ public class DeviceServicesActivity extends Activity
                         break;
                     case MyCustomService.UUID_BIKE_FLAGS_ID:
                         break;
+                    case HeartRateService.UUID_HEARTRATE_MEASURE_ID:
+                        textView = (TextView) findViewById(R.id.data_characteristic_value);
+                        textView.setText(Integer.toString(value));
+                        textView.refreshDrawableState();
+                        break;
                 }
             }
         });
@@ -255,6 +255,7 @@ public class DeviceServicesActivity extends Activity
                     case MyCustomService.UUID_BIKE_SPEED_ID:
                         textView = (TextView) findViewById(R.id.textView_rpm_variable);
                         textView.setText(Float.toString(value));
+                        textView.refreshDrawableState();
                         break;
                 }
             }

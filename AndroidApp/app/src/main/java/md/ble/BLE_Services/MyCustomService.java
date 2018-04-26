@@ -55,7 +55,7 @@ public class MyCustomService<T> extends InfoService<T> {
 
     private MyCustomServiceListener _listener = null;
 
-    public void setMyCustomServiceListener(MyCustomServiceListener listener) {
+    public void setServiceListener(MyCustomServiceListener listener) {
         _listener = listener;
     }
 
