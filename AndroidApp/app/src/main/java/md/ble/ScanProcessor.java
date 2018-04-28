@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothDevice;
 
 import com.chimeraiot.android.ble.BleScanner;
 
+import java.util.HashSet;
 import java.util.Set;
 
 
@@ -23,7 +24,7 @@ public class ScanProcessor implements BleScanner.BleScannerListener {
     }
 
     public void FindDevice(Set<String> deviceToFind) {
-        _devicesToFind = deviceToFind;
+        _devicesToFind = new HashSet<String>(deviceToFind);
         scanner.start();
     }
     public void Stop() {

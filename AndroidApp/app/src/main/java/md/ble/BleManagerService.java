@@ -157,7 +157,7 @@ public class BleManagerService extends com.chimeraiot.android.ble.BleService
         super.onConnectionFailed(name, address, status, state);
         if (_bleStateListener != null)
             _bleStateListener.onBleStateChange(bleState.connectionFailed);
-        // getBleManager().reset(address);
+        //getBleManager().reset(address);
         scanner.FindDevice(RECORD_DEVICE_NAME);
     }
 
@@ -221,13 +221,13 @@ public class BleManagerService extends com.chimeraiot.android.ble.BleService
 
         final InfoService<?> sensor2 = (InfoService<?>) getBleManager().getDeviceDefCollection()
                 .get(name, address).getSensor(HeartRateService.UUID_SERVICE);
-        if (sensor instanceof HeartRateService) {
+        if (sensor2 instanceof HeartRateService) {
 
             try {
                 App.sensorDataController.addItemInTable(
                         new SensorData(serviceUuid,
                                 characteristicUuid,
-                                Integer.toString((((HeartRateService) sensor).getMeasureValue()))));
+                                Integer.toString((((HeartRateService) sensor2).getMeasureValue()))));
             } catch (Exception e) {
 
             }
@@ -238,7 +238,6 @@ public class BleManagerService extends com.chimeraiot.android.ble.BleService
     public void onAskedDeviceFound(final BluetoothDevice device, final int rssi) {
         final FoundDeviceEntity foundDevice = new FoundDeviceEntity(device, rssi);
         //_foundDevices.add(foundDevice);
-        if (!getBleManager().getConnectedDevices().contains(device))
             getBleManager().connect(getBaseContext(), foundDevice.getAdress());
     }
 
