@@ -25,6 +25,7 @@ public class BaseDef<M> extends DeviceDef<M> {
         sensors.add(new DeviceInfoService<M>(model));
         sensors.add(new GattService<M>(model));
         sensors.add(new MyCustomService<M>(model));
+        sensors.add(new MyPedalService<M>(model));
 
         // MI Band 2 Services
         sensors.add(new BasicService<M>(model));

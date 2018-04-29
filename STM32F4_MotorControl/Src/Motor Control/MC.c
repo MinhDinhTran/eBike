@@ -23,7 +23,7 @@ extern TIM_HandleTypeDef TIM_MC_WATCHDOG;
 
 MotorControl_t MotorControl = { .ADC_V = { 0, 0, 0 }, .DutyCycle = 20, .Wanted_DutyCycle = 20, .Integral = 0, .Limits = {
 		.Integral = 3000 // su ~50% duty cycle testuota
-}, .Flags = { .ClosedLoop = 0 }, .PWM_Switching = {
+}, .Flags = { .ClosedLoop = 1 }, .PWM_Switching = {
 		.IsRisingFront = 1,
 		.ActiveSequence = PWMSequencesNotInit,
 		.UseComplementaryPWM = 0,

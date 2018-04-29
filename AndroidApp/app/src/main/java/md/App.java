@@ -30,7 +30,8 @@ public class App extends Application {
                 return DEVICE_DEF;
             }
         };
-        DEVICE_DEF_COLLECTION.register(AppConfig.DEF_DEVICE_NAME);
+        DEVICE_DEF_COLLECTION.register(AppConfig.DEF_EBIKE_CENTRAL);
+        DEVICE_DEF_COLLECTION.register(AppConfig.DEF_EBIKE_PEDAL);
         DEVICE_DEF_COLLECTION.register(AppConfig.DEF_MI_BAND2_DEVICE_NAME);
     }
 
@@ -40,6 +41,7 @@ public class App extends Application {
         BleConfig.setDebugEnabled(true);
         enableBleIfNotEnabled();
         startBleSensorsService(true);
+        startGPSService();
     }
     private void startBleSensorsService(boolean start)
     {
@@ -54,7 +56,14 @@ public class App extends Application {
 
         }
     }
+    private void startGPSService()
+    {
 
+        final Intent gattServiceIntent = new Intent(this, GPS_Service.class);
+
+            this.startService(gattServiceIntent);
+
+    }
 
 
     private void enableBleIfNotEnabled() {

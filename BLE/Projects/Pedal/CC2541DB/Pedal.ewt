@@ -1075,52 +1075,52 @@
         <group>
             <name>Common</name>
             <file>
-                <name>$PROJ_DIR$\..\..\..\..\Components\hal\common\hal_drivers.c</name>
+                <name>$PROJ_DIR$\..\..\..\Components\hal\common\hal_drivers.c</name>
             </file>
         </group>
         <group>
             <name>Include</name>
             <file>
-                <name>$PROJ_DIR$\..\..\..\..\Components\hal\include\hal_adc.h</name>
+                <name>$PROJ_DIR$\..\..\..\Components\hal\include\hal_adc.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\..\..\Components\hal\include\hal_assert.h</name>
+                <name>$PROJ_DIR$\..\..\..\Components\hal\include\hal_assert.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\..\..\Components\hal\include\hal_board.h</name>
+                <name>$PROJ_DIR$\..\..\..\Components\hal\include\hal_board.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\..\..\Components\hal\include\hal_defs.h</name>
+                <name>$PROJ_DIR$\..\..\..\Components\hal\include\hal_defs.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\..\..\Components\hal\include\hal_drivers.h</name>
+                <name>$PROJ_DIR$\..\..\..\Components\hal\include\hal_drivers.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\..\..\Components\hal\include\hal_flash.h</name>
+                <name>$PROJ_DIR$\..\..\..\Components\hal\include\hal_flash.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\..\..\Components\hal\include\hal_key.h</name>
+                <name>$PROJ_DIR$\..\..\..\Components\hal\include\hal_key.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\..\..\Components\hal\include\hal_lcd.h</name>
+                <name>$PROJ_DIR$\..\..\..\Components\hal\include\hal_lcd.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\..\..\Components\hal\include\hal_led.h</name>
+                <name>$PROJ_DIR$\..\..\..\Components\hal\include\hal_led.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\..\..\Components\hal\include\hal_rpc.h</name>
+                <name>$PROJ_DIR$\..\..\..\Components\hal\include\hal_rpc.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\..\..\Components\hal\include\hal_sleep.h</name>
+                <name>$PROJ_DIR$\..\..\..\Components\hal\include\hal_sleep.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\..\..\Components\hal\include\hal_timer.h</name>
+                <name>$PROJ_DIR$\..\..\..\Components\hal\include\hal_timer.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\..\..\Components\hal\include\hal_uart.h</name>
+                <name>$PROJ_DIR$\..\..\..\Components\hal\include\hal_uart.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\..\..\Components\services\saddr\saddr.h</name>
+                <name>$PROJ_DIR$\..\..\..\Components\services\saddr\saddr.h</name>
             </file>
         </group>
         <group>
@@ -1130,67 +1130,67 @@
                 <group>
                     <name>Config</name>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\..\Components\hal\target\CC2540EB\hal_board_cfg.h</name>
+                        <name>$PROJ_DIR$\..\..\..\Components\hal\target\CC2540EB\hal_board_cfg.h</name>
                     </file>
                 </group>
                 <group>
                     <name>Drivers</name>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\..\Components\hal\target\CC2540EB\hal_adc.c</name>
+                        <name>$PROJ_DIR$\..\..\..\Components\hal\target\CC2540EB\hal_adc.c</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\..\Components\hal\target\CC2540EB\hal_aes.c</name>
+                        <name>$PROJ_DIR$\..\..\..\Components\hal\target\CC2540EB\hal_aes.c</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\..\Components\hal\target\CC2540EB\hal_crc.c</name>
+                        <name>$PROJ_DIR$\..\..\..\Components\hal\target\CC2540EB\hal_crc.c</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\..\Components\hal\target\CC2540EB\hal_dma.c</name>
+                        <name>$PROJ_DIR$\..\..\..\Components\hal\target\CC2540EB\hal_dma.c</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\..\Components\hal\target\CC2540EB\hal_flash.c</name>
+                        <name>$PROJ_DIR$\..\..\..\Components\hal\target\CC2540EB\hal_flash.c</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\..\Components\hal\target\CC2540EB\hal_key.c</name>
+                        <name>$PROJ_DIR$\..\..\..\Components\hal\target\CC2540EB\hal_key.c</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\..\Components\hal\target\CC2540EB\hal_lcd.c</name>
+                        <name>$PROJ_DIR$\..\..\..\Components\hal\target\CC2540EB\hal_lcd.c</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\..\Components\hal\target\CC2540EB\hal_led.c</name>
+                        <name>$PROJ_DIR$\..\..\..\Components\hal\target\CC2540EB\hal_led.c</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\..\Components\hal\target\CC2540EB\hal_sleep.c</name>
+                        <name>$PROJ_DIR$\..\..\..\Components\hal\target\CC2540EB\hal_sleep.c</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\..\Components\hal\target\CC2540EB\hal_startup.c</name>
+                        <name>$PROJ_DIR$\..\..\..\Components\hal\target\CC2540EB\hal_startup.c</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\..\Components\hal\target\CC2540EB\hal_timer.c</name>
+                        <name>$PROJ_DIR$\..\..\..\Components\hal\target\CC2540EB\hal_timer.c</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\..\Components\hal\target\CC2540EB\hal_uart.c</name>
+                        <name>$PROJ_DIR$\..\..\..\Components\hal\target\CC2540EB\hal_uart.c</name>
                     </file>
                 </group>
                 <group>
                     <name>Includes</name>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\..\Components\hal\target\CC2540EB\hal_aes.h</name>
+                        <name>$PROJ_DIR$\..\..\..\Components\hal\target\CC2540EB\hal_aes.h</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\..\Components\hal\target\CC2540EB\hal_ccm.h</name>
+                        <name>$PROJ_DIR$\..\..\..\Components\hal\target\CC2540EB\hal_ccm.h</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\..\Components\hal\target\CC2540EB\hal_crc.h</name>
+                        <name>$PROJ_DIR$\..\..\..\Components\hal\target\CC2540EB\hal_crc.h</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\..\Components\hal\target\CC2540EB\hal_dma.h</name>
+                        <name>$PROJ_DIR$\..\..\..\Components\hal\target\CC2540EB\hal_dma.h</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\..\Components\hal\target\CC2540EB\hal_mcu.h</name>
+                        <name>$PROJ_DIR$\..\..\..\Components\hal\target\CC2540EB\hal_mcu.h</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\..\Components\hal\target\CC2540EB\hal_types.h</name>
+                        <name>$PROJ_DIR$\..\..\..\Components\hal\target\CC2540EB\hal_types.h</name>
                     </file>
                 </group>
             </group>
@@ -1199,166 +1199,160 @@
     <group>
         <name>INCLUDE</name>
         <file>
-            <name>$PROJ_DIR$\..\..\..\..\Components\ble\include\att.h</name>
+            <name>$PROJ_DIR$\..\..\..\Components\ble\include\att.h</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\..\..\..\Components\ble\include\gap.h</name>
+            <name>$PROJ_DIR$\..\..\..\Components\ble\include\gap.h</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\..\..\..\Components\ble\include\gatt.h</name>
+            <name>$PROJ_DIR$\..\..\..\Components\ble\include\gatt.h</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\..\..\..\Components\ble\include\gatt_uuid.h</name>
+            <name>$PROJ_DIR$\..\..\..\Components\ble\include\gatt_uuid.h</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\..\..\..\Components\ble\include\hci.h</name>
+            <name>$PROJ_DIR$\..\..\..\Components\ble\include\hci.h</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\..\..\..\Components\ble\include\l2cap.h</name>
+            <name>$PROJ_DIR$\..\..\..\Components\ble\include\l2cap.h</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\..\..\..\Components\ble\host\linkdb.h</name>
+            <name>$PROJ_DIR$\..\..\..\Components\ble\host\linkdb.h</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\..\..\..\Components\ble\controller\CC254x\include\ll.h</name>
+            <name>$PROJ_DIR$\..\..\..\Components\ble\controller\CC254x\include\ll.h</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\..\common\npi\npi_np\npi.h</name>
+            <name>$PROJ_DIR$\..\..\ble\common\npi\npi_np\npi.h</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\..\..\..\Components\ble\controller\CC254x\include\phy.h</name>
+            <name>$PROJ_DIR$\..\..\..\Components\ble\controller\CC254x\include\phy.h</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\..\..\..\Components\ble\include\sm.h</name>
+            <name>$PROJ_DIR$\..\..\..\Components\ble\include\sm.h</name>
         </file>
     </group>
     <group>
         <name>LIB</name>
         <file>
-            <name>$PROJ_DIR$\..\..\Libraries\CC2541DB\bin\CC2541_BLE_peri.lib</name>
+            <name>$PROJ_DIR$\..\..\ble\Libraries\CC2541DB\bin\CC2541_BLE_peri.lib</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\..\Libraries\Common\bin\CC254x_BLE_HCI_TL_None.lib</name>
+            <name>$PROJ_DIR$\..\..\ble\Libraries\Common\bin\CC254x_BLE_HCI_TL_None.lib</name>
         </file>
     </group>
     <group>
         <name>NPI</name>
         <file>
-            <name>$PROJ_DIR$\..\..\common\npi\npi_np\npi.c</name>
+            <name>$PROJ_DIR$\..\..\ble\common\npi\npi_np\npi.c</name>
         </file>
     </group>
     <group>
         <name>OSAL</name>
         <file>
-            <name>$PROJ_DIR$\..\..\..\..\Components\ble\include\bcomdef.h</name>
+            <name>$PROJ_DIR$\..\..\..\Components\ble\include\bcomdef.h</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\..\..\..\Components\osal\common\OSAL.c</name>
+            <name>$PROJ_DIR$\..\..\..\Components\osal\common\OSAL.c</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\..\..\..\Components\osal\common\osal_bufmgr.c</name>
+            <name>$PROJ_DIR$\..\..\..\Components\osal\common\osal_bufmgr.c</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\..\..\..\Components\osal\common\osal_cbtimer.c</name>
+            <name>$PROJ_DIR$\..\..\..\Components\osal\common\osal_cbtimer.c</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\..\..\..\Components\osal\common\OSAL_ClockBLE.c</name>
+            <name>$PROJ_DIR$\..\..\..\Components\osal\common\OSAL_ClockBLE.c</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\..\..\..\Components\osal\common\OSAL_Memory.c</name>
+            <name>$PROJ_DIR$\..\..\..\Components\osal\common\OSAL_Memory.c</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\..\..\..\Components\osal\common\OSAL_PwrMgr.c</name>
+            <name>$PROJ_DIR$\..\..\..\Components\osal\common\OSAL_PwrMgr.c</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\..\..\..\Components\osal\mcu\cc2540\osal_snv.c</name>
+            <name>$PROJ_DIR$\..\..\..\Components\osal\mcu\cc2540\osal_snv.c</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\..\..\..\Components\osal\common\OSAL_Timers.c</name>
+            <name>$PROJ_DIR$\..\..\..\Components\osal\common\OSAL_Timers.c</name>
         </file>
     </group>
     <group>
         <name>PROFILES</name>
         <file>
-            <name>$PROJ_DIR$\..\..\Profiles\CustomPedalProfile\CC254x\customPedalProfile.c</name>
+            <name>$PROJ_DIR$\..\..\ble\Profiles\CustomPedalProfile\CC254x\customPedalProfile.c</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\..\Profiles\CustomPedalProfile\customPedalProfile.h</name>
+            <name>$PROJ_DIR$\..\..\ble\Profiles\CustomPedalProfile\customPedalProfile.h</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\..\Profiles\DevInfo\devinfoservice.c</name>
+            <name>$PROJ_DIR$\..\..\ble\Profiles\DevInfo\devinfoservice.c</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\..\Profiles\DevInfo\devinfoservice.h</name>
+            <name>$PROJ_DIR$\..\..\ble\Profiles\DevInfo\devinfoservice.h</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\..\Profiles\Roles\gap.c</name>
+            <name>$PROJ_DIR$\..\..\ble\Profiles\Roles\gap.c</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\..\Profiles\Roles\gapbondmgr.c</name>
+            <name>$PROJ_DIR$\..\..\ble\Profiles\Roles\gapbondmgr.c</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\..\Profiles\Roles\gapbondmgr.h</name>
+            <name>$PROJ_DIR$\..\..\ble\Profiles\Roles\gapbondmgr.h</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\..\Include\gapgattserver.h</name>
+            <name>$PROJ_DIR$\..\..\ble\Include\gapgattserver.h</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\..\..\..\Components\ble\host\gatt_uuid.c</name>
+            <name>$PROJ_DIR$\..\..\..\Components\ble\host\gatt_uuid.c</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\..\Include\gattservapp.h</name>
+            <name>$PROJ_DIR$\..\..\ble\Include\gattservapp.h</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\..\Profiles\GATT\gattservapp_util.c</name>
+            <name>$PROJ_DIR$\..\..\ble\Profiles\GATT\gattservapp_util.c</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\..\Profiles\OAD\oad.h</name>
+            <name>$PROJ_DIR$\..\..\ble\Profiles\OAD\oad.h</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\..\Profiles\OAD\oad_target.c</name>
+            <name>$PROJ_DIR$\..\..\ble\Profiles\OAD\oad_target.c</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\..\Profiles\OAD\oad_target.h</name>
+            <name>$PROJ_DIR$\..\..\ble\Profiles\OAD\oad_target.h</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\..\Profiles\Roles\CC254x\peripheral.c</name>
+            <name>$PROJ_DIR$\..\..\ble\Profiles\Roles\CC254x\peripheral.c</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\..\Profiles\Roles\CC254x\peripheral.h</name>
+            <name>$PROJ_DIR$\..\..\ble\Profiles\Roles\CC254x\peripheral.h</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\..\Profiles\Roles\peripheralBroadcaster.c</name>
+            <name>$PROJ_DIR$\..\..\ble\Profiles\Roles\peripheralBroadcaster.c</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\..\Profiles\Roles\peripheralBroadcaster.h</name>
+            <name>$PROJ_DIR$\..\..\ble\Profiles\Roles\peripheralBroadcaster.h</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\..\Profiles\SimpleProfile\CC254x\simpleGATTprofile.c</name>
+            <name>$PROJ_DIR$\..\..\ble\Profiles\Keys\CC254x\simplekeys.c</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\..\Profiles\SimpleProfile\SIMPLEgattPROFILE.h</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\Profiles\Keys\CC254x\simplekeys.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\Profiles\Keys\simplekeys.h</name>
+            <name>$PROJ_DIR$\..\..\ble\Profiles\Keys\simplekeys.h</name>
         </file>
     </group>
     <group>
         <name>TOOLS</name>
         <file>
-            <name>$PROJ_DIR$\..\..\config\buildComponents.cfg</name>
+            <name>$PROJ_DIR$\..\..\ble\config\buildComponents.cfg</name>
         </file>
         <file>
             <name>$PROJ_DIR$\buildConfig.cfg</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\..\common\cc2540\OnBoard.c</name>
+            <name>$PROJ_DIR$\..\..\ble\common\cc2540\OnBoard.c</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\..\common\cc2540\OnBoard.h</name>
+            <name>$PROJ_DIR$\..\..\ble\common\cc2540\OnBoard.h</name>
         </file>
     </group>
 </project>

@@ -51,7 +51,7 @@
  */
 
 // How often to perform periodic event
-#define SBP_PERIODIC_EVT_PERIOD                   100
+#define SBP_PERIODIC_EVT_PERIOD                   150
 
 // What is the advertising interval when device is discoverable (units of 625us, 160=100ms)
 #define DEFAULT_ADVERTISING_INTERVAL          160
@@ -627,27 +627,25 @@ static void performPeriodicTask( void )
   if (msg != NULL)
   {
       NPI_WriteTransport(msg->pData, msg->length+1);
-      
       free(msg->pData);
       free(msg);
       msg = NULL;
-  }
-  if (_PWM_DUTY_CYCLE_Value_Changed && msg == NULL)
+  }else if (_PWM_DUTY_CYCLE_Value_Changed)
   {
+    printf("%d\n", _PWM_DUTY_CYCLE_Value );
       msg = MyMsg_CreateString(PWM_DUTY_CYCLE_ID, &_PWM_DUTY_CYCLE_Value, PWM_DUTY_CYCLE_LEN);
       _PWM_DUTY_CYCLE_Value_Changed = false;
   }
-  else if (_V_THRESHOLD_Value_Changed && msg == NULL)
+  else if (_V_THRESHOLD_Value_Changed)
   {
       msg = MyMsg_CreateString(V_THRESHOLD_ID, &_V_THRESHOLD_Value, V_THRESHOLD_LEN);
       _V_THRESHOLD_Value_Changed = false;
   }
-  else if (_MODE_Value_Changed && msg == NULL)
+  else if (_MODE_Value_Changed)
   {
       msg = MyMsg_CreateString(MODE_ID, &_MODE_Value, MODE_LEN);
       _MODE_Value_Changed = false;
   }
- 
   /*uint8 valueToCopy;
   uint8 stat;
   stat = SimpleProfile_GetParameter( SIMPLEPROFILE_CHAR3, &valueToCopy);

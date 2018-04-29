@@ -18,7 +18,7 @@ public class SensorData{
 
     @Override
     public String toString() {
-        return _sensorID;
+        return _sensorID.substring(4,8) + " " + _characteristicID.substring(4,8) + " " + _value;
     }
 
 

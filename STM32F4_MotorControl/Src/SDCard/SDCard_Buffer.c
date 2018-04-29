@@ -19,6 +19,10 @@ uint16_t Buffer_CanRead() {
 	return Buffer_State & BUFFER_CAN_READ;
 }
 
+char data[25] = { 0 };
+uint16_t u_data[8000];
+uint16_t i_data[8000];
+
 void Buffer_Init() {
 	if (Buffer_State & BUFFER_READING_DATA)
 		return;
@@ -26,20 +30,19 @@ void Buffer_Init() {
 		Buffer_State |= BUFFER_CAN_READ;
 	else {
 
-		if (DataLimiter > 500)
+		if (DataLimiter > 7990)
 			return;
-		char data[25] = { 0 };
 		RTC_TimeTypeDef RTC_TimeStructure;
 		RTC_DateTypeDef RTC_DateStructure;
 		HAL_RTC_GetTime(&hrtc, &RTC_TimeStructure, RTC_FORMAT_BIN);
 		HAL_RTC_GetDate(&hrtc, &RTC_DateStructure, RTC_FORMAT_BIN);
 		sprintf(data, "%04d-%02d-%02d %02d:%02d:%02d", 2000 + RTC_DateStructure.Year, RTC_DateStructure.Month, RTC_DateStructure.Date, RTC_TimeStructure.Hours, RTC_TimeStructure.Minutes, RTC_TimeStructure.Seconds);
 
-		root = cJSON_CreateObject();
+		/*root = cJSON_CreateObject();
 		cJSON_AddItemToObject(root, "Data", cJSON_CreateString(data));
 		cJSON_AddItemToObject(root, "Itampa", root_Itampa = cJSON_CreateArray());
 		cJSON_AddItemToObject(root, "Srove", root_Srove = cJSON_CreateArray());
-
+*/
 		Buffer_State |= BUFFER_IS_INIT;
 	}
 
@@ -58,16 +61,18 @@ void Buffer_AddValue(uint16_t u_value, uint16_t i_value) {
 		return;
 	if (!(Buffer_State & BUFFER_IS_INIT))
 		return;
-	if (root == NULL || root_Itampa == NULL || root_Srove == NULL)
+	//if (root == NULL || root_Itampa == NULL || root_Srove == NULL)
+	//	return;
+	if (DataLimiter > 7990)
 		return;
-	if (DataLimiter > 500)
-		return;
-	cJSON_AddItemToArray(root_Itampa, cJSON_CreateNumber(u_value));
-	cJSON_AddItemToArray(root_Srove, cJSON_CreateNumber(i_value));
+	u_data[DataLimiter] = u_value;
+	i_data[DataLimiter] = i_value;
+	//cJSON_AddItemToArray(root_Itampa, cJSON_CreateNumber(u_value));
+	//cJSON_AddItemToArray(root_Srove, cJSON_CreateNumber(i_value));
 	DataLimiter++;
 }
 void Buffer_OnReadFinish() {
-	cJSON_Delete(root);
+	//cJSON_Delete(root);
 	Buffer_State = 0;
 	DataLimiter = 0;
 }

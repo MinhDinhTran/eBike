@@ -5,7 +5,6 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGattService;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.ParcelUuid;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -15,7 +14,6 @@ import com.chimeraiot.android.ble.sensor.Sensor;
 
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import md.App;
@@ -25,6 +23,7 @@ import md.apk.R;
 import md.ble.BLE_Services.InfoService;
 import md.ble.BLE_Services.MiBand2.HeartRateService;
 import md.ble.BLE_Services.MyCustomService;
+import md.ble.BLE_Services.MyPedalService;
 
 public class BleManagerService extends com.chimeraiot.android.ble.BleService
         implements ScanProcessor.ScanProcessorListener {
@@ -71,7 +70,7 @@ public class BleManagerService extends com.chimeraiot.android.ble.BleService
 
     private static final String TAG = BleManagerService.class.getSimpleName();
     private static final Set<String> RECORD_DEVICE_NAME = new HashSet<>(Arrays.asList(
-            new String[]{"eBike MC", "MI Band 2"}
+            new String[]{AppConfig.DEF_EBIKE_CENTRAL, AppConfig.DEF_EBIKE_PEDAL, AppConfig.DEF_MI_BAND2_DEVICE_NAME}
     ));
     //private static Set<FoundDeviceEntity> _foundDevices = new HashSet<>();
 
@@ -149,6 +148,7 @@ public class BleManagerService extends com.chimeraiot.android.ble.BleService
         super.onDisconnected(name, address);
         if (_bleStateListener != null)
             _bleStateListener.onBleStateChange(bleState.disconnected);
+        getBleManager().reset(address);
         scanner.FindDevice(RECORD_DEVICE_NAME);
     }
 
@@ -157,7 +157,7 @@ public class BleManagerService extends com.chimeraiot.android.ble.BleService
         super.onConnectionFailed(name, address, status, state);
         if (_bleStateListener != null)
             _bleStateListener.onBleStateChange(bleState.connectionFailed);
-        //getBleManager().reset(address);
+        getBleManager().reset(address);
         scanner.FindDevice(RECORD_DEVICE_NAME);
     }
 
@@ -177,7 +177,8 @@ public class BleManagerService extends com.chimeraiot.android.ble.BleService
                     getBleManager().listen(address, sensor, MyCustomService.UUID_BIKE_SPEED_ID);
                     getBleManager().listen(address, sensor, MyCustomService.UUID_BIKE_FLAGS_ID);
                 }
-            }if (service.getUuid().toString().equals(HeartRateService.UUID_SERVICE)) {
+            }
+            if (service.getUuid().toString().equals(HeartRateService.UUID_SERVICE)) {
                 final InfoService<?> sensor = (InfoService<?>) getBleManager().getDeviceDefCollection()
                         .get(name, address).getSensor(HeartRateService.UUID_SERVICE);
 
@@ -185,16 +186,17 @@ public class BleManagerService extends com.chimeraiot.android.ble.BleService
                     getBleManager().listen(address, sensor, HeartRateService.UUID_HEARTRATE_MEASURE_ID);
                 }
             }
-        }
+            if (service.getUuid().toString().equals(MyPedalService.UUID_SERVICE)) {
+                final InfoService<?> sensor = (InfoService<?>) getBleManager().getDeviceDefCollection()
+                        .get(name, address).getSensor(MyPedalService.UUID_SERVICE);
 
-        /*final InfoService<?> sensor = (InfoService<?>) getBleManager().getDeviceDefCollection()
-                .get(name, address).getSensor(SENSOR_TO_READ);
-        if (sensor instanceof MyCustomService) {
-            getBleManager().listen(address, sensor, MyCustomService.UUID_BIKE_BATTERY_LEVEL_ID);
-            getBleManager().listen(address, sensor, MyCustomService.UUID_CURRENT_ID);
-            getBleManager().listen(address, sensor, MyCustomService.UUID_BIKE_SPEED_ID);
-            getBleManager().listen(address, sensor, MyCustomService.UUID_BIKE_FLAGS_ID);
-        }*/
+                if (sensor != null) {
+                    getBleManager().listen(address, sensor, MyPedalService.UUID_BATTERY_LV_ID);
+                    getBleManager().listen(address, sensor, MyPedalService.UUID_PEDALLING_STR_ID);
+                    getBleManager().listen(address, sensor, MyPedalService.UUID_RAW_DATA_ID);
+                }
+            }
+        }
     }
 
     @Override
@@ -213,7 +215,7 @@ public class BleManagerService extends com.chimeraiot.android.ble.BleService
                 App.sensorDataController.addItemInTable(
                         new SensorData(serviceUuid,
                                 characteristicUuid,
-                                Integer.toString((((MyCustomService) sensor).getIntValue()))));//WTF is getIntValue??? TODO: depending on characteristicUuid get last cached value
+                                Integer.toString((((MyCustomService) sensor).getIntValue()))));//WTF is getRawValue??? TODO: depending on characteristicUuid get last cached value
             } catch (Exception e) {
 
             }
@@ -232,13 +234,36 @@ public class BleManagerService extends com.chimeraiot.android.ble.BleService
 
             }
         }
+        final InfoService<?> sensor3 = (InfoService<?>) getBleManager().getDeviceDefCollection()
+                .get(name, address).getSensor(MyPedalService.UUID_SERVICE);
+        if (sensor3 instanceof MyPedalService) {
+
+            try {
+                App.sensorDataController.addItemInTable(
+                        new SensorData(serviceUuid,
+                                characteristicUuid,
+                                Integer.toString((((MyPedalService) sensor3).getRawValue()))));
+            } catch (Exception e) {
+                Log.d(TAG, "onCharacteristicChanged: exception "+e.getMessage());
+            }
+        }
     }
 
     @Override
     public void onAskedDeviceFound(final BluetoothDevice device, final int rssi) {
         final FoundDeviceEntity foundDevice = new FoundDeviceEntity(device, rssi);
         //_foundDevices.add(foundDevice);
-            getBleManager().connect(getBaseContext(), foundDevice.getAdress());
+        String address = foundDevice.getAdress();
+        boolean found = false;
+        for (BluetoothDevice dev : getBleManager().getConnectedDevices()) {
+            if (dev.getAddress().equals(address)) {
+                found = true;
+                break;
+            }
+        }
+
+        if (!found)
+            getBleManager().connect(getBaseContext(), address);
     }
 
     public void update(Sensor<?> sensor, String uuid, Bundle data) {
@@ -247,7 +272,11 @@ public class BleManagerService extends com.chimeraiot.android.ble.BleService
             {
                 getBleManager().update(device.getAddress(), sensor, uuid, data);
             }
-            else if  (sensor instanceof MyCustomService && device.getName().equals(AppConfig.DEF_DEVICE_NAME))
+            else if  (sensor instanceof MyCustomService && device.getName().equals(AppConfig.DEF_EBIKE_CENTRAL))
+            {
+                getBleManager().update(device.getAddress(), sensor, uuid, data);
+            }
+            else if  (sensor instanceof MyPedalService && device.getName().equals(AppConfig.DEF_EBIKE_PEDAL))
             {
                 getBleManager().update(device.getAddress(), sensor, uuid, data);
             }

@@ -7,11 +7,11 @@
 #include <MC.h>
 #include <stdlib.h>
 #include <string.h>
+#include <SDCard_Buffer.h>
 #include "ff.h"
 #include "SDCard.h"
 
 #include "cJSON.h"
-#include "SDCard_Buffer.h"
 
 TaskHandle_t SDCard_Task_Handle = NULL;
 void Start_SDCard_Task(void);
@@ -55,7 +55,10 @@ void ChangeFile() {
 	if (res != FR_OK)
 		Error_Handler();
 }
-
+extern char data[25];
+extern uint16_t u_data[8000];
+extern uint16_t i_data[8000];
+extern int DataLimiter;
 void SDCard_Task(void * pvParameters) {
 	UNUSED(pvParameters);
 	osDelay(1000);
@@ -68,20 +71,49 @@ void SDCard_Task(void * pvParameters) {
 
 	int a = 0;
 
-
 	for (;;) {
 		if (Buffer_CanRead()) {
 			//SDCardList_t* msg = Log();
 			a++;
 			osDelay(25);
-			char* out = Buffer_GetString();
-			int bytesToWrite = strlen(out);//msg->Length;
-			char* tail = out;//msg->Data;
-			if (out == NULL)
+			//char* out = Buffer_GetString();
+
+
+			res = f_write(&Fil, data, strlen(data), &bw);
+			if (res != FR_OK)
 				Error_Handler();
+
+
+			int bytesCount = DataLimiter*2;
+
+			int bytesToWrite = bytesCount;//msg->Length;
+			char* tail = (char*)u_data;//msg->Data;
+			//if (out == NULL)
+			//	Error_Handler();
 			while (bytesToWrite >=500)
 			{
+				res = f_write(&Fil, tail, 500, &bw);
+				if (res != FR_OK)
+					Error_Handler();
+				tail+= 500;
+				bytesToWrite-=500;
+			}
+			if (bytesToWrite > 0)
+			{
 
+				res = f_write(&Fil, tail, bytesToWrite, &bw);
+				if (res != FR_OK)
+					Error_Handler();
+			}
+
+
+
+			bytesToWrite = bytesCount;//msg->Length;
+			tail = (char*)i_data;//msg->Data;
+			//if (out == NULL)
+			//	Error_Handler();
+			while (bytesToWrite >=500)
+			{
 				res = f_write(&Fil, tail, 500, &bw);
 				if (res != FR_OK)
 					Error_Handler();
@@ -98,13 +130,13 @@ void SDCard_Task(void * pvParameters) {
 			/*if (msg->Length != (int) bw)
 				Error_Handler();*/
 
-			free(out);
+			//free(out);
 
+			ChangeFile();
 			Buffer_OnReadFinish();
 			HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
 
-			if (a % 20 == 0)
-				ChangeFile();
+			//if (a % 20 == 0)
 		}
 
 		osDelay(25);

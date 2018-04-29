@@ -1,5 +1,5 @@
-#ifndef SDCARD_SDCARD_BUFFER_H_
-#define SDCARD_SDCARD_BUFFER_H_
+#ifndef SDCARD_SDCARD_BUFFER_H_TXT_
+#define SDCARD_SDCARD_BUFFER_H_TXT_
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -13,4 +13,4 @@ void Buffer_OnReadFinish();
 
 
 
-#endif /* SDCARD_SDCARD_BUFFER_H_ */
+#endif /* SDCARD_SDCARD_BUFFER_H_TXT_ */

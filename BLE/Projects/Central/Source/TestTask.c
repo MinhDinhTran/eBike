@@ -13,7 +13,7 @@
 #include "SIMPLEgattPROFILE.h"
 
 #define TestTask_MeasureADC                               0x0001
-#define TestTask_MeasureADC_Period                        50
+#define TestTask_MeasureADC_Period                        500
 
 //--------------- UART defs/vars
 static void SetParameter(MyMsg_t* msg);
@@ -73,7 +73,7 @@ uint16 TestTask_ProcessEvent( uint8 task_id, uint16 events )
 
 void npiCBack ( uint8 port, uint8 event )
 {  
-processUART();
+  processUART();
 }
 
 

@@ -84,6 +84,9 @@
   #include "oad_target.h"
 #endif
 
+				
+				  
+
 #define DEBUGGING
 
 
@@ -138,6 +141,7 @@
 /*********************************************************************
  * GLOBAL VARIABLES
  */
+bool Connected = false;
 
 /*********************************************************************
  * EXTERNAL VARIABLES
@@ -158,11 +162,13 @@ static gaprole_States_t gapProfileState = GAPROLE_INIT;
 static uint8 scanRspData[] =
 {
   // complete name
-  10,   // length of this data
-  GAP_ADTYPE_LOCAL_NAME_COMPLETE,
+  12,   // length of this data
+  GAP_ADTYPE_LOCAL_NAME_COMPLETE,  
+  'e',
   'B',
-  'L',
-  'E',
+  'i',
+  'k',
+  'e',
   ' ',
   'P',
   'e',
@@ -199,13 +205,13 @@ static uint8 advertData[] =
   // in this peripheral
   0x03,   // length of this data
   GAP_ADTYPE_16BIT_MORE,      // some of the UUID's, but not all
-  LO_UINT16( SIMPLEPROFILE_SERV_UUID ),
-  HI_UINT16( SIMPLEPROFILE_SERV_UUID ),
+  LO_UINT16( PEDALPROFILE_SERV_UUID ),
+  HI_UINT16( PEDALPROFILE_SERV_UUID ),
 
 };
 
 // GAP GATT Attributes
-static uint8 attDeviceName[GAP_DEVICE_NAME_LEN] = "BLE Peripheral";
+static uint8 attDeviceName[GAP_DEVICE_NAME_LEN] = "eBike Pedal";
 
 /*********************************************************************
  * LOCAL FUNCTIONS
@@ -341,12 +347,19 @@ void SimpleBLEPeripheral_Init( uint8 task_id )
     float pedalStrValue = 0;
     uint32 configValue = 0;
     uint16 rawDataValue = 0;
+							
+						 
+						  
     
     customPedalProfile_SetParameter( BATTERY_LV_ID, BATTERY_LV_LEN, &battValue );
     customPedalProfile_SetParameter( PEDALLING_STRENGTH_ID, PEDALLING_STRENGTH_LEN, &pedalStrValue );
+																			  
     customPedalProfile_SetParameter( CONFIG_ID, CONFIG_LEN, &configValue );
     customPedalProfile_SetParameter( RAW_DATA_ID, RAW_DATA_LEN, &rawDataValue );
+																			 
+																			 
   }
+
 
   // Register callback with SimpleGATTprofile
   VOID customPedalProfile_RegisterAppCBs( &simpleBLEPeripheral_customPedalProfileCBs );
@@ -476,7 +489,9 @@ static void simpleBLEPeripheral_ProcessGATTMsg( gattMsgEvent_t *pMsg )
  */
 static void peripheralStateNotificationCB( gaprole_States_t newState )
 {
+#ifdef PLUS_BROADCASTER
   static uint8 first_conn_flag = 0;
+#endif // PLUS_BROADCASTER
   
   
   switch ( newState )
@@ -505,18 +520,26 @@ static void peripheralStateNotificationCB( gaprole_States_t newState )
         DevInfo_SetParameter(DEVINFO_SYSTEM_ID, DEVINFO_SYSTEM_ID_LEN, systemId);
         
         #if (defined DEBUGGING)
-          printf("Initialized. Own adress: %s \n", bdAddr2Str( ownAddress ));
+          printf("adress: %s \n", bdAddr2Str( ownAddress ));
         #endif
       }
       break;
 
     case GAPROLE_ADVERTISING:
       {
+        Connected = false;
         #if (defined DEBUGGING)
-          printf("Advertising.\n");
+          printf("Adv.\n");
         #endif
       }
       break;
+
+#ifdef PLUS_BROADCASTER   
+    /* After a connection is dropped a device in PLUS_BROADCASTER will continue
+     * sending non-connectable advertisements and shall sending this change of 
+     * state to the application.  These are then disabled here so that sending 
+     * connectable advertisements can resume.
+     */
     case GAPROLE_ADVERTISING_NONCONN:
       {
         uint8 advertEnabled = FALSE;
@@ -528,13 +551,18 @@ static void peripheralStateNotificationCB( gaprole_States_t newState )
         // Reset flag for next connection.
         first_conn_flag = 0;
       }
-      break;   
+      break;
+#endif //PLUS_BROADCASTER         
+      
     case GAPROLE_CONNECTED:
       {   
+        Connected = true;
         #if (defined DEBUGGING)
           printf("c\n");
         #endif
           
+          
+#ifdef PLUS_BROADCASTER
         // Only turn advertising on for this state when we first connect
         // otherwise, when we go from connected_advertising back to this state
         // we will be turning advertising back on.
@@ -555,6 +583,7 @@ static void peripheralStateNotificationCB( gaprole_States_t newState )
             
             first_conn_flag = 1;
         }
+#endif // PLUS_BROADCASTER
       }
       break;
 
@@ -563,20 +592,27 @@ static void peripheralStateNotificationCB( gaprole_States_t newState )
         #if (defined DEBUGGING)
           printf("Connected Advertising.\n");
         #endif
+          
       }
       break;      
     case GAPROLE_WAITING:
       {
+        Connected = false;
         #if (defined DEBUGGING)
           printf("D.\n");
         #endif
           
-                      
+        #if (defined HAL_LCD) && (HAL_LCD == TRUE)
+          HalLcdWriteString( "Disconnected",  HAL_LCD_LINE_3 );
+        #endif // (defined HAL_LCD) && (HAL_LCD == TRUE)
+          
+#ifdef PLUS_BROADCASTER                
         uint8 advertEnabled = TRUE;
       
         // Enabled connectable advertising.
         GAPRole_SetParameter(GAPROLE_ADVERT_ENABLED, sizeof(uint8),
                              &advertEnabled);
+#endif //PLUS_BROADCASTER
       }
       break;
 
@@ -585,9 +621,15 @@ static void peripheralStateNotificationCB( gaprole_States_t newState )
         #if (defined DEBUGGING)
           printf("Timed Out.\n");
         #endif
-
+          
+        #if (defined HAL_LCD) && (HAL_LCD == TRUE)
+          HalLcdWriteString( "Timed Out",  HAL_LCD_LINE_3 );
+        #endif // (defined HAL_LCD) && (HAL_LCD == TRUE)
+          
+#ifdef PLUS_BROADCASTER
         // Reset flag for next connection.
         first_conn_flag = 0;
+#endif //#ifdef (PLUS_BROADCASTER)
       }
       break;
 
@@ -596,6 +638,7 @@ static void peripheralStateNotificationCB( gaprole_States_t newState )
         #if (defined DEBUGGING)
           printf("Error.\n");
         #endif
+          
       }
       break;
 
@@ -608,7 +651,7 @@ static void peripheralStateNotificationCB( gaprole_States_t newState )
 
   gapProfileState = newState;
 
-
+  VOID gapProfileState;     // added to prevent compiler warning with
 
 }
 
@@ -626,6 +669,7 @@ static void peripheralStateNotificationCB( gaprole_States_t newState )
  *
  * @return  none
  */
+									 
 static void performPeriodicTask( void )
 {
   /*uint8 valueToCopy;
@@ -654,13 +698,14 @@ static void customPedalProfileChangeCB( uint8 paramID )
   {
     case CONFIG_ID:
       customPedalProfile_GetParameter( CONFIG_ID, &newValue );
-      break;
+      break;	
     default:
       // should not reach here!
       break;
   }
 }
 
+											
 /*********************************************************************
  * @fn      bdAddr2Str
  *
@@ -692,6 +737,7 @@ char *bdAddr2Str( uint8 *pAddr )
 
   return str;
 }
+												  
 
 /*********************************************************************
 *********************************************************************/

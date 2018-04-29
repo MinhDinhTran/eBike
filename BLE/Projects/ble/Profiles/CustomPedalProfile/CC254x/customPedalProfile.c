@@ -38,7 +38,7 @@
 // Simple GATT Profile Service UUID: 0xFFF0
 CONST uint8 customPedalProfileServUUID[ATT_BT_UUID_SIZE] =
 { 
-  LO_UINT16(SIMPLEPROFILE_SERV_UUID), HI_UINT16(SIMPLEPROFILE_SERV_UUID)
+  LO_UINT16(PEDALPROFILE_SERV_UUID), HI_UINT16(PEDALPROFILE_SERV_UUID)
 };
 
 #define createUUID(name) CONST uint8 _ ## name[] = { LO_UINT16(name), HI_UINT16(name) }
@@ -256,7 +256,7 @@ bStatus_t customPedalProfile_SetParameter( uint8 param, uint8 len, void *value )
       break;
       
     case PEDALLING_STRENGTH_ID:
-      SetValue(uint8, _PEDALLING_STRENGTH_Value)
+      SetValue(float, _PEDALLING_STRENGTH_Value)
      if ( GATTServApp_ProcessCharCfg( _PEDALLING_STRENGTH_NotiConfig, ((uint8*)&_PEDALLING_STRENGTH_Value), FALSE,
                                   customPedalProfileAttrTbl, GATT_NUM_ATTRS( customPedalProfileAttrTbl ),
                                   INVALID_TASK_ID, customPedalProfile_ReadAttrCB ) != SUCCESS)
@@ -268,7 +268,7 @@ bStatus_t customPedalProfile_SetParameter( uint8 param, uint8 len, void *value )
       break;
       
     case RAW_DATA_ID:
-      SetValue(uint32, _RAW_DATA_Value);
+      SetValue(uint16, _RAW_DATA_Value);
       
      if ( GATTServApp_ProcessCharCfg( _RAW_DATA_NotiConfig, ((uint8*)&_RAW_DATA_Value), FALSE,
                                   customPedalProfileAttrTbl, GATT_NUM_ATTRS( customPedalProfileAttrTbl ),

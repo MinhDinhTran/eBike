@@ -15,7 +15,7 @@
 #include "OSAL.h"
 #include "npi.h"
 
-#include "SIMPLEgattPROFILE.h"
+#include "customPedalProfile.h"
 
 #define TestTask_MeasureADC                               0x0001
 #define TestTask_MeasureADC_Period                        200
@@ -45,13 +45,29 @@ void TestTask_Init( uint8 task_id )
   osal_start_reload_timer( TestTask_ID, TestTask_MeasureADC, TestTask_MeasureADC_Period );
  
 }
-
+#define DataCountToAVG 2
+uint16 AdcData[DataCountToAVG] = {0};
+uint8 dataCount = 0;
+uint16 AdcDataAVG = 0;
 
 uint16 TestTask_ProcessEvent( uint8 task_id, uint16 events )
 {
-uint16 adc0;
-   adc0 =  HalAdcRead ( HAL_ADC_CHANNEL_0, HAL_ADC_RESOLUTION_12);
-      printf ( "0-%d\n", adc0);
+    AdcData[dataCount] = HalAdcRead ( HAL_ADC_CHANNEL_1, HAL_ADC_RESOLUTION_12);
+    
+      
+    dataCount++;
+    if (dataCount == DataCountToAVG)
+    {
+      uint32 AdcDataSUM = 0;
+      for(uint8 i = 0; i < DataCountToAVG; i++)
+        AdcDataSUM += AdcData[i];
+      
+      AdcDataAVG = AdcDataSUM / DataCountToAVG;
+    //  printf ( "%d\n", AdcDataAVG);
+      customPedalProfile_SetParameter( RAW_DATA_ID, RAW_DATA_LEN, &AdcDataAVG );
+      
+      dataCount = 0;
+    }
    /* adc0 =  HalAdcRead ( HAL_ADC_CHANNEL_1, HAL_ADC_RESOLUTION_12);
       printf ( "1-%d\n", adc0);
   adc0 =  HalAdcRead ( HAL_ADC_CHANNEL_2, HAL_ADC_RESOLUTION_12);

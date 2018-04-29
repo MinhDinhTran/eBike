@@ -1,7 +1,14 @@
 package md.DB;
 
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.net.MalformedURLException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -11,6 +18,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.os.Environment;
 import android.widget.ProgressBar;
 
 import com.google.common.util.concurrent.FutureCallback;
@@ -23,6 +31,7 @@ import com.microsoft.windowsazure.mobileservices.http.OkHttpClientFactory;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilter;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
+import com.microsoft.windowsazure.mobileservices.table.query.Query;
 import com.microsoft.windowsazure.mobileservices.table.query.QueryOperations;
 import com.microsoft.windowsazure.mobileservices.table.sync.MobileServiceSyncContext;
 import com.microsoft.windowsazure.mobileservices.table.sync.MobileServiceSyncTable;
@@ -41,11 +50,11 @@ public class SensorDataController {
     private ProgressBar _progressBar;
     private Activity _activity;
     private boolean _isInit = false;
+    private Query _query = null;
 
     public SensorDataController(Activity activity, ProgressBar progressBar) throws IllegalArgumentException {
         if (activity == null)
             throw new IllegalArgumentException();
-
         _progressBar = progressBar;//(ProgressBar) findViewById(R.id.loadingProgressBar);
         if (_progressBar != null)
             _progressBar.setVisibility(ProgressBar.GONE);
@@ -66,6 +75,7 @@ public class SensorDataController {
                 }
             });
             _sensorDataTable = _client.getSyncTable("SensorData", SensorData.class);
+            _query = _client.getTable(SensorData.class).where().field("Value").eq(0);
             initLocalStore().get();
             //refreshItemsFromTable();
             _isInit = true;
@@ -85,6 +95,7 @@ public class SensorDataController {
      */
     public SensorData addItemInTable(SensorData item) throws ExecutionException, InterruptedException {
         SensorData entity = _sensorDataTable.insert(item).get();
+        appendLog(item.toString());
         return entity;
     }
 
@@ -136,14 +147,15 @@ public class SensorDataController {
         sync();
     }
     private AsyncTask<Void, Void, Void> sync() {
+
+
         AsyncTask<Void, Void, Void> task = new AsyncTask<Void, Void, Void>(){
             @Override
             protected Void doInBackground(Void... params) {
                 try {
                     MobileServiceSyncContext syncContext = _client.getSyncContext();
-                    syncContext.push().get();
-                   _sensorDataTable.pull(QueryOperations.field("id").
-                           eq(val("."))).get();
+                    syncContext.push();
+                   _sensorDataTable.read(_query).get();
                 } catch (final Exception e) {
                     createAndShowDialogFromTask(e, "sync.Error");
                 }
@@ -255,6 +267,44 @@ public class SensorDataController {
             });
 
             return resultFuture;
+        }
+    }
+
+
+
+
+
+    public void appendLog(String text)
+    {
+        File logFile = new File("/storage/emulated/0/Log.txt");
+        if (!logFile.exists())
+        {
+            try
+            {
+                logFile.createNewFile();
+            }
+            catch (IOException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+        try
+        {
+            //BufferedWriter for performance, true to set append to file flag
+            BufferedWriter buf = new BufferedWriter(new FileWriter(logFile, true));
+            Date currentTime = Calendar.getInstance().getTime();
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            String currentDateAndTime = sdf.format(currentTime);
+            buf.append(currentDateAndTime + ": ");
+            buf.append(text);
+            buf.newLine();
+            buf.close();
+        }
+        catch (IOException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
     }
 }

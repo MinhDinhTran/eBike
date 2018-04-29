@@ -68,7 +68,7 @@ extern "C"
 #define RAW_DATA_ID                     3
   
 // Simple Profile Service UUID
-#define SIMPLEPROFILE_SERV_UUID         0xFFF0
+#define PEDALPROFILE_SERV_UUID         0xFFE0
     
 // Key Pressed UUID
 #define UUID_BATTERY_LV_ID              0xFFE1
