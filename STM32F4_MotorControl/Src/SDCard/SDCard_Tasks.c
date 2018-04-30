@@ -23,7 +23,7 @@ static void SDCard_Task(void * pvParameters);
 
 uint32_t fileCount = 0;
 FIL Fil;
-_Bool first = 1;
+_Bool _closeFileFirst = 0;
 
 
 void Start_SDCard_Task(void) {
@@ -39,21 +39,28 @@ void Start_SDCard_Task(void) {
 
 }
 
-void ChangeFile() {
+FRESULT ChangeFile() {
 	FRESULT res;
-	if (!first) {
+	if (_closeFileFirst) {
 		res = f_close(&Fil);
 		if (res != FR_OK)
-			Error_Handler();
+		{
+			return res;
+		}else
+			_closeFileFirst = 0;
 	}
 
-	char str[15] = { 0 };
-	sprintf(str, "file_%lu.txt", fileCount++);
-	res = f_open(&Fil, str, FA_OPEN_APPEND | FA_WRITE | FA_READ);
-	if (res == FR_NO_FILESYSTEM)
-		Error_Handler();
-	if (res != FR_OK)
-		Error_Handler();
+	char data[25] = { 0 };
+	RTC_TimeTypeDef RTC_TimeStructure;
+	RTC_DateTypeDef RTC_DateStructure;
+	HAL_RTC_GetTime(&hrtc, &RTC_TimeStructure, RTC_FORMAT_BIN);
+	HAL_RTC_GetDate(&hrtc, &RTC_DateStructure, RTC_FORMAT_BIN);
+	sprintf(data, "%02d%02d%02d.txt", RTC_TimeStructure.Hours, RTC_TimeStructure.Minutes, RTC_TimeStructure.Seconds);
+
+	//sprintf(str, "file_%lu.txt", fileCount++);
+	res = f_open(&Fil, data, FA_OPEN_APPEND | FA_WRITE | FA_READ);
+
+	return res;
 }
 extern char data[25];
 extern uint16_t u_data[8000];
@@ -66,16 +73,25 @@ void SDCard_Task(void * pvParameters) {
 		Error_Handler();
 	FRESULT res = FR_OK;
 	UINT bw;
-	ChangeFile();
-	first = 0;
+	uint8_t needChangeFile = 1;
 
 	int a = 0;
 
 	for (;;) {
-		if (Buffer_CanRead()) {
+		osDelay(25);
+		if (needChangeFile)
+		{
+			if (ChangeFile() == FR_OK)
+				needChangeFile = 0;
+			else
+			{
+				HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
+				osDelay(100);
+			}
+			HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
+		}else if (Buffer_CanRead()) {
 			//SDCardList_t* msg = Log();
 			a++;
-			osDelay(25);
 			//char* out = Buffer_GetString();
 
 
@@ -131,8 +147,8 @@ void SDCard_Task(void * pvParameters) {
 				Error_Handler();*/
 
 			//free(out);
-
-			ChangeFile();
+			_closeFileFirst = 1;
+			needChangeFile = 1;
 			Buffer_OnReadFinish();
 			HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
 

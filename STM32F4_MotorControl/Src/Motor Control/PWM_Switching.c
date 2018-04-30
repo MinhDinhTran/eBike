@@ -4,6 +4,8 @@
 #include "InstDefs.h"
 #include "PWM_Switching.h"
 
+extern void CruiseControl_Reset();
+
 static const PWMActions ForwardCommutationSequence[6][3] = {
 		{ OnH, None, OffH },
 		{ None, OffL, OnL },
@@ -135,9 +137,10 @@ void ChangePWMSwitchingSequence(PWMSequences newSequences) {
 	//	return;
 
 	TurnAllPWMsOFF();
+	CruiseControl_Reset();
 
 	MotorControl.PWM_Switching.IsChangingSequence = 1;
-
+	MotorControl.Wanted_DutyCycle = 20;
 	ChangePWMDutyCycle(20, 100);
 
 	MotorControl.PWM_Switching.ActiveSequence = newSequences;

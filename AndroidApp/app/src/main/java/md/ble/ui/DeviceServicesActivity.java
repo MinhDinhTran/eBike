@@ -18,6 +18,7 @@ import md.ble.BLE_Services.BLEConst;
 import md.ble.BLE_Services.InfoService;
 import md.ble.BLE_Services.MiBand2.HeartRateService;
 import md.ble.BLE_Services.MyCustomService;
+import md.ble.BLE_Services.MyPedalService;
 import md.ble.BleManagerService;
 import md.apk.R;
 import md.ble.ui.adapters.BleServicesAdapter;
@@ -29,7 +30,8 @@ public class DeviceServicesActivity extends Activity
         BleManagerService.BleStateListener,
         Button.OnClickListener,
         MyCustomService.MyCustomServiceListener,
-        HeartRateService.HeartRateServiceListener {
+        HeartRateService.HeartRateServiceListener ,
+        MyPedalService.MyPedalServiceListener{
 
     protected PowerManager.WakeLock mWakeLock;
     @SuppressWarnings("UnusedDeclaration")
@@ -212,6 +214,10 @@ public class DeviceServicesActivity extends Activity
 
         final InfoService<?> sensor2 = (InfoService<?>) App.DEVICE_DEF.getSensor(HeartRateService.UUID_SERVICE);
         ((HeartRateService) sensor2).setServiceListener(this);
+
+
+        final InfoService<?> sensor3 = (InfoService<?>) App.DEVICE_DEF.getSensor(MyPedalService.UUID_SERVICE);
+        ((MyPedalService) sensor3).setServiceListener(this);
     }
 
     @Override
@@ -236,6 +242,12 @@ public class DeviceServicesActivity extends Activity
                         break;
                     case HeartRateService.UUID_HEARTRATE_MEASURE_ID:
                         textView = (TextView) findViewById(R.id.data_characteristic_value);
+                        textView.setText(Integer.toString(value));
+                        textView.refreshDrawableState();
+                        break;
+
+                    case MyPedalService.UUID_RAW_DATA_ID:
+                        textView = (TextView) findViewById(R.id.textView_pedal);
                         textView.setText(Integer.toString(value));
                         textView.refreshDrawableState();
                         break;

@@ -128,7 +128,7 @@ extern void CruiseControl_Start(void);
   * @retval None
   */
 int main(void)
-{
+ {
   /* USER CODE BEGIN 1 */
   /* USER CODE END 1 */
 

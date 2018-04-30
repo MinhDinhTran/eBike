@@ -6,6 +6,7 @@ __weak void OnButtonClick(void) {
 }
 extern void OnPWMTriggeredEXT();
 
+extern void CruiseControl_Reset();
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 	switch (GPIO_Pin) {
 	case GPIO_PIN_0:
@@ -13,6 +14,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 		break;
 	case GPIO_PIN_1:
 		MotorControl.Flags.OverCurrent = HAL_GPIO_ReadPin(GPIOD, GPIO_PIN_1) == GPIO_PIN_SET;
+		CruiseControl_Reset();
 		if (HAL_GPIO_ReadPin(GPIOD, GPIO_PIN_1) == GPIO_PIN_SET)
 			HAL_GPIO_WritePin(GPIOD, GPIO_PIN_13, GPIO_PIN_SET);
 		else

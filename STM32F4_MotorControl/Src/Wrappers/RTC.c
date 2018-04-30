@@ -16,12 +16,12 @@ void HAL_RTC_AlarmAEventCallback(RTC_HandleTypeDef *hrtc)
     	return;
     RTC_Prescaler = 0;
 
-	if (xQueueTX != NULL)
+/*	if (xQueueTX != NULL)
 	{
 
 		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
 
 		MyMsg_t* msg = MyMsg_CreateString(BIKE_BATTERY_LEVEL_ID, &MotorControl.ADC_VBAT, sizeof(uint16_t));
 		xQueueSendFromISR(xQueueTX, (void * ) &msg, (TickType_t ) 0);
-	}
+	}*/
 }

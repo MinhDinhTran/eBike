@@ -37,7 +37,6 @@
 #endif
 
 #include "npi.h"
-#include "MyMsg.h"
 
 #define DEBUGGING
 
@@ -618,33 +617,43 @@ static void peripheralStateNotificationCB( gaprole_States_t newState )
 extern uint8 _PWM_DUTY_CYCLE_Value;
 extern uint32 _V_THRESHOLD_Value;
 extern uint8 _MODE_Value;
-MyMsg_t* msg = NULL;
 bool _PWM_DUTY_CYCLE_Value_Changed = false;
 bool _V_THRESHOLD_Value_Changed = false;
 bool _MODE_Value_Changed = false;
+char msgStr[15] = {0};
+
+  
+
 static void performPeriodicTask( void )
 {
-  if (msg != NULL)
-  {
-      NPI_WriteTransport(msg->pData, msg->length+1);
-      free(msg->pData);
-      free(msg);
-      msg = NULL;
-  }else if (_PWM_DUTY_CYCLE_Value_Changed)
+  if (_PWM_DUTY_CYCLE_Value_Changed)
   {
     printf("%d\n", _PWM_DUTY_CYCLE_Value );
-      msg = MyMsg_CreateString(PWM_DUTY_CYCLE_ID, &_PWM_DUTY_CYCLE_Value, PWM_DUTY_CYCLE_LEN);
-      _PWM_DUTY_CYCLE_Value_Changed = false;
+    
+    memset(msgStr, 0, 15);
+    strcpy(msgStr, "Begin");
+    msgStr[5] = PWM_DUTY_CYCLE_ID;
+    memcpy(&msgStr[6], &_PWM_DUTY_CYCLE_Value, PWM_DUTY_CYCLE_LEN);
+    NPI_WriteTransport(msgStr, 6+PWM_DUTY_CYCLE_LEN);
+    _PWM_DUTY_CYCLE_Value_Changed = false;
   }
   else if (_V_THRESHOLD_Value_Changed)
   {
-      msg = MyMsg_CreateString(V_THRESHOLD_ID, &_V_THRESHOLD_Value, V_THRESHOLD_LEN);
+    memset(msgStr, 0, 15);
+    strcpy(msgStr, "Begin");
+    msgStr[5] = V_THRESHOLD_ID;
+    memcpy(&msgStr[6], &_V_THRESHOLD_Value, V_THRESHOLD_LEN);
+    NPI_WriteTransport(msgStr, 6+V_THRESHOLD_LEN);
       _V_THRESHOLD_Value_Changed = false;
   }
   else if (_MODE_Value_Changed)
   {
-      msg = MyMsg_CreateString(MODE_ID, &_MODE_Value, MODE_LEN);
-      _MODE_Value_Changed = false;
+    memset(msgStr, 0, 15);
+    strcpy(msgStr, "Begin");
+    msgStr[5] = MODE_ID;
+    memcpy(&msgStr[6], &_MODE_Value, MODE_LEN);
+    NPI_WriteTransport(msgStr, 6+MODE_LEN);
+    _MODE_Value_Changed = false;
   }
   /*uint8 valueToCopy;
   uint8 stat;
@@ -667,6 +676,7 @@ static void performPeriodicTask( void )
  */
 static void simpleProfileChangeCB( uint8 paramID )
 {
+  HalLedSet( HAL_LED_ALL, HAL_LED_MODE_TOGGLE );
   switch( paramID )
   {
     case MODE_ID:
@@ -674,6 +684,7 @@ static void simpleProfileChangeCB( uint8 paramID )
       break;
     case PWM_DUTY_CYCLE_ID:
       _PWM_DUTY_CYCLE_Value_Changed = true; 
+
       break;
       
     case V_THRESHOLD_ID:

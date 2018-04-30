@@ -24,20 +24,21 @@ static void CruiseControlTask(void const * argument) {
 	UNUSED(argument);
 	for (;;) {
 		osDelay(10);
-
-		if (CruiseControl_IsActive) {
-			PID();
-		} else {
-			int rpm = (int) MotorControl.RPM;
-			if (rpm == 0 || rpm > CruiseControl_RPM + CruiseControl_RPM_Toleration || rpm < CruiseControl_RPM - CruiseControl_RPM_Toleration) {
-				CruiseControl_Count = 0;
-				CruiseControl_RPM = rpm;
+		if (MotorControl.PWM_Switching.ActiveSequence == ForwardCommutation) {
+			if (CruiseControl_IsActive) {
+				PID();
 			} else {
-				if (CruiseControl_Count < 100) {
-					CruiseControl_Count++;
-					if (CruiseControl_Count == 100) {
-						arm_pid_reset_f32(&MotorControl.PID);
-						CruiseControl_IsActive = 1;
+				int rpm = (int) MotorControl.RPM;
+				if (rpm == 0 || rpm > CruiseControl_RPM + CruiseControl_RPM_Toleration || rpm < CruiseControl_RPM - CruiseControl_RPM_Toleration) {
+					CruiseControl_Count = 0;
+					CruiseControl_RPM = rpm;
+				} else {
+					if (CruiseControl_Count < 100) {
+						CruiseControl_Count++;
+						if (CruiseControl_Count == 100) {
+							arm_pid_reset_f32(&MotorControl.PID);
+							CruiseControl_IsActive = 1;
+						}
 					}
 				}
 			}
@@ -51,9 +52,10 @@ static void PID() {
 	float32_t output = arm_pid_f32(&MotorControl.PID, (float32_t) MotorControl.RPM - CruiseControl_RPM);
 	int newDutyCycle = (int) output;
 
-	if (newDutyCycle < 25)
-		newDutyCycle = 25;
+	if (newDutyCycle < 20)
+		newDutyCycle = 20;
 	if (newDutyCycle > 95)
 		newDutyCycle = 95;
-	ChangePWMDutyCycle((uint8_t) newDutyCycle, 0);
+	MotorControl.Wanted_DutyCycle = newDutyCycle;
+	//ChangePWMDutyCycle((uint8_t) newDutyCycle, 1);
 }

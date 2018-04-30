@@ -1242,16 +1242,7 @@
         </file>
     </group>
     <group>
-        <name>MyLibs</name>
-        <group>
-            <name>MyMsg</name>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\..\STM32F4_MotorControl\MyLibs\MyMsg\msg.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\..\STM32F4_MotorControl\MyLibs\MyMsg\MyMsg.h</name>
-            </file>
-        </group>
+        <name>Middleware</name>
     </group>
     <group>
         <name>NPI</name>
@@ -1343,7 +1334,7 @@
             <name>$PROJ_DIR$\..\..\ble\Profiles\SimpleProfile\CC254x\simpleGATTprofile.c</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\..\ble\Profiles\SimpleProfile\simpleGATTprofile.h</name>
+            <name>$PROJ_DIR$\..\..\ble\Profiles\SimpleProfile\SIMPLEgattPROFILE.h</name>
         </file>
         <file>
             <name>$PROJ_DIR$\..\..\ble\Profiles\Keys\CC254x\simplekeys.c</name>

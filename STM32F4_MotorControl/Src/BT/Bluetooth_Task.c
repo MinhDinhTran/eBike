@@ -38,17 +38,14 @@ static void BT_Task(void *pvParameters) {
 	for (;;) {
 
 		if (xQueueReceive(xQueueTX, &(msgToSend), (TickType_t ) 5)) {
-			BT_UART_Driver.Send((uint8_t*) msgToSend->pData, msgToSend->length + 1);
-			free(msgToSend->pData);
+			char msgStr[15] = { 0 };
+			strcpy(msgStr, "Begin");
+			msgStr[5] = msgToSend->UUID;
+			memcpy(&msgStr[6], msgToSend->pData, msgToSend->length);
+			BT_UART_Driver.Send((uint8_t*) msgStr, 6 + msgToSend->length);
 			free(msgToSend);
 		}
 		osDelay(10);
-		MyMsg_t *msg = MyMsg_ProcessCache();
-		if (msg != NULL) {
-			ProccesReceivedMessage(msg);
-			free(msg->pData);
-			free(msg);
-		}
 	}
 }
 

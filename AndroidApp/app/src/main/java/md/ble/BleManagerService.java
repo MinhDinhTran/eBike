@@ -239,10 +239,12 @@ public class BleManagerService extends com.chimeraiot.android.ble.BleService
         if (sensor3 instanceof MyPedalService) {
 
             try {
-                App.sensorDataController.addItemInTable(
-                        new SensorData(serviceUuid,
-                                characteristicUuid,
-                                Integer.toString((((MyPedalService) sensor3).getRawValue()))));
+                if (characteristicUuid.equals(MyPedalService.UUID_RAW_DATA_ID)) {
+                    App.sensorDataController.addItemInTable(
+                            new SensorData(serviceUuid,
+                                    characteristicUuid,
+                                    Integer.toString((((MyPedalService) sensor3).getRawValue()))));
+                }
             } catch (Exception e) {
                 Log.d(TAG, "onCharacteristicChanged: exception "+e.getMessage());
             }

@@ -2,7 +2,6 @@
 #define BT_BLUETOOTH_MSG_H_
 
 #include "cmsis_os.h"
-#include "MyMsg.h"
 
 
 #define UUID_LEN 1
@@ -33,7 +32,12 @@ struct UART_Driver
     uint32_t (*Send)(uint8_t*, uint16_t);
     TaskHandle_t *xTaskToNotify;
 };
-
+typedef struct MyMsg_t MyMsg_t;
+struct MyMsg_t {
+	uint8_t UUID;
+	uint8_t length;
+	char pData[4];
+};
 
 extern QueueHandle_t xQueueTX;
 extern UART_Driver BT_UART_Driver;

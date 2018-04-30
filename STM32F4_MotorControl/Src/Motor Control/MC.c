@@ -21,14 +21,18 @@ extern ADC_HandleTypeDef ADC_INSTANCE_V2;
 extern ADC_HandleTypeDef ADC_INSTANCE_V3;
 extern TIM_HandleTypeDef TIM_MC_WATCHDOG;
 
-MotorControl_t MotorControl = { .ADC_V = { 0, 0, 0 }, .DutyCycle = 20, .Wanted_DutyCycle = 20, .Integral = 0, .Limits = {
-		.Integral = 3000 // su ~50% duty cycle testuota
-}, .Flags = { .ClosedLoop = 1 }, .PWM_Switching = {
-		.IsRisingFront = 1,
-		.ActiveSequence = PWMSequencesNotInit,
-		.UseComplementaryPWM = 0,
-		.UsePWMOnPWMN = 0 }, .pwmCountToChangePhase = 25, //355;
-		.PID = { .Kp = 0.35, .Ki = -0.01, .Kd = -0.05 } }; //{ .Kp = 0.3, .Ki = -0.07, .Kd = -0.1
+MotorControl_t MotorControl = {
+		.ADC_V = { 0, 0, 0 },
+		.DutyCycle = 20,
+		.Wanted_DutyCycle = 20,
+		.V_Treshold = 30,
+		.Integral = 0,
+		.Limits = { .Integral = 3000 // su ~50% duty cycle testuota
+		},
+		.Flags = { .ClosedLoop = 1 },
+		.PWM_Switching = { .IsRisingFront = 1, .ActiveSequence = PWMSequencesNotInit, .UseComplementaryPWM = 0, .UsePWMOnPWMN = 0 },
+		.pwmCountToChangePhase = 25, //355;
+		.PID = { .Kp = 0.35, .Ki = -0.01, .Kd = -0.05 } }; //{ .Kp = 0.3, .Ki = -0.07, .Kd = -0.1 } }; // { .Kp = 0.3, .Ki = -0.07, .Kd = -0.1
 
 static uint32_t GetActualBEMF();
 static void Integrate();
@@ -70,18 +74,29 @@ void MotorControlThread(void const * argument) // MotorControlThread function
 
 			processUserBtn = 0;
 		}
-		MyMsg_t *msg = MyMsg_CreateString(BIKE_BATTERY_LEVEL_ID, &MotorControl.ADC_VBAT, BIKE_BATTERY_LEVEL_LEN);
+		MyMsg_t *msg = malloc(sizeof(MyMsg_t));
+		msg->UUID = BIKE_BATTERY_LEVEL_ID;
+		*(uint16_t*)msg->pData = MotorControl.ADC_VBAT;
+		msg->length = BIKE_BATTERY_LEVEL_LEN;
 		xQueueSendFromISR(xQueueTX, (void * ) &msg, (TickType_t ) 0);
 		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
 		osDelay(500);
 
-		msg = MyMsg_CreateString(CURRENT_ID, &MotorControl.ADC_I[0], CURRENT_LEN);
+		msg = malloc(sizeof(MyMsg_t));
+		msg->UUID = CURRENT_ID;
+		*(uint16_t*)msg->pData = MotorControl.ADC_I[0];
+		msg->length = CURRENT_LEN;
 		xQueueSendFromISR(xQueueTX, (void * ) &msg, (TickType_t ) 0);
-
 		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
 		osDelay(500);
-		msg = MyMsg_CreateString(BIKE_SPEED_ID, &MotorControl.RPM, BIKE_SPEED_LEN);
+
+		msg = malloc(sizeof(MyMsg_t));
+		msg->UUID = BIKE_SPEED_ID;
+		*(float*)msg->pData = MotorControl.RPM;
+		msg->length = BIKE_SPEED_LEN;
 		xQueueSendFromISR(xQueueTX, (void * ) &msg, (TickType_t ) 0);
+		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
+		osDelay(500);
 
 	}
 }
@@ -204,6 +219,7 @@ void OnPhaseChanged() {
 	case PWMSequencesNotInit:
 		break;
 	case ForwardCommutation:
+		ChangePWMDutyCycle(MotorControl.Wanted_DutyCycle, 2);
 		if (MotorControl.pwm_phase == 0) {
 			Buffer_Init();
 			if (HAL_TIM_OC_Stop_IT(&TIM_MC_WATCHDOG, TIM_MC_WATCHDOG_CHN) != HAL_OK)
@@ -216,6 +232,7 @@ void OnPhaseChanged() {
 			if (MotorControl.RPM > 1000 || MotorControl.RPM < 0)
 				MotorControl.RPM = 0;
 
+			MotorControl.Limits.Integral = MotorControl.V_Treshold * 100;
 		}
 
 		/*if (!MotorControl.Flags.ClosedLoop) {
@@ -261,14 +278,15 @@ void ChangePWMDutyCycle(uint8_t newDutyCycle, int8_t maxStep) {
 		newDutyCycle = 5;
 	if (newDutyCycle > 95)
 		newDutyCycle = 95;
-	/*int8_t diff = newDutyCycle - MotorControl.DutyCycle;
-	 if (diff > 0 && diff > maxStep)
-	 diff = maxStep;
-	 else if (diff < 0 && diff < -maxStep)
-	 diff = -maxStep;
+	int8_t diff = newDutyCycle - MotorControl.DutyCycle;
+	if (diff > 0 && diff > maxStep)
+		diff = maxStep;
+	else if (diff < 0 && diff < -maxStep)
+		diff = -maxStep;
 
-	 uint8_t dutyCycleToSet = MotorControl.DutyCycle + diff;*/
-	uint8_t dutyCycleToSet = newDutyCycle;
+	uint8_t dutyCycleToSet = MotorControl.DutyCycle + diff;
+
+	//uint8_t dutyCycleToSet = newDutyCycle;
 	__HAL_TIM_SET_COMPARE(&PWM_INSTANCE, TIM_CHANNEL_1, dutyCycleToSet * 10);
 	__HAL_TIM_SET_COMPARE(&PWM_INSTANCE, TIM_CHANNEL_2, dutyCycleToSet * 10);
 	__HAL_TIM_SET_COMPARE(&PWM_INSTANCE, TIM_CHANNEL_3, dutyCycleToSet * 10);
