@@ -13,7 +13,15 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
+import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineDataSet;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import md.App;
+import md.AppConfig;
 import md.ble.BLE_Services.BLEConst;
 import md.ble.BLE_Services.InfoService;
 import md.ble.BLE_Services.MiBand2.HeartRateService;
@@ -36,8 +44,23 @@ public class DeviceServicesActivity extends Activity
     protected PowerManager.WakeLock mWakeLock;
     @SuppressWarnings("UnusedDeclaration")
     private final static String TAG = DeviceServicesActivity.class.getSimpleName();
-
+    // Controls
+    Button button_pwm_down = null;
+    Button button_pwm_up = null;
+    Button button_vthr_down = null;
+    Button button_vthr_up = null;
+    ToggleButton button_Start = null;
+    ToggleButton button_motor = null;
+    ToggleButton button_heartrate= null;
+    ToggleButton button_leftpedal = null;
+    ToggleButton button_right_peda = null;
+    //
     Long lastChanged_PWMDutyCycle = 0L;
+    List<Entry> entries = new ArrayList<Entry>();
+    LineDataSet dataSet;
+    LineChart chart_itampa;
+    long chartDataIndex = 0;
+    int chartDatarefreshCounter = 0;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -50,18 +73,38 @@ public class DeviceServicesActivity extends Activity
         final SeekBar seekBar2 = (SeekBar) findViewById(R.id.seekBar_vthr);
         seekBar2.setOnSeekBarChangeListener(this);
 
-        final Button button_pwm_down = (Button) findViewById(R.id.button_pwm_down);
+        button_pwm_down = (Button) findViewById(R.id.button_pwm_down);
         button_pwm_down.setOnClickListener(this);
-        final Button button_pwm_up = (Button) findViewById(R.id.button_pwm_up);
+        button_pwm_up = (Button) findViewById(R.id.button_pwm_up);
         button_pwm_up.setOnClickListener(this);
-        final Button button_vthr_down = (Button) findViewById(R.id.button_vthr_down);
+        button_vthr_down = (Button) findViewById(R.id.button_vthr_down);
         button_vthr_down.setOnClickListener(this);
-        final Button button_vthr_up = (Button) findViewById(R.id.button_vthr_up);
+        button_vthr_up = (Button) findViewById(R.id.button_vthr_up);
         button_vthr_up.setOnClickListener(this);
-        final ToggleButton button_Start = (ToggleButton) findViewById(R.id.toggleButton_start);
+        button_Start = (ToggleButton) findViewById(R.id.toggleButton_start);
         button_Start.setOnClickListener(this);
-        final Button button_measureHR = (Button) findViewById(R.id.button_MeasureHeartRate);
-        button_measureHR.setOnClickListener(this);
+
+        button_motor = (ToggleButton) findViewById(R.id.toggleButton_ble_motor);
+        button_motor.setOnClickListener(this);
+        button_heartrate= (ToggleButton) findViewById(R.id.toggleButton_ble_heartrate);
+        button_heartrate.setOnClickListener(this);
+        button_leftpedal = (ToggleButton) findViewById(R.id.toggleButton_ble_leftpedal);
+        button_leftpedal.setOnClickListener(this);
+        button_right_peda = (ToggleButton) findViewById(R.id.toggleButton_ble_right_pedal);
+        button_right_peda.setOnClickListener(this);
+
+
+
+
+
+
+
+       /* entries.add(new Entry(0,0));
+        dataSet = new LineDataSet(entries, "Itampa");
+        chart_itampa = (LineChart) findViewById(R.id.chart_itampa);
+        chart_itampa.setData( new LineData(dataSet));
+        chart_itampa.invalidate(); //
+        chart_itampa.setVisibleXRangeMaximum(100);*/
 
         SubscribeBLEServices();
         final PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
@@ -124,7 +167,8 @@ public class DeviceServicesActivity extends Activity
                 break;
             case R.id.seekBar_vthr:
                 final TextView tvVthr = (TextView) findViewById(R.id.textView_vthr);
-                tvVthr.setText("V Threshold = " + progress);
+                int val = progress*270+3000;
+                tvVthr.setText("V Threshold = " + val);
 
                 BleManagerService.getInstance().update((MyCustomService) sensor, MyCustomService.UUID_V_THRESHOLD_ID, bundle);
                 break;
@@ -132,24 +176,35 @@ public class DeviceServicesActivity extends Activity
     }
 
     @Override
-    public void onBleStateChange(BleManagerService.bleState state) {
-        final BleManagerService.bleState s = state;
+    public void onBleStateChange(final String name, final BleManagerService.bleState state) {
+        final int color = state == BleManagerService.bleState.connected ?
+                getResources().getColor(android.R.color.holo_green_dark) : state == BleManagerService.bleState.connectionFailed ?
+                getResources().getColor(android.R.color.holo_red_light) :
+                getResources().getColor(android.R.color.holo_red_dark);
+
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                final TextView textview = ((TextView) findViewById(R.id.data_characteristic_uuid));
-                switch (s) {
-                    case connected:
-                        textview.setText("Connected");
+                ToggleButton toggleButton = null;
+                switch (name) {
+                    case AppConfig.DEF_EBIKE_CENTRAL:
+                        toggleButton = (ToggleButton) findViewById(R.id.toggleButton_ble_motor);
                         break;
-                    case disconnected:
-                        textview.setText("Disconnected");
+                    case AppConfig.DEF_MI_BAND2_DEVICE_NAME:
+                        toggleButton = (ToggleButton) findViewById(R.id.toggleButton_ble_heartrate);
                         break;
-                    case connectionFailed:
-                        textview.setText("Connection Failed");
+                    case AppConfig.DEF_EBIKE_PEDAL_L:
+                        toggleButton = (ToggleButton) findViewById(R.id.toggleButton_ble_leftpedal);
+                        break;
+                    case AppConfig.DEF_EBIKE_PEDAL_R:
+                        toggleButton = (ToggleButton) findViewById(R.id.toggleButton_ble_right_pedal);
                         break;
                 }
-                textview.refreshDrawableState();
+                if (toggleButton != null) {
+                    toggleButton.setBackgroundColor(color);
+                    toggleButton.setChecked(state == BleManagerService.bleState.connected);
+                    toggleButton.refreshDrawableState();
+                }
             }
         });
     }
@@ -181,10 +236,36 @@ public class DeviceServicesActivity extends Activity
                 BleManagerService.getInstance().update((MyCustomService) sensor, MyCustomService.UUID_MODE_ID, bundle);
 
                 break;
-            case R.id.button_MeasureHeartRate:
+          /*  case R.id.button_MeasureHeartRate:
 
                 final InfoService<?> sensorHR = (InfoService<?>) App.DEVICE_DEF.getSensor(HeartRateService.UUID_SERVICE);
                 BleManagerService.getInstance().update((HeartRateService) sensorHR, HeartRateService.UUID_HEARTRATE_CONTROL_ID, null);
+                break;*/
+
+
+            case R.id.toggleButton_ble_motor:
+                if (button_motor.isChecked())
+                    BleManagerService.getInstance().ConnectToDevice(AppConfig.DEF_EBIKE_CENTRAL);
+                else
+                    BleManagerService.getInstance().CancelSearch(AppConfig.DEF_EBIKE_CENTRAL);
+                break;
+            case R.id.toggleButton_ble_heartrate:
+                if (button_heartrate.isChecked())
+                    BleManagerService.getInstance().ConnectToDevice(AppConfig.DEF_MI_BAND2_DEVICE_NAME);
+                else
+                    BleManagerService.getInstance().CancelSearch(AppConfig.DEF_MI_BAND2_DEVICE_NAME);
+                break;
+            case R.id.toggleButton_ble_leftpedal:
+                if (button_leftpedal.isChecked())
+                    BleManagerService.getInstance().ConnectToDevice(AppConfig.DEF_EBIKE_PEDAL_L);
+                else
+                    BleManagerService.getInstance().CancelSearch(AppConfig.DEF_EBIKE_PEDAL_L);
+                break;
+            case R.id.toggleButton_ble_right_pedal:
+                if (button_right_peda.isChecked())
+                    BleManagerService.getInstance().ConnectToDevice(AppConfig.DEF_EBIKE_PEDAL_R);
+                else
+                    BleManagerService.getInstance().CancelSearch(AppConfig.DEF_EBIKE_PEDAL_R);
                 break;
             default:
                 break;
@@ -208,16 +289,17 @@ public class DeviceServicesActivity extends Activity
 
 
     private void SubscribeBLEServices() {
-        final InfoService<?> sensor = (InfoService<?>) App.DEVICE_DEF.getSensor(MyCustomService.UUID_SERVICE);
-        ((MyCustomService) sensor).setServiceListener(this);
+        final MyCustomService sensor = (MyCustomService) App.DEVICE_DEF.getSensor(MyCustomService.UUID_SERVICE);
+        sensor.setServiceListener(this);
 
+        final HeartRateService sensor2 = (HeartRateService) App.DEVICE_DEF.getSensor(HeartRateService.UUID_SERVICE);
+        sensor2.setServiceListener(this);
 
-        final InfoService<?> sensor2 = (InfoService<?>) App.DEVICE_DEF.getSensor(HeartRateService.UUID_SERVICE);
-        ((HeartRateService) sensor2).setServiceListener(this);
+        final MyPedalService sensor3 = (MyPedalService) App.DEVICE_DEF.getSensor(MyPedalService.UUID_SERVICE);
+        sensor3.setServiceListener(this);
 
-
-        final InfoService<?> sensor3 = (InfoService<?>) App.DEVICE_DEF.getSensor(MyPedalService.UUID_SERVICE);
-        ((MyPedalService) sensor3).setServiceListener(this);
+        final MyPedalService sensor4 = (MyPedalService) App.DEVICE_DEF2.getSensor(MyPedalService.UUID_SERVICE);
+        sensor4.setServiceListener(this);
     }
 
     @Override
@@ -230,26 +312,47 @@ public class DeviceServicesActivity extends Activity
                 switch (characteristic) {
                     case MyCustomService.UUID_BIKE_BATTERY_LEVEL_ID:
                         textView = (TextView) findViewById(R.id.textView_bat_variable);
-                        textView.setText(Integer.toString(value));
+                        textView.setText(String.format ("%.2f", value*0.01356534));// 3.2*((2.2k + 36k)/2.2k) = 55.56 / 4096
                         textView.refreshDrawableState();
                         break;
                     case MyCustomService.UUID_CURRENT_ID:
                         textView = (TextView) findViewById(R.id.textView_srove_variable);
-                        textView.setText(Integer.toString(value));
+                        textView.setText( String.valueOf(value)); //* 0.0217285 - 22.22// (3.2 - 1.6)/(0.001 * 36) = 44.44 / 4096
+                      //  dataSet.addEntry();
+                       /* entries.add(new Entry(chartDataIndex++, value));
+                        if (chartDataIndex > 500) {
+                            dataSet.removeEntry(0);
+                        }
+                        if (++chartDatarefreshCounter > 50){
+                            chartDatarefreshCounter = 0;
+                            dataSet.notifyDataSetChanged();
+                            chart_itampa.notifyDataSetChanged();
+                            chart_itampa.fitScreen();
+                           // chart_itampa.invalidate();
+                        }*/
                         textView.refreshDrawableState();
+
                         break;
                     case MyCustomService.UUID_BIKE_FLAGS_ID:
+                        final ToggleButton button_Start = (ToggleButton) findViewById(R.id.toggleButton_start);
+                        if (value == 0)
+                            button_Start.setBackgroundColor(getResources().getColor(android.R.color.darker_gray));
+                        else {
+                            button_Start.setBackgroundColor(getResources().getColor(android.R.color.holo_red_light));
+                            if (button_Start.isChecked())
+                                button_Start.toggle();
+                            final SeekBar seekBar_pwm1 = (SeekBar) findViewById(R.id.seekBar_pwm);
+                            seekBar_pwm1.setProgress(20);
+                        }
                         break;
                     case HeartRateService.UUID_HEARTRATE_MEASURE_ID:
-                        textView = (TextView) findViewById(R.id.data_characteristic_value);
+                        textView = (TextView) findViewById(R.id.textView_heartrate_value);
                         textView.setText(Integer.toString(value));
                         textView.refreshDrawableState();
                         break;
-
-                    case MyPedalService.UUID_RAW_DATA_ID:
-                        textView = (TextView) findViewById(R.id.textView_pedal);
-                        textView.setText(Integer.toString(value));
-                        textView.refreshDrawableState();
+                    case MyCustomService.UUID_PWM_DUTY_CYCLE_ID:
+                        final SeekBar seekBar_pwm = (SeekBar) findViewById(R.id.seekBar_pwm);
+                        seekBar_pwm.setProgress(value);
                         break;
                 }
             }
@@ -266,7 +369,28 @@ public class DeviceServicesActivity extends Activity
                 switch (characteristic) {
                     case MyCustomService.UUID_BIKE_SPEED_ID:
                         textView = (TextView) findViewById(R.id.textView_rpm_variable);
-                        textView.setText(Float.toString(value));
+                        textView.setText(String.format ("%.1f", value));
+                        textView.refreshDrawableState();
+                        break;
+                }
+            }
+        });
+    }
+
+    @Override
+    public void OnCharacteristicChanged(final String name, final String characteristic,final int value) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+
+                TextView textView;
+                switch (characteristic) {
+                    case MyPedalService.UUID_RAW_DATA_ID:
+                        if (name.equals(AppConfig.DEF_EBIKE_PEDAL_L))
+                            textView = (TextView) findViewById(R.id.textView_leftpedal_value);
+                        else
+                            textView = (TextView) findViewById(R.id.textView_rightpedal_value);
+                        textView.setText(Integer.toString(value));
                         textView.refreshDrawableState();
                         break;
                 }

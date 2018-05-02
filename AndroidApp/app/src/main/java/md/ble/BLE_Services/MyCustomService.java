@@ -128,8 +128,12 @@ public class MyCustomService<T> extends InfoService<T> {
                 floatValue = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN).getFloat();
                 //floatValue = c.getFloatValue(BluetoothGattCharacteristic.FORMAT_FLOAT, 0);
                 break;
+            case UUID_PWM_DUTY_CYCLE_ID:
+                intValue = c.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, 0);
+                break;
             case UUID_BIKE_FLAGS_ID:
                 intValue = c.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT32, 0);
+                read(UUID_PWM_DUTY_CYCLE_ID);
                 break;
         }
         value = intValue;

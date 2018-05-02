@@ -70,7 +70,7 @@ static customPedalProfileCBs_t *customPedalProfile_AppCBs = NULL;
 static CONST gattAttrType_t customPedalProfileService = { ATT_BT_UUID_SIZE, customPedalProfileServUUID };
 
 static uint8 _BATTERY_LV_Props = GATT_PROP_READ|GATT_PROP_NOTIFY;
-static uint8 _BATTERY_LV_Value = 0;
+static uint16 _BATTERY_LV_Value = 0;
 static uint8 _BATTERY_LV_Desc[] = "Battery level";
 static gattCharCfg_t* _BATTERY_LV_NotiConfig;
 
@@ -248,7 +248,7 @@ bStatus_t customPedalProfile_SetParameter( uint8 param, uint8 len, void *value )
   switch ( param )
   {
     case BATTERY_LV_ID:
-      SetValue(uint8, _BATTERY_LV_Value)
+      SetValue(uint16, _BATTERY_LV_Value)
      if ( GATTServApp_ProcessCharCfg( _BATTERY_LV_NotiConfig, ((uint8*)&_BATTERY_LV_Value), FALSE,
                                   customPedalProfileAttrTbl, GATT_NUM_ATTRS( customPedalProfileAttrTbl ),
                                   INVALID_TASK_ID, customPedalProfile_ReadAttrCB ) != SUCCESS)

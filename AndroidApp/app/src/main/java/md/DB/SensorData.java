@@ -15,10 +15,17 @@ public class SensorData{
         _characteristicID = characteristicID;
         _value = value;
     }
-
+    public SensorData(String sensorID, String characteristicID) {
+        _sensorID = sensorID;
+        _characteristicID = characteristicID;
+    }
+    public void setValue(int value)
+    {
+        _value = Integer.toString(value);
+    }
     @Override
     public String toString() {
-        return _sensorID.substring(4,8) + " " + _characteristicID.substring(4,8) + " " + _value;
+        return "\t" + _sensorID.substring(4,8) + "\t" + _characteristicID.substring(4,8) + "\t" + _value;
     }
 
 

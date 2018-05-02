@@ -17,8 +17,8 @@ void CruiseControl_Reset() { // reset when user changes duty cycle
 	CruiseControl_IsActive = 0;
 }
 void CruiseControl_Start() {
-	osThreadDef(cruiseControl, CruiseControlTask, osPriorityNormal, 0, 128);
-	CruiseControlTaskHandle = osThreadCreate(osThread(cruiseControl), NULL);
+	//osThreadDef(cruiseControl, CruiseControlTask, osPriorityNormal, 0, 128);
+	//CruiseControlTaskHandle = osThreadCreate(osThread(cruiseControl), NULL);
 }
 static void CruiseControlTask(void const * argument) {
 	UNUSED(argument);

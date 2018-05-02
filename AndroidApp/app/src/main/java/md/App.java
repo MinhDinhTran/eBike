@@ -12,6 +12,7 @@ import com.chimeraiot.android.ble.sensor.DeviceDefCollection;
 
 import md.DB.SensorDataController;
 import md.ble.BLE_Services.BaseDef;
+import md.ble.BLE_Services.BaseDef_LeftPedal;
 import md.ble.BleManagerService;
 
 /** Application class. */
@@ -19,7 +20,8 @@ public class App extends Application {
     private boolean _bleWasEnabled = true;
 
     public static final DeviceDefCollection DEVICE_DEF_COLLECTION;
-    public static final DeviceDef DEVICE_DEF = new BaseDef<>((Void)null);
+    public static final DeviceDef DEVICE_DEF = new BaseDef<>(AppConfig.DEF_EBIKE_PEDAL_R);
+    public static final DeviceDef DEVICE_DEF2 = new BaseDef_LeftPedal(AppConfig.DEF_EBIKE_PEDAL_L);
     public static SensorDataController sensorDataController = null;
 
     static {
@@ -27,11 +29,14 @@ public class App extends Application {
             @Nullable
             @Override
             public DeviceDef create(String name, String address) {
+                if (name.equals(AppConfig.DEF_EBIKE_PEDAL_L))
+                    return DEVICE_DEF2;
                 return DEVICE_DEF;
             }
         };
         DEVICE_DEF_COLLECTION.register(AppConfig.DEF_EBIKE_CENTRAL);
-        DEVICE_DEF_COLLECTION.register(AppConfig.DEF_EBIKE_PEDAL);
+        DEVICE_DEF_COLLECTION.register(AppConfig.DEF_EBIKE_PEDAL_R);
+        DEVICE_DEF_COLLECTION.register(AppConfig.DEF_EBIKE_PEDAL_L);
         DEVICE_DEF_COLLECTION.register(AppConfig.DEF_MI_BAND2_DEVICE_NAME);
     }
 
@@ -40,10 +45,10 @@ public class App extends Application {
         super.onCreate();
         BleConfig.setDebugEnabled(true);
         enableBleIfNotEnabled();
-        startBleSensorsService(true);
-        startGPSService();
+        startBleSensorsService();
+      //  startGPSService();
     }
-    private void startBleSensorsService(boolean start)
+    private void startBleSensorsService()
     {
         final BluetoothAdapter adapter = BleUtils.getBluetoothAdapter(this);
         if (adapter == null ) return;

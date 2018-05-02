@@ -13,9 +13,7 @@ import java.util.HashMap;
 /** BLE device info services. */
 public class MyPedalService<T> extends InfoService<T> {
     public interface MyPedalServiceListener {
-        void OnCharacteristicChanged(String characteristic, int value);
-
-        void OnCharacteristicChanged(String characteristic, float value);
+        void OnCharacteristicChanged(String name, String characteristic, int value);
     }
 
     private static final String TAG = MyPedalService.class.getSimpleName();
@@ -54,6 +52,7 @@ public class MyPedalService<T> extends InfoService<T> {
     }
 
     protected MyPedalService(T model) {
+
         super(model);
     }
 
@@ -97,14 +96,14 @@ public class MyPedalService<T> extends InfoService<T> {
         }
     }
 
-
     @Override
     protected boolean apply(final BluetoothGattCharacteristic c, final T data) {
-       // int intValue = 0;
+        //int  intValue= 0;
+        byte bytes[];
        // float floatValue = 0;
         switch (c.getUuid().toString()) {
             case UUID_BATTERY_LV_ID:
-              //  intValue = c.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 0);
+                bytes = c.getValue();
                 break;
             case UUID_PEDALLING_STR_ID:
               //  intValue = c.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT32, 0);
@@ -112,9 +111,10 @@ public class MyPedalService<T> extends InfoService<T> {
             case UUID_RAW_DATA_ID:
                 _rawValue = c.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, 0);
                 if (_listener != null)
-                    _listener.OnCharacteristicChanged(UUID_RAW_DATA_ID, _rawValue);
+                    _listener.OnCharacteristicChanged((String)getData(), UUID_RAW_DATA_ID, _rawValue);
                 //floatValue = c.getFloatValue(BluetoothGattCharacteristic.FORMAT_FLOAT, 0);
                 break;
+
         }
         return true;
     }

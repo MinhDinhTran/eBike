@@ -17,8 +17,7 @@ import java.util.Map;
 import md.apk.R;
 
 /** Adapter for holding devices found through scanning. */
-public class
-BleDevicesAdapter extends BaseAdapter {
+public class BleDevicesAdapter extends BaseAdapter {
     /** Connected RSSI value. */
     public static final int RSSI_CONNECTED = -1;
 

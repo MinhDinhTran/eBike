@@ -79,7 +79,7 @@ extern "C"
 // Simple Keys Profile Services bit fields
 #define SIMPLEPROFILE_SERVICE               0x00000001
 
-#define BATTERY_LV_LEN                  1  
+#define BATTERY_LV_LEN                  2
 #define PEDALLING_STRENGTH_LEN          4 
 #define CONFIG_LEN                      4
 #define RAW_DATA_LEN                    2

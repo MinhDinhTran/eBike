@@ -286,7 +286,6 @@ public class MainActivity extends AppCompatActivity {
 
     public void StartChronometer(View view) {
 
-        _sensorDataController.Sync();
         Chronometer mChronometer = (Chronometer) findViewById(R.id.chronometer);
         Button mButton = (Button) findViewById(R.id.button_chronometer);
         if (isChronometerStarted) {

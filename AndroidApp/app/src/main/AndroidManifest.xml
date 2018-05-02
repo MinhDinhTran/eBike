@@ -68,7 +68,9 @@
         <service
             android:name="md.ble.BleManagerService"
             android:enabled="true" />
-        <service android:name="md.GPS_Service" android:enabled="true" />
+        <service
+            android:name="md.GPS_Service"
+            android:enabled="true" />
 
         <receiver android:name="md.ble.BluetoothStateReceiver">
             <intent-filter>

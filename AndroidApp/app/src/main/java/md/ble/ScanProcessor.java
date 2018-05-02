@@ -23,6 +23,20 @@ public class ScanProcessor implements BleScanner.BleScannerListener {
         scanner.setScanPeriod(SCAN_PERIOD);
     }
 
+    public void FindDevice(String deviceToFind) {
+        if (_devicesToFind ==  null)
+            _devicesToFind = new HashSet<String>();
+        _devicesToFind.add(deviceToFind);
+        scanner.start();
+    }
+    public void CancelSearch(String deviceToFind) {
+        if (_devicesToFind == null)
+            _devicesToFind = new HashSet<String>();
+        if (_devicesToFind.contains(deviceToFind))
+            _devicesToFind.remove(deviceToFind);
+        if (_devicesToFind.size() == 0)
+            scanner.stop();
+    }
     public void FindDevice(Set<String> deviceToFind) {
         _devicesToFind = new HashSet<String>(deviceToFind);
         scanner.start();
@@ -38,7 +52,8 @@ public class ScanProcessor implements BleScanner.BleScannerListener {
 
     @Override
     public void onScanRepeat() {
-
+        if (_devicesToFind.size() == 0)
+            scanner.stop();
     }
 
     @Override

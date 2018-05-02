@@ -86,6 +86,7 @@ void processUART()
           SetParameter();
         break;
       default:
+        UART_suffixCnt = 0;
         break;
       }
     }
@@ -133,6 +134,13 @@ static void SetParameter()
     if (UART_suffixCnt == 6+CURRENT_LEN)
     {
       SimpleProfile_SetParameter( CURRENT_ID, CURRENT_LEN, &UART_data);
+      isParameterSet = 1;
+    }
+    break;
+  case PWM_DUTY_CYCLE_ID:
+    if (UART_suffixCnt == 6+PWM_DUTY_CYCLE_LEN)
+    {
+      SimpleProfile_SetParameter( PWM_DUTY_CYCLE_ID, PWM_DUTY_CYCLE_LEN, &UART_data);
       isParameterSet = 1;
     }
     break;

@@ -18,25 +18,19 @@
 #include "customPedalProfile.h"
 
 #define TestTask_MeasureADC                               0x0001
-#define TestTask_MeasureADC_Period                        200
+#define TestTask_MeasureADC_Period                        10
 
-//--------------- UART defs/vars
-#define UART_LEN_OFFSET 1
-#define UART_SUFFIX_SIZE 2
-#define UART_ID_SIZE 1
-#define UART_BUFFER_SIZE 128
-//static void SetParameter(uint16 ID, char* data, uint8 len);
-const uint16 UART_Suffix = 0x0D0A; // aka "\r\n".
-char UART_buffer[UART_BUFFER_SIZE] = {0};
-uint16 UART_RxActivePos = 0;
-//---------------
+#define DataCountToAVG 5
+uint16 AdcData[DataCountToAVG] = {0};
+uint8 dataCount = 0;
+uint16 AdcDataAVG = 0;
+
+uint16 countWhenMeasureBattery = 0;
+extern bool Connected;
 
 extern bStatus_t SimpleProfile_SetParameter( uint8 param, uint8 len, void *value );
 uint8 TestTask_ID;
-uint16 ADCMeasureNo = 0;
-uint16 buffer[5] = {0};
-uint16 bufferIndex = 0;
-void npiCBack ( uint8 port, uint8 event );
+
 
 void TestTask_Init( uint8 task_id )
 {
@@ -45,52 +39,39 @@ void TestTask_Init( uint8 task_id )
   osal_start_reload_timer( TestTask_ID, TestTask_MeasureADC, TestTask_MeasureADC_Period );
  
 }
-#define DataCountToAVG 2
-uint16 AdcData[DataCountToAVG] = {0};
-uint8 dataCount = 0;
-uint16 AdcDataAVG = 0;
 
 uint16 TestTask_ProcessEvent( uint8 task_id, uint16 events )
 {
+  if (Connected) 
+  {
     AdcData[dataCount] = HalAdcRead ( HAL_ADC_CHANNEL_1, HAL_ADC_RESOLUTION_12);
-    
-      
     dataCount++;
     if (dataCount == DataCountToAVG)
     {
       uint32 AdcDataSUM = 0;
       for(uint8 i = 0; i < DataCountToAVG; i++)
         AdcDataSUM += AdcData[i];
-      
+
       AdcDataAVG = AdcDataSUM / DataCountToAVG;
-    //  printf ( "%d\n", AdcDataAVG);
       customPedalProfile_SetParameter( RAW_DATA_ID, RAW_DATA_LEN, &AdcDataAVG );
-      
+
       dataCount = 0;
     }
-   /* adc0 =  HalAdcRead ( HAL_ADC_CHANNEL_1, HAL_ADC_RESOLUTION_12);
-      printf ( "1-%d\n", adc0);
-  adc0 =  HalAdcRead ( HAL_ADC_CHANNEL_2, HAL_ADC_RESOLUTION_12);
-      printf ( "2-%d\n", adc0);
-   adc0 =  HalAdcRead ( HAL_ADC_CHANNEL_3, HAL_ADC_RESOLUTION_12);
-      printf ( "3-%d\n", adc0);
-   adc0 =  HalAdcRead ( HAL_ADC_CHANNEL_4, HAL_ADC_RESOLUTION_12);
-      printf ( "4-%d\n", adc0);
-   adc0 =  HalAdcRead ( HAL_ADC_CHANNEL_5, HAL_ADC_RESOLUTION_12);
-      printf ( "5-%d\n", adc0);
-   adc0 =  HalAdcRead ( HAL_ADC_CHANNEL_6, HAL_ADC_RESOLUTION_12);
-      printf ( "6-%d\n", adc0);
-   adc0 =  HalAdcRead ( HAL_ADC_CHANNEL_7, HAL_ADC_RESOLUTION_12);
-      printf ( "7-%d\n", adc0);*/
-   
-   
-
-   //printf("%d, ", (buffer[0] + buffer[1] + buffer[2] + buffer[3] + buffer[4])/5);
-
-
-   events = ( events ^ TestTask_MeasureADC);
-   osal_start_reload_timer( TestTask_ID, TestTask_MeasureADC, TestTask_MeasureADC_Period );
-   return events;//( events ^ TestTask_MeasureADC);
+    
+    if (countWhenMeasureBattery++ >= 100)
+    {
+      countWhenMeasureBattery = 0;
+      uint16 vbat = (uint16)(HalAdcRead ( HAL_ADC_CHANNEL_VDD, HAL_ADC_RESOLUTION_12)*3);
+      customPedalProfile_SetParameter( BATTERY_LV_ID, BATTERY_LV_LEN, &vbat );
+    }
+  }
+  
+  //  BATTERY_LV_ID
+  
+  
+  events = ( events ^ TestTask_MeasureADC);
+  osal_start_reload_timer( TestTask_ID, TestTask_MeasureADC, TestTask_MeasureADC_Period );
+  return events;//( events ^ TestTask_MeasureADC);
 }
 
 

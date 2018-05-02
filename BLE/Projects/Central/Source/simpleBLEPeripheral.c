@@ -50,7 +50,7 @@
  */
 
 // How often to perform periodic event
-#define SBP_PERIODIC_EVT_PERIOD                   150
+#define SBP_PERIODIC_EVT_PERIOD                   100
 
 // What is the advertising interval when device is discoverable (units of 625us, 160=100ms)
 #define DEFAULT_ADVERTISING_INTERVAL          160
@@ -684,9 +684,7 @@ static void simpleProfileChangeCB( uint8 paramID )
       break;
     case PWM_DUTY_CYCLE_ID:
       _PWM_DUTY_CYCLE_Value_Changed = true; 
-
       break;
-      
     case V_THRESHOLD_ID:
       _V_THRESHOLD_Value_Changed = true;
       break;

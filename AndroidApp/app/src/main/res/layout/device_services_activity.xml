@@ -9,261 +9,358 @@
     android:screenOrientation="portrait"
     tools:context="md.ble.ui.DeviceServicesActivity">
 
-    <android.support.design.widget.AppBarLayout
-        android:id="@+id/app_bar"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:theme="@style/AppTheme.AppBarOverlay">
+        android:layout_height="wrap_content">
 
-        <TextView
-            android:id="@+id/data_characteristic_uuid"
+        <android.support.design.widget.AppBarLayout
+            android:id="@+id/app_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="16dp"
-            android:layout_marginRight="16dp"
-            android:text="@string/no_data_characteristic"
-            android:textAppearance="@style/CodeTextAppearance" />
+            android:theme="@style/AppTheme.AppBarOverlay">
 
-        <TextView
-            android:id="@+id/data_characteristic_value"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:layout_marginLeft="16dp"
-            android:layout_marginRight="16dp"
-            android:text="@string/no_data_characteristic"
-            android:textAppearance="@style/CodeTextAppearance" />
+            <TableLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
 
-        <TextView
-            android:id="@+id/textView_pedal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:layout_marginLeft="16dp"
-            android:layout_marginRight="16dp"
-            android:textAppearance="@style/CodeTextAppearance" />
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
 
-        <Button
-            android:id="@+id/button_MeasureHeartRate"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Measure heart rate" />
+                    <TextView
+                        android:id="@+id/textView_motor"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginLeft="6dp"
+                        android:layout_weight="1"
+                        android:text="Motor Ctrl"
+                        android:textAppearance="@style/CodeTextAppearance" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/primary2"
-            android:orientation="vertical">
+                    <TextView
+                        android:id="@+id/textview_heartrate"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginLeft="6dp"
+                        android:layout_weight="1"
+                        android:text="Heart rate"
+                        android:textAppearance="@style/CodeTextAppearance" />
 
+                    <TextView
+                        android:id="@+id/textview_leftpedal"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginLeft="6dp"
+                        android:layout_weight="1"
+                        android:text="Left pedal"
+                        android:textAppearance="@style/CodeTextAppearance" />
 
-            <ToggleButton
-                android:id="@+id/toggleButton_start"
+                    <TextView
+                        android:id="@+id/textView_rightpedal"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginLeft="6dp"
+                        android:layout_weight="1"
+                        android:text="Right pedal"
+                        android:textAppearance="@style/CodeTextAppearance" />
+                </TableRow>
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <TextView
+                        android:id="@+id/textView_motorcontrol"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginLeft="6dp"
+                        android:layout_weight="1"
+                        android:text="-"
+                        android:textAppearance="@style/CodeTextAppearance" />
+
+                    <TextView
+                        android:id="@+id/textView_heartrate_value"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginLeft="6dp"
+                        android:layout_weight="1"
+                        android:text="0"
+                        android:textAppearance="@style/CodeTextAppearance" />
+
+                    <TextView
+                        android:id="@+id/textView_leftpedal_value"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginLeft="6dp"
+                        android:layout_weight="1"
+                        android:text="0"
+                        android:textAppearance="@style/CodeTextAppearance" />
+
+                    <TextView
+                        android:id="@+id/textView_rightpedal_value"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginLeft="6dp"
+                        android:layout_weight="1"
+                        android:text="0"
+                        android:textAppearance="@style/CodeTextAppearance" />
+                </TableRow>
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <ToggleButton
+                        android:id="@+id/toggleButton_ble_motor"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="@android:color/holo_red_light"
+                        android:text="ToggleButton"
+                        android:textSize="12sp" />
+
+                    <ToggleButton
+                        android:id="@+id/toggleButton_ble_heartrate"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="@android:color/holo_red_light"
+                        android:text="ToggleButton"
+                        android:textSize="12sp" />
+
+                    <ToggleButton
+                        android:id="@+id/toggleButton_ble_leftpedal"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="@android:color/holo_red_light"
+                        android:text="ToggleButton"
+                        android:textSize="12sp" />
+
+                    <ToggleButton
+                        android:id="@+id/toggleButton_ble_right_pedal"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="@android:color/holo_red_light"
+                        android:text="ToggleButton"
+                        android:textSize="12sp" />
+
+                </TableRow>
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@android:color/darker_gray"
+                    android:padding="3dp" >
+
+                </TableRow>
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <TextView
+                        android:id="@+id/textView_speed_variable"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:text="0"
+                        android:textAlignment="center"
+                        android:textAppearance="@style/CodeTextAppearance"
+                        android:textSize="24sp" />
+
+                    <TextView
+                        android:id="@+id/textView_rpm_variable"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:text="0"
+                        android:textAlignment="center"
+                        android:textAppearance="@style/CodeTextAppearance"
+                        android:textSize="24sp" />
+
+                    <TextView
+                        android:id="@+id/textView_bat_variable"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:text="0"
+                        android:textAlignment="center"
+                        android:textAppearance="@style/CodeTextAppearance"
+                        android:textSize="24sp" />
+
+                    <TextView
+                        android:id="@+id/textView_srove_variable"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:text="0"
+                        android:textAlignment="center"
+                        android:textAppearance="@style/CodeTextAppearance"
+                        android:textSize="24sp" />
+                </TableRow>
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <TextView
+                        android:id="@+id/textView_speed"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:text="KM/H"
+                        android:textAlignment="center"
+                        android:textAppearance="@style/CodeTextAppearance" />
+
+                    <TextView
+                        android:id="@+id/textView_rpm"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:text="RPM"
+                        android:textAlignment="center"
+                        android:textAppearance="@style/CodeTextAppearance" />
+
+                    <TextView
+                        android:id="@+id/textView_bat"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:text="Baterija (V)"
+                        android:textAlignment="center"
+                        android:textAppearance="@style/CodeTextAppearance" />
+
+                    <TextView
+                        android:id="@+id/textView_srove"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:text="Srove"
+                        android:textAlignment="center"
+                        android:textAppearance="@style/CodeTextAppearance" />
+
+                </TableRow>
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@android:color/darker_gray"
+                    android:padding="3dp" />
+
+            </TableLayout>
+
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="ToggleButton" />
+                android:background="@color/primary2"
+                android:orientation="vertical">
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:orientation="horizontal">
 
                 <TextView
-                    android:id="@+id/textView_speed"
+                    android:id="@+id/textView_vthr"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="KM/H"
-                    android:textAlignment="center"
-                    android:textColor="@android:color/black" />
-
-                <TextView
-                    android:id="@+id/textView_rpm"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="RPM"
-                    android:textAlignment="center"
-                    android:textColor="@android:color/black" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/textView_speed_variable"
-                    android:layout_width="21dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="0"
-                    android:textAlignment="center"
-                    android:textColor="@android:color/black"
-                    android:textSize="36sp" />
-
-                <TextView
-                    android:id="@+id/textView_rpm_variable"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="0"
-                    android:textAlignment="center"
-                    android:textColor="@android:color/black"
-                    android:textSize="36sp" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/textView_bat"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Baterija (V)"
-                    android:textAlignment="center"
-                    android:textColor="@android:color/black" />
-
-                <TextView
-                    android:id="@+id/textView_srove"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Srove"
-                    android:textAlignment="center"
-                    android:textColor="@android:color/black" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/textView_bat_variable"
-                    android:layout_width="21dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="0"
-                    android:textAlignment="center"
-                    android:textColor="@android:color/black"
-                    android:textSize="36sp" />
-
-                <TextView
-                    android:id="@+id/textView_srove_variable"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="0"
-                    android:textAlignment="center"
-                    android:textColor="@android:color/black"
-                    android:textSize="36sp" />
-            </LinearLayout>
-
-            <TextView
-                android:id="@+id/textView_vthr"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:layout_alignParentTop="true"
-                android:layout_weight="1"
-                android:text="V Threshold ="
-                android:textColor="@color/text" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:orientation="horizontal">
-
-                <Button
-                    android:id="@+id/button_vthr_down"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="-"
-                    android:textSize="18sp" />
+                    android:text="V Threshold ="
+                    android:textColor="@color/text" />
 
                 <SeekBar
                     android:id="@+id/seekBar_vthr"
                     style="@style/tallerBarStyle"
-                    android:layout_width="338dp"
+                    android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_alignParentEnd="true"
-                    android:layout_alignParentTop="true"
-                    android:layout_toEndOf="@+id/textView_vthr"
                     android:layout_weight="1"
                     android:scrollbarStyle="outsideInset" />
 
-                <Button
-                    android:id="@+id/button_vthr_up"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:text="+" />
+                    android:orientation="horizontal">
 
-            </LinearLayout>
+                    <Button
+                        android:id="@+id/button_vthr_down"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="-"
+                        android:textSize="18sp" />
 
-            <TextView
-                android:id="@+id/textView_pwmdutycycle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:layout_weight="1"
-                android:text="PWM Duty Cycle ="
-                android:textColor="@color/text" />
+                    <Button
+                        android:id="@+id/button_vthr_up"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="+" />
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="horizontal">
+                </LinearLayout>
 
-                <Button
-                    android:id="@+id/button_pwm_down"
-                    android:layout_width="wrap_content"
+                <TextView
+                    android:id="@+id/textView_pwmdutycycle"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
                     android:layout_weight="1"
-                    android:text="-"
-                    android:textSize="18sp" />
+                    android:text="PWM Duty Cycle ="
+                    android:textColor="@color/text" />
 
                 <SeekBar
                     android:id="@+id/seekBar_pwm"
                     style="@style/tallerBarStyle"
-                    android:layout_width="338dp"
+                    android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_alignParentEnd="true"
                     android:layout_alignParentTop="true"
                     android:layout_toEndOf="@+id/textView_vthr"
                     android:layout_weight="1" />
 
-                <Button
-                    android:id="@+id/button_pwm_up"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="+" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/button_pwm_down"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="-"
+                        android:textSize="18sp" />
+
+                    <Button
+                        android:id="@+id/button_pwm_up"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="+" />
+
+                </LinearLayout>
+
+                <com.github.mikephil.charting.charts.LineChart
+                    android:id="@+id/chart_itampa"
+                    android:layout_width="match_parent"
+                    android:layout_height="100dp"
+                    android:visibility="visible">
+
+                </com.github.mikephil.charting.charts.LineChart>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+                    <ToggleButton
+                        android:id="@+id/toggleButton_start"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="ToggleButton"
+                        android:textSize="36sp" />
+                </LinearLayout>
 
             </LinearLayout>
 
-            <com.github.mikephil.charting.charts.LineChart
-                android:id="@+id/chart_itampa"
-                android:layout_width="match_parent"
-                android:layout_height="144dp"
-                android:layout_alignParentStart="true"
-                android:layout_below="@+id/seekBar_vthr"
-                android:visibility="visible">
-
-            </com.github.mikephil.charting.charts.LineChart>
-
-        </LinearLayout>
-
-    </android.support.design.widget.AppBarLayout>
+        </android.support.design.widget.AppBarLayout>
+    </ScrollView>
 
 </android.support.design.widget.CoordinatorLayout>

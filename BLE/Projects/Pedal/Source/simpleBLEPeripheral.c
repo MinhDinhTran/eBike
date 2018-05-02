@@ -162,7 +162,7 @@ static gaprole_States_t gapProfileState = GAPROLE_INIT;
 static uint8 scanRspData[] =
 {
   // complete name
-  12,   // length of this data
+  14,   // length of this data
   GAP_ADTYPE_LOCAL_NAME_COMPLETE,  
   'e',
   'B',
@@ -175,6 +175,8 @@ static uint8 scanRspData[] =
   'd',
   'a',
   'l',
+  ' ',
+  'L',
 
   // connection interval range
   5,   // length of this data
@@ -343,7 +345,7 @@ void SimpleBLEPeripheral_Init( uint8 task_id )
 
   // Setup the customPedalProfile Characteristic Values
   {
-    uint8 battValue = 0;
+    uint16 battValue = 0;
     float pedalStrValue = 0;
     uint32 configValue = 0;
     uint16 rawDataValue = 0;

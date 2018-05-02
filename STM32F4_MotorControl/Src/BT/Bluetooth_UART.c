@@ -124,8 +124,8 @@ static void SetParameter() {
 	case V_THRESHOLD_ID:
 		if (UART_suffixCnt == 6 + V_THRESHOLD_LEN) {
 			MotorControl.V_Treshold = *(uint32_t*)&UART_data;
-			if (MotorControl.V_Treshold < 5)
-				MotorControl.V_Treshold = 5;
+			if (MotorControl.V_Treshold < 1)
+				MotorControl.V_Treshold = 1;
 			if (MotorControl.V_Treshold > 100)
 				MotorControl.V_Treshold = 100;
 			isParameterSet = 1;

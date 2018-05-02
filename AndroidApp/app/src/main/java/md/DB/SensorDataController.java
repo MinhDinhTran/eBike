@@ -95,7 +95,6 @@ public class SensorDataController {
      */
     public SensorData addItemInTable(SensorData item) throws ExecutionException, InterruptedException {
         SensorData entity = _sensorDataTable.insert(item).get();
-        appendLog(item.toString());
         return entity;
     }
 
@@ -274,37 +273,5 @@ public class SensorDataController {
 
 
 
-    public void appendLog(String text)
-    {
-        File logFile = new File("/storage/emulated/0/Log.txt");
-        if (!logFile.exists())
-        {
-            try
-            {
-                logFile.createNewFile();
-            }
-            catch (IOException e)
-            {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        }
-        try
-        {
-            //BufferedWriter for performance, true to set append to file flag
-            BufferedWriter buf = new BufferedWriter(new FileWriter(logFile, true));
-            Date currentTime = Calendar.getInstance().getTime();
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            String currentDateAndTime = sdf.format(currentTime);
-            buf.append(currentDateAndTime + ": ");
-            buf.append(text);
-            buf.newLine();
-            buf.close();
-        }
-        catch (IOException e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-    }
+
 }

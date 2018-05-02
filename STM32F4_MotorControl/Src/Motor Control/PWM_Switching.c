@@ -191,7 +191,7 @@ void ChangePhase(void) {
 	else if ((*ActiveSequence)[pwm_phase][2] == OffH || (*ActiveSequence)[pwm_phase][2] == OffL)
 		Enable_State((*ActiveSequence)[pwm_phase][2], TIM_CHANNEL_3);
 
-	for(int i = 500; i>0;i--)
+	for(int i = 50; i>0;i--)
 		__NOP();
 
 

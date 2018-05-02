@@ -32,8 +32,8 @@ MotorControl_t MotorControl = {
 		.Flags = { .ClosedLoop = 1 },
 		.PWM_Switching = { .IsRisingFront = 1, .ActiveSequence = PWMSequencesNotInit, .UseComplementaryPWM = 0, .UsePWMOnPWMN = 0 },
 		.pwmCountToChangePhase = 25, //355;
-		.PID = { .Kp = 0.35, .Ki = -0.01, .Kd = -0.05 } }; //{ .Kp = 0.3, .Ki = -0.07, .Kd = -0.1 } }; // { .Kp = 0.3, .Ki = -0.07, .Kd = -0.1
-
+		.PID = { .Kp = 0.35, .Ki = -0.01, .Kd = -0.05 } }; //{ .Kp = 0.3, .Ki = -0.07, .Kd = -0.1 } }; //
+static uint16_t I_MAX = 0;
 static uint32_t GetActualBEMF();
 static void Integrate();
 
@@ -60,7 +60,7 @@ void MotorControlThread(void const * argument) // MotorControlThread function
 	ChangePWMSwitchingSequence(Regeneration);
 	for (;;) {
 		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
-		osDelay(500);
+		osDelay(200);
 
 		if (processUserBtn) {
 
@@ -80,15 +80,16 @@ void MotorControlThread(void const * argument) // MotorControlThread function
 		msg->length = BIKE_BATTERY_LEVEL_LEN;
 		xQueueSendFromISR(xQueueTX, (void * ) &msg, (TickType_t ) 0);
 		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
-		osDelay(500);
+		osDelay(200);
 
-		msg = malloc(sizeof(MyMsg_t));
+	/*	msg = malloc(sizeof(MyMsg_t));
 		msg->UUID = CURRENT_ID;
-		*(uint16_t*)msg->pData = MotorControl.ADC_I[0];
+		*(uint16_t*)msg->pData = I_MAX;
 		msg->length = CURRENT_LEN;
 		xQueueSendFromISR(xQueueTX, (void * ) &msg, (TickType_t ) 0);
 		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
-		osDelay(500);
+		osDelay(200);
+		I_MAX = 0;*/
 
 		msg = malloc(sizeof(MyMsg_t));
 		msg->UUID = BIKE_SPEED_ID;
@@ -96,7 +97,7 @@ void MotorControlThread(void const * argument) // MotorControlThread function
 		msg->length = BIKE_SPEED_LEN;
 		xQueueSendFromISR(xQueueTX, (void * ) &msg, (TickType_t ) 0);
 		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
-		osDelay(500);
+		osDelay(200);
 
 	}
 }
@@ -144,7 +145,8 @@ void OnPWM_ADC_Measured(ADC_HandleTypeDef* hadc) {
 	uint8_t index = GetADCIndex(hadc->Instance);
 	MotorControl.ADC_V[index] = HAL_ADCEx_InjectedGetValue(hadc, ADC_V_INJ_RANK);
 	MotorControl.ADC_I[index] = HAL_ADCEx_InjectedGetValue(hadc, ADC_I_INJ_RANK);
-
+	if (I_MAX < MotorControl.ADC_I[index])
+		I_MAX = MotorControl.ADC_I[index];
 	Buffer_AddValue(MotorControl.ADC_V[index], MotorControl.ADC_I[index]);
 }
 
@@ -232,7 +234,14 @@ void OnPhaseChanged() {
 			if (MotorControl.RPM > 1000 || MotorControl.RPM < 0)
 				MotorControl.RPM = 0;
 
-			MotorControl.Limits.Integral = MotorControl.V_Treshold * 100;
+			MotorControl.Limits.Integral = MotorControl.V_Treshold * 270 + 3000;
+			MyMsg_t *msg = malloc(sizeof(MyMsg_t));
+			msg->UUID = CURRENT_ID;
+			*(uint16_t*)msg->pData = I_MAX;
+			msg->length = CURRENT_LEN;
+			xQueueSendFromISR(xQueueTX, (void * ) &msg, (TickType_t ) 0);
+
+			I_MAX = 0;
 		}
 
 		/*if (!MotorControl.Flags.ClosedLoop) {
