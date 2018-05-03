@@ -119,14 +119,18 @@ public class MyCustomService<T> extends InfoService<T> {
         switch (c.getUuid().toString()) {
             case UUID_BIKE_BATTERY_LEVEL_ID:
                 intValue = c.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, 0);
+                if (intValue > 4096) intValue = 0;
                 break;
             case UUID_CURRENT_ID:
                 intValue = c.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, 0);
+                if (intValue > 4096) intValue = 0;
                 break;
             case UUID_BIKE_SPEED_ID:
                 byte bytes[] = c.getValue();
                 floatValue = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN).getFloat();
                 //floatValue = c.getFloatValue(BluetoothGattCharacteristic.FORMAT_FLOAT, 0);
+                if (floatValue > 4096) floatValue = 0;
+                if (floatValue < 1) floatValue = 1;
                 break;
             case UUID_PWM_DUTY_CYCLE_ID:
                 intValue = c.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, 0);

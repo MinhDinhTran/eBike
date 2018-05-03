@@ -9,6 +9,7 @@ import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.ToggleButton;
@@ -318,7 +319,10 @@ public class DeviceServicesActivity extends Activity
                     case MyCustomService.UUID_CURRENT_ID:
                         textView = (TextView) findViewById(R.id.textView_srove_variable);
                         textView.setText( String.valueOf(value)); //* 0.0217285 - 22.22// (3.2 - 1.6)/(0.001 * 36) = 44.44 / 4096
-                      //  dataSet.addEntry();
+
+                        ProgressBar bar = (ProgressBar) findViewById(R.id.progressBar3);
+                        bar.setProgress(value);
+                        //  dataSet.addEntry();
                        /* entries.add(new Entry(chartDataIndex++, value));
                         if (chartDataIndex > 500) {
                             dataSet.removeEntry(0);
@@ -384,13 +388,19 @@ public class DeviceServicesActivity extends Activity
             public void run() {
 
                 TextView textView;
+                ProgressBar bar;
                 switch (characteristic) {
                     case MyPedalService.UUID_RAW_DATA_ID:
-                        if (name.equals(AppConfig.DEF_EBIKE_PEDAL_L))
+                        if (name.equals(AppConfig.DEF_EBIKE_PEDAL_L)){
                             textView = (TextView) findViewById(R.id.textView_leftpedal_value);
-                        else
+                            bar = (ProgressBar) findViewById(R.id.progressBar4);
+                        }
+                        else {
+                            bar = (ProgressBar) findViewById(R.id.progressBar5);
                             textView = (TextView) findViewById(R.id.textView_rightpedal_value);
+                        }
                         textView.setText(Integer.toString(value));
+                        bar.setProgress(value);
                         textView.refreshDrawableState();
                         break;
                 }

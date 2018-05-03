@@ -296,6 +296,34 @@
 
                 </LinearLayout>
 
+                <ProgressBar
+                    android:id="@+id/progressBar3"
+                    style="@android:style/Widget.DeviceDefault.Light.ProgressBar.Horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@android:color/background_dark"
+                    android:max="4096"
+                    android:progress="20" />
+
+                <ProgressBar
+                    android:id="@+id/progressBar4"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@android:color/background_dark"
+                    android:max="2048" />
+
+                <ProgressBar
+                    android:id="@+id/progressBar5"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@android:color/background_dark"
+                    android:max="2048" />
+
                 <TextView
                     android:id="@+id/textView_pwmdutycycle"
                     android:layout_width="match_parent"
@@ -313,7 +341,8 @@
                     android:layout_alignParentEnd="true"
                     android:layout_alignParentTop="true"
                     android:layout_toEndOf="@+id/textView_vthr"
-                    android:layout_weight="1" />
+                    android:layout_weight="1"
+                    android:progress="20" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -340,7 +369,7 @@
                 <com.github.mikephil.charting.charts.LineChart
                     android:id="@+id/chart_itampa"
                     android:layout_width="match_parent"
-                    android:layout_height="100dp"
+                    android:layout_height="130dp"
                     android:visibility="visible">
 
                 </com.github.mikephil.charting.charts.LineChart>
@@ -355,7 +384,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="ToggleButton"
-                        android:textSize="36sp" />
+                        android:textSize="48sp" />
                 </LinearLayout>
 
             </LinearLayout>
