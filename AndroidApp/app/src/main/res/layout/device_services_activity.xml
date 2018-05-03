@@ -366,13 +366,12 @@
 
                 </LinearLayout>
 
-                <com.github.mikephil.charting.charts.LineChart
-                    android:id="@+id/chart_itampa"
+                <View
+                    android:id="@+id/divider"
                     android:layout_width="match_parent"
-                    android:layout_height="130dp"
-                    android:visibility="visible">
-
-                </com.github.mikephil.charting.charts.LineChart>
+                    android:layout_height="50dp"
+                    android:layout_weight="1"
+                    android:background="?android:attr/listDivider" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -385,7 +384,16 @@
                         android:layout_height="wrap_content"
                         android:text="ToggleButton"
                         android:textSize="48sp" />
+
                 </LinearLayout>
+
+                <com.github.mikephil.charting.charts.LineChart
+                    android:id="@+id/chart_itampa"
+                    android:layout_width="match_parent"
+                    android:layout_height="250dp"
+                    android:visibility="visible">
+
+                </com.github.mikephil.charting.charts.LineChart>
 
             </LinearLayout>
 

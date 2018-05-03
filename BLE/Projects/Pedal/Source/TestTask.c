@@ -39,31 +39,33 @@ void TestTask_Init( uint8 task_id )
   osal_start_reload_timer( TestTask_ID, TestTask_MeasureADC, TestTask_MeasureADC_Period );
  
 }
-
+uint16 lastSentData = 0;
 uint16 TestTask_ProcessEvent( uint8 task_id, uint16 events )
 {
   if (Connected) 
   {
     AdcData[dataCount] = HalAdcRead ( HAL_ADC_CHANNEL_1, HAL_ADC_RESOLUTION_12);
-    dataCount++;
-    if (dataCount == DataCountToAVG)
-    {
+    dataCount = (dataCount + 1 )%DataCountToAVG;
+   /* if (dataCount == DataCountToAVG)
+    {*/
       uint32 AdcDataSUM = 0;
       for(uint8 i = 0; i < DataCountToAVG; i++)
         AdcDataSUM += AdcData[i];
 
       AdcDataAVG = AdcDataSUM / DataCountToAVG;
-      customPedalProfile_SetParameter( RAW_DATA_ID, RAW_DATA_LEN, &AdcDataAVG );
-
-      dataCount = 0;
-    }
+      if (lastSentData+25 < AdcDataSUM  || lastSentData-25 > AdcDataSUM)
+      {
+        lastSentData = AdcDataSUM;
+        customPedalProfile_SetParameter( RAW_DATA_ID, RAW_DATA_LEN, &AdcDataAVG );
+      }
+    //}
     
-    if (countWhenMeasureBattery++ >= 100)
+   /* if (countWhenMeasureBattery++ >= 100)
     {
       countWhenMeasureBattery = 0;
       uint16 vbat = (uint16)(HalAdcRead ( HAL_ADC_CHANNEL_VDD, HAL_ADC_RESOLUTION_12)*3);
       customPedalProfile_SetParameter( BATTERY_LV_ID, BATTERY_LV_LEN, &vbat );
-    }
+    }*/
   }
   
   //  BATTERY_LV_ID

@@ -111,6 +111,8 @@ void Tim10PulseFinished() {
 void Tim9PulseFinished(void) {
 	if (HAL_TIM_OC_Stop_IT(&TIM_PWM_ADC_V_DELAY, TIM_PWM_ADC_V_DELAY_CHN) != HAL_OK)
 		Error_Handler();
+
+	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_RESET);
 	switch (MotorControl.pwm_phase) {
 	case 0:
 	case 3:
@@ -133,6 +135,7 @@ void OnPWMTriggeredEXT(void) {
 	if (HAL_GPIO_ReadPin(GPIO_PWM_TRIGGER_GPIO_Port, GPIO_PWM_TRIGGER_Pin) == GPIO_PIN_SET) {
 		if (HAL_TIM_OC_Start_IT(&TIM_PWM_ADC_V_DELAY, TIM_PWM_ADC_V_DELAY_CHN) != HAL_OK)
 			Error_Handler();
+		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_SET);
 	} else {
 		MotorControl.pwmCountThisPhase++;
 		if (!MotorControl.Flags.ClosedLoop && MotorControl.pwmCountThisPhase >= MotorControl.pwmCountToChangePhase) {
@@ -142,12 +145,15 @@ void OnPWMTriggeredEXT(void) {
 	}
 }
 void OnPWM_ADC_Measured(ADC_HandleTypeDef* hadc) {
+
 	uint8_t index = GetADCIndex(hadc->Instance);
 	MotorControl.ADC_V[index] = HAL_ADCEx_InjectedGetValue(hadc, ADC_V_INJ_RANK);
 	MotorControl.ADC_I[index] = HAL_ADCEx_InjectedGetValue(hadc, ADC_I_INJ_RANK);
 	if (I_MAX < MotorControl.ADC_I[index])
 		I_MAX = MotorControl.ADC_I[index];
 	Buffer_AddValue(MotorControl.ADC_V[index], MotorControl.ADC_I[index]);
+
+
 }
 
 void OnVBAT_ADC_Measured(ADC_HandleTypeDef* hadc) {
@@ -210,12 +216,17 @@ static void Integrate() {
 	case FreeWheeling:
 		break;
 	case Regeneration:
-
+		if (MotorControl.pwmCountThisPhase > 400) {
+			ChangePhase();
+			return;
+		}
 		break;
 	default:
 		break;
 	}
 }
+
+int countWhenToSlendIMAX = 0;
 void OnPhaseChanged() {
 	switch (MotorControl.PWM_Switching.ActiveSequence) {
 	case PWMSequencesNotInit:
@@ -263,6 +274,20 @@ void OnPhaseChanged() {
 	case FreeWheeling:
 		break;
 	case Regeneration:
+		ChangePWMDutyCycle(MotorControl.Wanted_DutyCycle, 2);
+
+		if (++countWhenToSlendIMAX > 25)
+		{
+			countWhenToSlendIMAX=0;
+
+			MyMsg_t *msg2 = malloc(sizeof(MyMsg_t));
+			msg2->UUID = CURRENT_ID;
+			*(uint16_t*)msg2->pData = I_MAX;
+			msg2->length = CURRENT_LEN;
+			xQueueSendFromISR(xQueueTX, (void * ) &msg2, (TickType_t ) 0);
+
+			I_MAX = 0;
+		}
 		/*if (MotorControl.Wanted_DutyCycle != MotorControl.DutyCycle)
 		 ChangePWMDutyCycle(MotorControl.Wanted_DutyCycle, 5);*/
 		break;
@@ -273,11 +298,32 @@ void OnPhaseChanged() {
 
 	MotorControl.Integral = 0;
 	MotorControl.PWM_Switching.IsRisingFront = !(MotorControl.pwm_phase % 2);
-	if (MotorControl.PWM_Switching.IsRisingFront)
-		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_SET);
-	else
-		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_RESET);
+
 	MotorControl.pwmCountThisPhase = 0;
+}
+
+void ChangeDelay(uint32_t period)
+{
+	  TIM_OC_InitTypeDef sConfigOC;
+
+	  htim9.Instance = TIM9;
+	  htim9.Init.Prescaler = 6;
+	  htim9.Init.CounterMode = TIM_COUNTERMODE_UP;
+	  htim9.Init.Period = period;
+	  htim9.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+	  if (HAL_TIM_OC_Init(&htim9) != HAL_OK)
+	  {
+	    _Error_Handler(__FILE__, __LINE__);
+	  }
+
+	  sConfigOC.OCMode = TIM_OCMODE_TIMING;
+	  sConfigOC.Pulse = period/2;
+	  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+	  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+	  if (HAL_TIM_OC_ConfigChannel(&htim9, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
+	  {
+	    _Error_Handler(__FILE__, __LINE__);
+	  }
 }
 void ChangePWMDutyCycle(uint8_t newDutyCycle, int8_t maxStep) {
 	if (MotorControl.DutyCycle == newDutyCycle) {
@@ -293,6 +339,7 @@ void ChangePWMDutyCycle(uint8_t newDutyCycle, int8_t maxStep) {
 	else if (diff < 0 && diff < -maxStep)
 		diff = -maxStep;
 
+
 	uint8_t dutyCycleToSet = MotorControl.DutyCycle + diff;
 
 	//uint8_t dutyCycleToSet = newDutyCycle;
@@ -301,6 +348,15 @@ void ChangePWMDutyCycle(uint8_t newDutyCycle, int8_t maxStep) {
 	__HAL_TIM_SET_COMPARE(&PWM_INSTANCE, TIM_CHANNEL_3, dutyCycleToSet * 10);
 
 	MotorControl.DutyCycle = dutyCycleToSet;
+
+
+
+	if(MotorControl.DutyCycle < 20)
+			ChangeDelay(2);
+	else if(MotorControl.DutyCycle < 30)
+			ChangeDelay(30);
+	else if(MotorControl.DutyCycle < 40)
+			ChangeDelay(100);
 
 }
 

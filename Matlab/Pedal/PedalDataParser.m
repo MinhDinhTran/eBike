@@ -14,9 +14,15 @@ for fileNo = 1:size(listing)-2
 end
 
 for fileNo = 1:size(listing)-2
-    C{fileNo}{6} = datenum(C{fileNo}{2});
+    for i = 1:size(C{fileNo}{2})
+    C{fileNo}{2}{i}(9) = '.';
+    C{fileNo}{2}{i}(13) = ' ';
+    end
 end
 
+for fileNo = 1:size(listing)-2
+    C{fileNo}{6} = datenum(C{fileNo}{2});
+end
 
 hold on
 plot (C{1}{6},C{1}{5})

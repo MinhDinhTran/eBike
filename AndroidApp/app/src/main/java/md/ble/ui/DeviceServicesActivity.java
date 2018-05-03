@@ -16,6 +16,7 @@ import android.widget.ToggleButton;
 
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 
 import java.util.ArrayList;
@@ -60,6 +61,8 @@ public class DeviceServicesActivity extends Activity
     List<Entry> entries = new ArrayList<Entry>();
     LineDataSet dataSet;
     LineChart chart_itampa;
+    LineData lineData;
+
     long chartDataIndex = 0;
     int chartDatarefreshCounter = 0;
 
@@ -94,18 +97,20 @@ public class DeviceServicesActivity extends Activity
         button_right_peda = (ToggleButton) findViewById(R.id.toggleButton_ble_right_pedal);
         button_right_peda.setOnClickListener(this);
 
-
-
-
-
-
-
-       /* entries.add(new Entry(0,0));
-        dataSet = new LineDataSet(entries, "Itampa");
         chart_itampa = (LineChart) findViewById(R.id.chart_itampa);
-        chart_itampa.setData( new LineData(dataSet));
-        chart_itampa.invalidate(); //
-        chart_itampa.setVisibleXRangeMaximum(100);*/
+
+
+
+
+
+        entries.add(new Entry(0,0));
+        dataSet = new LineDataSet(entries, "Itampa");
+        lineData = new LineData(dataSet);
+        chart_itampa.setData(lineData);
+
+        chart_itampa.invalidate();
+        chart_itampa.getXAxis().setGranularity(1f);
+
 
         SubscribeBLEServices();
         final PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
@@ -322,18 +327,22 @@ public class DeviceServicesActivity extends Activity
 
                         ProgressBar bar = (ProgressBar) findViewById(R.id.progressBar3);
                         bar.setProgress(value);
-                        //  dataSet.addEntry();
-                       /* entries.add(new Entry(chartDataIndex++, value));
-                        if (chartDataIndex > 500) {
+
+                        dataSet.addEntry(new Entry(chartDataIndex++, value));
+
+                        if (chartDataIndex > 100)
                             dataSet.removeEntry(0);
-                        }
-                        if (++chartDatarefreshCounter > 50){
+                        if (++chartDatarefreshCounter > 5){
                             chartDatarefreshCounter = 0;
+
                             dataSet.notifyDataSetChanged();
+                            lineData.notifyDataChanged();
                             chart_itampa.notifyDataSetChanged();
+
                             chart_itampa.fitScreen();
-                           // chart_itampa.invalidate();
-                        }*/
+                            chart_itampa.invalidate();
+                        }
+
                         textView.refreshDrawableState();
 
                         break;
@@ -399,6 +408,7 @@ public class DeviceServicesActivity extends Activity
                             bar = (ProgressBar) findViewById(R.id.progressBar5);
                             textView = (TextView) findViewById(R.id.textView_rightpedal_value);
                         }
+
                         textView.setText(Integer.toString(value));
                         bar.setProgress(value);
                         textView.refreshDrawableState();

@@ -28,9 +28,9 @@ public class FileLog {
             //BufferedWriter for performance, true to set append to file flag
             BufferedWriter buf = new BufferedWriter(new FileWriter(logFile, true));
             Date currentTime = Calendar.getInstance().getTime();
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
             String currentDateAndTime = sdf.format(currentTime);
-            buf.append(currentDateAndTime + ": ");
+            buf.append(currentDateAndTime + " ");
             buf.append(text);
             buf.newLine();
             buf.close();

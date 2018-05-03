@@ -16,11 +16,11 @@ for fileNo = 3:size(listing)
     % plot (A);
     figure(1)
     clf(1)
-    ylim([1700 2200])
+%     ylim([1700 2200])
     hold on
-%      plot (A(1:len-1),'blue');
-    plot (A(len+1:len*2-1),'red');
+     plot (A(1:len-1),'blue');
+    plot (A(len+1:len*2-1)*(-1)+4096,'red');
     hold off
-    pause(0.1);
+    pause(0.5);
     fclose('all')
 end

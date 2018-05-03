@@ -61,7 +61,36 @@ static void ChangePWMPinType() {
 	GPIO_InitStruct.Pin = PWMN_CH3_Pin;
 	HAL_GPIO_Init(PWMN_CH3_GPIO_Port, &GPIO_InitStruct);
 }
+static void ChangePWMPinType_Complementary(uint32_t Channel, uint8_t SetAsGPIO) {
 
+	uint32_t Pin;
+	GPIO_TypeDef  *GPIOx;
+	switch(Channel)
+	{
+	case TIM_CHANNEL_1:
+		Pin = PWMN_CH1_Pin;
+		GPIOx = PWMN_CH1_GPIO_Port;
+		break;
+	case TIM_CHANNEL_2:
+		Pin = PWMN_CH2_Pin;
+		GPIOx = PWMN_CH2_GPIO_Port;
+		break;
+	case TIM_CHANNEL_3:
+		Pin = PWMN_CH3_Pin;
+		GPIOx = PWMN_CH3_GPIO_Port;
+		break;
+	default:
+		 return;
+	}
+
+	GPIO_InitTypeDef GPIO_InitStruct;
+	GPIO_InitStruct.Pull = GPIO_NOPULL;
+	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_MEDIUM;
+	GPIO_InitStruct.Alternate = GPIO_AF1_TIM1;
+	GPIO_InitStruct.Mode = SetAsGPIO ? GPIO_MODE_AF_PP : GPIO_MODE_OUTPUT_PP;
+	GPIO_InitStruct.Pin = Pin;
+	HAL_GPIO_Init(GPIOx, &GPIO_InitStruct);
+}
 static void Enable_State(PWMActions action, uint32_t Channel) {
 	switch (action) {
 	case OnH:
@@ -89,19 +118,30 @@ static void Enable_State(PWMActions action, uint32_t Channel) {
 
 static void Set_PWM_CHN(PWMStates state, uint32_t Channel) {
 	if (state == On)
+	{
 		HAL_TIM_PWM_Start_IT(&PWM_INSTANCE, Channel);
+		ChangePWMPinType_Complementary(Channel, 1);
+		HAL_TIMEx_PWMN_Start_IT(&PWM_INSTANCE, Channel);
+	}
 	else
+	{
 		HAL_TIM_PWM_Stop_IT(&PWM_INSTANCE, Channel);
+		HAL_TIMEx_PWMN_Stop_IT(&PWM_INSTANCE, Channel);
+	}
 }
 
 static void Set_PWM_CHN1N(PWMStates state, uint32_t Channel) {
 	if (state == On)
+	{
 		HAL_TIMEx_PWMN_Start(&PWM_INSTANCE, Channel);
+	}
 	else
 		HAL_TIMEx_PWMN_Stop(&PWM_INSTANCE, Channel);
 }
 
 static void Set_PWM_CHN1N_GPIO(PWMStates state, uint32_t Channel) {
+
+	ChangePWMPinType_Complementary(Channel, 0);
 	switch (Channel) {
 	case TIM_CHANNEL_1:
 		HAL_GPIO_WritePin(PWMN_CH1_GPIO_Port, PWMN_CH1_Pin,
@@ -191,8 +231,8 @@ void ChangePhase(void) {
 	else if ((*ActiveSequence)[pwm_phase][2] == OffH || (*ActiveSequence)[pwm_phase][2] == OffL)
 		Enable_State((*ActiveSequence)[pwm_phase][2], TIM_CHANNEL_3);
 
-	for(int i = 50; i>0;i--)
-		__NOP();
+	//for(int i = 50; i>0;i--)
+	//	__NOP();
 
 
 	if ((*ActiveSequence)[pwm_phase][0] == OnH || (*ActiveSequence)[pwm_phase][0] == OnL)

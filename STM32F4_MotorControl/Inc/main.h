@@ -78,10 +78,6 @@
 #define ADC_V2_GPIO_Port GPIOC
 #define ADC_I1_Pin GPIO_PIN_3
 #define ADC_I1_GPIO_Port GPIOC
-#define ADC_V3_Pin GPIO_PIN_1
-#define ADC_V3_GPIO_Port GPIOA
-#define ADC_VBAT_Pin GPIO_PIN_4
-#define ADC_VBAT_GPIO_Port GPIOA
 #define ADC_I2_Pin GPIO_PIN_4
 #define ADC_I2_GPIO_Port GPIOC
 #define ADC_I3_Pin GPIO_PIN_5

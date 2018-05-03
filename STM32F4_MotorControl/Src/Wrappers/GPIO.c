@@ -24,6 +24,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 		uint32_t flag = 0;
 		if (HAL_GPIO_ReadPin(GPIOD, GPIO_PIN_1) == GPIO_PIN_SET)
 		{
+			ChangePWMSwitchingSequence(Regeneration);
 			HAL_GPIO_WritePin(GPIOD, GPIO_PIN_13, GPIO_PIN_SET);
 			MotorControl.Flags.OverCurrent = 1;
 			flag = 1;
