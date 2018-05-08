@@ -171,7 +171,13 @@ void TurnAllPWMsOFF(void) {
 	Enable_State(OffL, TIM_CHANNEL_3);
 	MotorControl.PWM_Switching.ForceTurnOffActive = 0;
 }
+void TurnOnRegeneration()
+{
 
+	Enable_State(OnL, TIM_CHANNEL_1);
+	Enable_State(OnL, TIM_CHANNEL_2);
+	Enable_State(OnL, TIM_CHANNEL_3);
+}
 void ChangePWMSwitchingSequence(PWMSequences newSequences) {
 	//if (MotorControl.PWM_Switching.ActiveSequence == newSequences)
 	//	return;
@@ -196,10 +202,7 @@ void ChangePWMSwitchingSequence(PWMSequences newSequences) {
 		//	__HAL_TIM_SET_PRESCALER(&PWM_INSTANCE, 150);
 		MotorControl.PWM_Switching.UsePWMOnPWMN = 1;
 		ChangePWMPinType();
-
-		Enable_State(OnL, TIM_CHANNEL_1);
-		Enable_State(OnL, TIM_CHANNEL_2);
-		Enable_State(OnL, TIM_CHANNEL_3);
+		//TurnOnRegeneration();
 		ActiveSequence = NULL;
 		break;
 	case FreeWheeling:

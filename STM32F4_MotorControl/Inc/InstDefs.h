@@ -12,9 +12,8 @@
 #define ADC_V_INJ_RANK ADC_INJECTED_RANK_1
 #define ADC_I_INJ_RANK ADC_INJECTED_RANK_2
 
-#define ADC_INSTANCE_V1  hadc3
-#define ADC_INSTANCE_V2  hadc2
-#define ADC_INSTANCE_V3  hadc1
+#define ADC_INSTANCE_V  hadc1
+#define ADC_INSTANCE_I  hadc2
 #define ADC_INSTANCE_VBAT  hadc1
 
 #define PWM_INSTANCE  htim1

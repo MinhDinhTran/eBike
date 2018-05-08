@@ -70,6 +70,7 @@ void TurnAllPWMsOFF(void);
 void ChangePhase(void);
 void ChangePWMSwitchingSequence(PWMSequences newSequences );
 void ChangePWMDutyCycle(uint8_t newDutyCycle, int8_t maxStep);
+void TurnOnRegeneration();
 
 
 #define POLIU_SKAICIUS 24

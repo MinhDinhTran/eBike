@@ -72,16 +72,8 @@
 #define PH1_OSC_OUT_GPIO_Port GPIOH
 #define OTG_FS_PowerSwitchOn_Pin GPIO_PIN_0
 #define OTG_FS_PowerSwitchOn_GPIO_Port GPIOC
-#define ADC_V1_Pin GPIO_PIN_1
-#define ADC_V1_GPIO_Port GPIOC
-#define ADC_V2_Pin GPIO_PIN_2
-#define ADC_V2_GPIO_Port GPIOC
-#define ADC_I1_Pin GPIO_PIN_3
-#define ADC_I1_GPIO_Port GPIOC
 #define ADC_I2_Pin GPIO_PIN_4
 #define ADC_I2_GPIO_Port GPIOC
-#define ADC_I3_Pin GPIO_PIN_5
-#define ADC_I3_GPIO_Port GPIOC
 #define PWMN_CH2_Pin GPIO_PIN_0
 #define PWMN_CH2_GPIO_Port GPIOB
 #define PWMN_CH3_Pin GPIO_PIN_1

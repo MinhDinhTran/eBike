@@ -44,11 +44,11 @@ uint16 TestTask_ProcessEvent( uint8 task_id, uint16 events )
 {
   if (Connected) 
   {
-    AdcData[dataCount] = HalAdcRead ( HAL_ADC_CHANNEL_1, HAL_ADC_RESOLUTION_12);
-    dataCount = (dataCount + 1 )%DataCountToAVG;
-   /* if (dataCount == DataCountToAVG)
-    {*/
-      uint32 AdcDataSUM = 0;
+  //  AdcData[dataCount] = HalAdcRead ( HAL_ADC_CHANNEL_1, HAL_ADC_RESOLUTION_12);
+  //  dataCount = (dataCount + 1 )%DataCountToAVG;
+  // /* if (dataCount == DataCountToAVG)
+  //  {*/
+  /*    uint32 AdcDataSUM = 0;
       for(uint8 i = 0; i < DataCountToAVG; i++)
         AdcDataSUM += AdcData[i];
 
@@ -58,6 +58,15 @@ uint16 TestTask_ProcessEvent( uint8 task_id, uint16 events )
         lastSentData = AdcDataSUM;
         customPedalProfile_SetParameter( RAW_DATA_ID, RAW_DATA_LEN, &AdcDataAVG );
       }
+
+        */
+        
+        
+    AdcData[0] = HalAdcRead ( HAL_ADC_CHANNEL_1, HAL_ADC_RESOLUTION_12);
+        customPedalProfile_SetParameter( RAW_DATA_ID, RAW_DATA_LEN, & AdcData[0] );
+        
+        
+        
     //}
     
    /* if (countWhenMeasureBattery++ >= 100)
