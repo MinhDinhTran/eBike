@@ -173,7 +173,6 @@ void TurnAllPWMsOFF(void) {
 }
 void TurnOnRegeneration()
 {
-
 	Enable_State(OnL, TIM_CHANNEL_1);
 	Enable_State(OnL, TIM_CHANNEL_2);
 	Enable_State(OnL, TIM_CHANNEL_3);
@@ -193,6 +192,8 @@ void ChangePWMSwitchingSequence(PWMSequences newSequences) {
 	switch (newSequences) {
 	case ForwardCommutation:
 		//	__HAL_TIM_SET_PRESCALER(&PWM_INSTANCE, 6);
+
+		__HAL_TIM_SET_COMPARE(&PWM_INSTANCE, TIM_CHANNEL_4, 500);
 		MotorControl.PWM_Switching.UsePWMOnPWMN = 0;
 		ChangePWMPinType();
 		ActiveSequence = &ForwardCommutationSequence;

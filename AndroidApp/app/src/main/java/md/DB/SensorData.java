@@ -23,9 +23,13 @@ public class SensorData{
     {
         _value = Integer.toString(value);
     }
+    public void setValue(float value)
+    {
+        _value = Float.toString(value);
+    }
     @Override
     public String toString() {
-        return "\t" + _sensorID.substring(4,8) + "\t" + _characteristicID.substring(4,8) + "\t" + _value;
+        return  "\t" + _value;
     }
 
 

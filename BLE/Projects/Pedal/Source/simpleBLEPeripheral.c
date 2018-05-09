@@ -176,7 +176,7 @@ static uint8 scanRspData[] =
   'a',
   'l',
   ' ',
-  'L',
+  'R',
 
   // connection interval range
   5,   // length of this data

@@ -207,8 +207,17 @@ public class BleManagerService extends com.chimeraiot.android.ble.BleService
         final InfoService<?> sensor = (InfoService<?>) getBleManager().getDeviceDefCollection()
                 .get(name, address).getSensor(serviceUuid);
 
-        if (sensor instanceof MyCustomService)
-            sensorData.setValue((((MyCustomService) sensor).getIntValue()));
+        if (sensor instanceof MyCustomService) {
+            if (characteristicUuid.equals(MyCustomService.UUID_BIKE_BATTERY_LEVEL_ID))
+                sensorData.setValue((((MyCustomService) sensor).getBatValue()));
+            else if (characteristicUuid.equals(MyCustomService.UUID_BIKE_SPEED_ID))
+                sensorData.setValue((((MyCustomService) sensor).getRPMValue()));
+            else if (characteristicUuid.equals(MyCustomService.UUID_CURRENT_ID))
+                sensorData.setValue((((MyCustomService) sensor).getCurrentValue()));
+            else if (characteristicUuid.equals(MyCustomService.UUID_PWM_DUTY_CYCLE_ID))
+                sensorData.setValue((((MyCustomService) sensor).getDutyCycleValue()));
+
+        }
         else if (sensor instanceof HeartRateService)
             sensorData.setValue(((HeartRateService) sensor).getMeasureValue());
         else if (sensor instanceof MyPedalService)
@@ -216,7 +225,7 @@ public class BleManagerService extends com.chimeraiot.android.ble.BleService
 
         try {
             if (!serviceUuid.equals(MyPedalService.UUID_BATTERY_LV_ID))
-                FileLog.Write("log_"+name+serviceUuid.substring(4,8), sensorData.toString());
+                FileLog.Write("log_ "+name + characteristicUuid.substring(4,8), sensorData.toString());
             //App.sensorDataController.addItemInTable(sensorData);
         } catch (Exception e) {
             Log.d(TAG, "onCharacteristicChanged: exception " + e.getMessage());

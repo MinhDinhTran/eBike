@@ -241,6 +241,9 @@ public class DeviceServicesActivity extends Activity
                 bundle.putString(BLEConst.DATA, Integer.toString(button_Start.isChecked() ? 1 : 0));
                 BleManagerService.getInstance().update((MyCustomService) sensor, MyCustomService.UUID_MODE_ID, bundle);
 
+
+                final SeekBar seekBar_pwm1 = (SeekBar) findViewById(R.id.seekBar_pwm);
+                seekBar_pwm1.setProgress(20);
                 break;
           /*  case R.id.button_MeasureHeartRate:
 
@@ -323,7 +326,8 @@ public class DeviceServicesActivity extends Activity
                         break;
                     case MyCustomService.UUID_CURRENT_ID:
                         textView = (TextView) findViewById(R.id.textView_srove_variable);
-                        textView.setText( String.valueOf(value)); //* 0.0217285 - 22.22// (3.2 - 1.6)/(0.001 * 36) = 44.44 / 4096
+
+                        textView.setText( String.format ("%.1f", -44.4+value*0.0217)); //* 0.0217285 - 22.22// (3.2 - 1.6)/(0.001 * 36) = 44.44 / 4096
 
                         ProgressBar bar = (ProgressBar) findViewById(R.id.progressBar3);
                         bar.setProgress(value);
@@ -354,9 +358,9 @@ public class DeviceServicesActivity extends Activity
                             button_Start.setBackgroundColor(getResources().getColor(android.R.color.holo_red_light));
                             if (button_Start.isChecked())
                                 button_Start.toggle();
-                            final SeekBar seekBar_pwm1 = (SeekBar) findViewById(R.id.seekBar_pwm);
-                            seekBar_pwm1.setProgress(20);
                         }
+                        final SeekBar seekBar_pwm1 = (SeekBar) findViewById(R.id.seekBar_pwm);
+                        seekBar_pwm1.setProgress(20);
                         break;
                     case HeartRateService.UUID_HEARTRATE_MEASURE_ID:
                         textView = (TextView) findViewById(R.id.textView_heartrate_value);
@@ -383,6 +387,10 @@ public class DeviceServicesActivity extends Activity
                     case MyCustomService.UUID_BIKE_SPEED_ID:
                         textView = (TextView) findViewById(R.id.textView_rpm_variable);
                         textView.setText(String.format ("%.1f", value));
+                        textView.refreshDrawableState();
+
+                        textView = (TextView) findViewById(R.id.textView_speed_variable);
+                        textView.setText(String.format ("%.1f", value * 72 * 0.001885));
                         textView.refreshDrawableState();
                         break;
                 }

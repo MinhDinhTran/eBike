@@ -24,7 +24,7 @@ MotorControl_t MotorControl = {
 		.ADC_V = { 0, 0, 0 },
 		.DutyCycle = 20,
 		.Wanted_DutyCycle = 20,
-		.V_Treshold = 30,
+		.V_Treshold = 0,
 		.Integral = 0,
 		.Limits = { .Integral = 3000 // su ~50% duty cycle testuota
 		},
@@ -32,9 +32,10 @@ MotorControl_t MotorControl = {
 		.PWM_Switching = { .IsRisingFront = 1, .ActiveSequence = PWMSequencesNotInit, .UseComplementaryPWM = 0, .UsePWMOnPWMN = 0 },
 		.pwmCountToChangePhase = 25, //355;
 		.PID = { .Kp = 0.35, .Ki = -0.01, .Kd = -0.05 } }; //{ .Kp = 0.3, .Ki = -0.07, .Kd = -0.1 } }; //
-static uint16_t I_MAX = 0;
+static uint16_t I_AVG = 0;
 static uint32_t GetActualBEMF();
 static void Integrate();
+static void CalcRPM();
 
 extern void ChangePhase(void);
 static void MotorControlThread(void const * argument);
@@ -60,11 +61,15 @@ void MotorControlThread(void const * argument) // MotorControlThread function
 	PWMSequences PWMSequence = ForwardCommutation;
 
 	for (;;) {
-		if (MotorControl.PWM_Switching.ActiveSequence == Regeneration && PWMSequence != MotorControl.PWM_Switching.ActiveSequence) {
-			PWMSequence = Regeneration;
-			osDelay(500);
-			if (MotorControl.PWM_Switching.ActiveSequence == Regeneration)
-				TurnOnRegeneration();
+		if (PWMSequence != MotorControl.PWM_Switching.ActiveSequence) {
+			PWMSequence = MotorControl.PWM_Switching.ActiveSequence;
+			if (MotorControl.PWM_Switching.ActiveSequence == Regeneration) {
+				osDelay(500);
+				if (MotorControl.PWM_Switching.ActiveSequence == Regeneration)
+					TurnOnRegeneration();
+				else
+					PWMSequence = MotorControl.PWM_Switching.ActiveSequence;
+			}
 		}
 
 		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
@@ -109,7 +114,22 @@ void MotorControlThread(void const * argument) // MotorControlThread function
 
 	}
 }
+uint32_t CounterWhenSendIAVG = 0;
+uint32_t I_SUM = 0;
 
+void SendIAVG() {
+	MyMsg_t *msg = malloc(sizeof(MyMsg_t));
+	msg->UUID = CURRENT_ID;
+	*(uint16_t*) msg->pData = I_AVG;
+	msg->length = CURRENT_LEN;
+	xQueueSendFromISR(xQueueTX, (void * ) &msg, (TickType_t ) 0);
+
+	I_AVG = 0;
+	/*if (MotorControl.PWM_Switching.ActiveSequence == ForwardCommutation)
+	 I_AVG = 0;
+	 else if (MotorControl.PWM_Switching.ActiveSequence == Regeneration)
+	 I_AVG = 0xFFFF;*/
+}
 void Tim10PulseFinished() {
 	if (HAL_TIM_OC_Stop_IT(&TIM_MC_WATCHDOG, TIM_MC_WATCHDOG_CHN) != HAL_OK)
 		Error_Handler();
@@ -126,19 +146,37 @@ void Tim9PulseFinished(void) {
 
 void OnPWMTriggeredEXT(void) {
 	if (HAL_GPIO_ReadPin(GPIO_PWM_TRIGGER_GPIO_Port, GPIO_PWM_TRIGGER_Pin) == GPIO_PIN_SET) {
-		if (HAL_TIM_OC_Start_IT(&TIM_PWM_ADC_V_DELAY, TIM_PWM_ADC_V_DELAY_CHN) != HAL_OK)
-			Error_Handler();
-		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_SET);
+		if (MotorControl.PWM_Switching.ActiveSequence == ForwardCommutation) {
+			//Tim9PulseFinished();
+			if (HAL_TIM_OC_Start_IT(&TIM_PWM_ADC_V_DELAY, TIM_PWM_ADC_V_DELAY_CHN) != HAL_OK)
+				Error_Handler();
+		}
 	} else {
+		if (MotorControl.PWM_Switching.ActiveSequence == Regeneration) {
+			Tim9PulseFinished();
+		}
+
 		MotorControl.pwmCountThisPhase++;
 		if (!MotorControl.Flags.ClosedLoop && MotorControl.pwmCountThisPhase >= MotorControl.pwmCountToChangePhase) {
 			ChangePhase();
 		}
 		Integrate();
+
+		if (++CounterWhenSendIAVG >= 240) {
+			CounterWhenSendIAVG = 0;
+			I_AVG = I_SUM / 240;
+			SendIAVG();
+			I_SUM = MotorControl.ADC_I[0];
+		} else {
+			I_SUM += MotorControl.ADC_I[0];
+		}
 	}
 }
+
+uint8_t OnTheTOP = 0;
 void OnPWM_ADC_Measured(ADC_HandleTypeDef* hadc) {
 
+	//uint16_t current = 0;
 	if (hadc->Instance == ADC_INSTANCE_V.Instance) {
 		MotorControl.ADC_V[0] = HAL_ADCEx_InjectedGetValue(hadc, ADC_INJECTED_RANK_1);
 		MotorControl.ADC_V[1] = HAL_ADCEx_InjectedGetValue(hadc, ADC_INJECTED_RANK_2);
@@ -149,38 +187,63 @@ void OnPWM_ADC_Measured(ADC_HandleTypeDef* hadc) {
 		MotorControl.ADC_I[1] = HAL_ADCEx_InjectedGetValue(hadc, ADC_INJECTED_RANK_2);
 		MotorControl.ADC_I[2] = HAL_ADCEx_InjectedGetValue(hadc, ADC_INJECTED_RANK_3);
 
-		switch (MotorControl.pwm_phase) {
-		case 0: //1
-				//HAL_DAC_SetValue(&hdac, DAC_CHANNEL_2, DAC_ALIGN_12B_R, MotorControl.ADC_I[1]);
-			Buffer_AddValue(MotorControl.ADC_V[1], MotorControl.ADC_I[1]);
-			break;
-		case 1:			//0
-						//HAL_DAC_SetValue(&hdac, DAC_CHANNEL_2, DAC_ALIGN_12B_R, MotorControl.ADC_I[1]);
-			Buffer_AddValue(MotorControl.ADC_V[0], MotorControl.ADC_I[1]);
-			break;
-		case 2:			//2
-						//HAL_DAC_SetValue(&hdac, DAC_CHANNEL_2, DAC_ALIGN_12B_R, MotorControl.ADC_I[2]);
-			Buffer_AddValue(MotorControl.ADC_V[2], MotorControl.ADC_I[2]);
-			break;
-		case 3:			//1
-						//HAL_DAC_SetValue(&hdac, DAC_CHANNEL_2, DAC_ALIGN_12B_R, MotorControl.ADC_I[2]);
-			Buffer_AddValue(MotorControl.ADC_V[1], MotorControl.ADC_I[2]);
-			break;
-		case 4:			//0
-						//HAL_DAC_SetValue(&hdac, DAC_CHANNEL_2, DAC_ALIGN_12B_R, MotorControl.ADC_I[0]);
-			Buffer_AddValue(MotorControl.ADC_V[0], 0);
-			break;
-		case 5:			//2
-						//HAL_DAC_SetValue(&hdac, DAC_CHANNEL_2, DAC_ALIGN_12B_R, MotorControl.ADC_I[0]);
-			Buffer_AddValue(MotorControl.ADC_V[2], 0);
-			break;
-		default:
-			break;
-		}
-	}
+		if (MotorControl.PWM_Switching.ActiveSequence == ForwardCommutation) {
+			/*switch (MotorControl.pwm_phase) {
+			 case 0: //1
+			 //HAL_DAC_SetValue(&hdac, DAC_CHANNEL_2, DAC_ALIGN_12B_R, MotorControl.ADC_I[1]);
+			 //Buffer_AddValue(MotorControl.ADC_V[1], MotorControl.ADC_I[1]);
+			 current = MotorControl.ADC_I[1];
+			 break;
+			 case 1:			//0
+			 //HAL_DAC_SetValue(&hdac, DAC_CHANNEL_2, DAC_ALIGN_12B_R, MotorControl.ADC_I[1]);
+			 //Buffer_AddValue(MotorControl.ADC_V[0], MotorControl.ADC_I[1]);
+			 current = MotorControl.ADC_I[1];
+			 break;
+			 case 2:			//2
+			 //HAL_DAC_SetValue(&hdac, DAC_CHANNEL_2, DAC_ALIGN_12B_R, MotorControl.ADC_I[2]);
+			 //Buffer_AddValue(MotorControl.ADC_V[2], MotorControl.ADC_I[2]);
+			 current = MotorControl.ADC_I[2];
+			 break;
+			 case 3:			//1
+			 //HAL_DAC_SetValue(&hdac, DAC_CHANNEL_2, DAC_ALIGN_12B_R, MotorControl.ADC_I[2]);
+			 //Buffer_AddValue(MotorControl.ADC_V[1], MotorControl.ADC_I[2]);
+			 current = MotorControl.ADC_I[2];
+			 break;
+			 case 4:			//0
+			 //HAL_DAC_SetValue(&hdac, DAC_CHANNEL_2, DAC_ALIGN_12B_R, MotorControl.ADC_I[0]);
+			 ///Buffer_AddValue(MotorControl.ADC_V[0], 0);
+			 current = 0;
+			 break;
+			 case 5:			//2
+			 //HAL_DAC_SetValue(&hdac, DAC_CHANNEL_2, DAC_ALIGN_12B_R, MotorControl.ADC_I[0]);
+			 //Buffer_AddValue(MotorControl.ADC_V[2], 0);
+			 current = 0;
+			 break;
+			 default:
+			 break;
+			 }*/
+			/*current = MotorControl.ADC_I[0];
+			 if (I_MAX < current)
+			 I_MAX = current;*/
+		} else if (MotorControl.PWM_Switching.ActiveSequence == Regeneration) {
+			//current = MotorControl.ADC_I[2] > MotorControl.ADC_I[1] ? MotorControl.ADC_I[1] : MotorControl.ADC_I[2];
 
-	/*if (I_MAX < MotorControl.ADC_I[index])
-	 I_MAX = MotorControl.ADC_I[index];*/
+			/*current = MotorControl.ADC_I[0];
+			 if (I_MAX > current)
+			 I_AVG = current;*/
+
+			if (!OnTheTOP && MotorControl.ADC_V[0] > MotorControl.ADC_VBAT*0.75) {
+				HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_15);
+				OnTheTOP = 1;
+				CalcRPM();
+			} else if (OnTheTOP && MotorControl.ADC_V[0] < MotorControl.ADC_VBAT*0.5) {
+				OnTheTOP = 0;
+			}
+		}
+		//Buffer_AddValue(MotorControl.ADC_VBAT, MotorControl.ADC_I[0]);
+		//Buffer_AddValue(MotorControl.ADC_V[0], MotorControl.ADC_V[1]);
+
+	}
 
 }
 
@@ -221,14 +284,17 @@ static void Integrate() {
 	case ForwardCommutation:
 		midPoint = (uint16_t) (MotorControl.ADC_VBAT / 2);
 		PWM_Lv = GetActualBEMF();
-		if (PWM_Lv < 40)
-			return;
+		//HAL_DAC_SetValue(&hdac, DAC_CHANNEL_2, DAC_ALIGN_12B_R, MotorControl.pwmCountThisPhase * 10);
+
+		/*if (PWM_Lv < 40)
+			return;*/
 		if (midPoint < 200)
 			return;
 		if (MotorControl.pwmCountThisPhase > 400) {
 			ChangePhase();
 			return;
 		}
+
 		if (MotorControl.PWM_Switching.IsRisingFront && PWM_Lv > midPoint) {
 			MotorControl.Integral += (uint64_t) (PWM_Lv - midPoint);
 		} else if (!MotorControl.PWM_Switching.IsRisingFront && PWM_Lv < midPoint) {
@@ -244,7 +310,7 @@ static void Integrate() {
 	case FreeWheeling:
 		break;
 	case Regeneration:
-		if (MotorControl.pwmCountThisPhase > 400) {
+		if (MotorControl.pwmCountThisPhase > 240) {
 			ChangePhase();
 			return;
 		}
@@ -253,8 +319,19 @@ static void Integrate() {
 		break;
 	}
 }
+static void CalcRPM()
+{
+	if (HAL_TIM_OC_Stop_IT(&TIM_MC_WATCHDOG, TIM_MC_WATCHDOG_CHN) != HAL_OK)
+		Error_Handler();
+	MotorControl.RPM = (float) 2500000 / TIM_MC_WATCHDOG.Instance->CNT; // (168MHz/168) / x * 60 / 24;
 
-int countWhenToSlendIMAX = 0;
+	htim10.Instance->CNT = 0;
+	if (HAL_TIM_OC_Start_IT(&TIM_MC_WATCHDOG, TIM_MC_WATCHDOG_CHN) != HAL_OK)
+		Error_Handler();
+	if (MotorControl.RPM > 1000 || MotorControl.RPM < 0)
+		MotorControl.RPM = 0;
+}
+int CountwhenCreatenewFile = 0;
 void OnPhaseChanged() {
 	switch (MotorControl.PWM_Switching.ActiveSequence) {
 	case PWMSequencesNotInit:
@@ -263,24 +340,10 @@ void OnPhaseChanged() {
 		ChangePWMDutyCycle(MotorControl.Wanted_DutyCycle, 2);
 		if (MotorControl.pwm_phase == 0) {
 			Buffer_Init();
-			if (HAL_TIM_OC_Stop_IT(&TIM_MC_WATCHDOG, TIM_MC_WATCHDOG_CHN) != HAL_OK)
-				Error_Handler();
-			MotorControl.RPM = (float) 2500000 / TIM_MC_WATCHDOG.Instance->CNT; // (168MHz/168) / x * 60 / 24;
 
-			htim10.Instance->CNT = 0;
-			if (HAL_TIM_OC_Start_IT(&TIM_MC_WATCHDOG, TIM_MC_WATCHDOG_CHN) != HAL_OK)
-				Error_Handler();
-			if (MotorControl.RPM > 1000 || MotorControl.RPM < 0)
-				MotorControl.RPM = 0;
-
+			CalcRPM();
 			MotorControl.Limits.Integral = MotorControl.V_Treshold * 270 + 3000;
-			MyMsg_t *msg = malloc(sizeof(MyMsg_t));
-			msg->UUID = CURRENT_ID;
-			*(uint16_t*) msg->pData = I_MAX;
-			msg->length = CURRENT_LEN;
-			xQueueSendFromISR(xQueueTX, (void * ) &msg, (TickType_t ) 0);
 
-			I_MAX = 0;
 		}
 
 		/*if (!MotorControl.Flags.ClosedLoop) {
@@ -304,16 +367,9 @@ void OnPhaseChanged() {
 	case Regeneration:
 		ChangePWMDutyCycle(MotorControl.Wanted_DutyCycle, 2);
 
-		if (++countWhenToSlendIMAX > 25) {
-			countWhenToSlendIMAX = 0;
-
-			MyMsg_t *msg2 = malloc(sizeof(MyMsg_t));
-			msg2->UUID = CURRENT_ID;
-			*(uint16_t*) msg2->pData = I_MAX;
-			msg2->length = CURRENT_LEN;
-			xQueueSendFromISR(xQueueTX, (void * ) &msg2, (TickType_t ) 0);
-
-			I_MAX = 0;
+		if (++CountwhenCreatenewFile > 100) {
+			CountwhenCreatenewFile = 0;
+			Buffer_Init();
 		}
 		/*if (MotorControl.Wanted_DutyCycle != MotorControl.DutyCycle)
 		 ChangePWMDutyCycle(MotorControl.Wanted_DutyCycle, 5);*/
@@ -355,8 +411,8 @@ void ChangePWMDutyCycle(uint8_t newDutyCycle, int8_t maxStep) {
 	}
 	if (newDutyCycle < 5)
 		newDutyCycle = 5;
-	if (newDutyCycle > 95)
-		newDutyCycle = 95;
+	if (newDutyCycle > 100)
+		newDutyCycle = 100;
 	int8_t diff = newDutyCycle - MotorControl.DutyCycle;
 	if (diff > 0 && diff > maxStep)
 		diff = maxStep;
@@ -366,9 +422,14 @@ void ChangePWMDutyCycle(uint8_t newDutyCycle, int8_t maxStep) {
 	uint8_t dutyCycleToSet = MotorControl.DutyCycle + diff;
 
 	//uint8_t dutyCycleToSet = newDutyCycle;
+
 	__HAL_TIM_SET_COMPARE(&PWM_INSTANCE, TIM_CHANNEL_1, dutyCycleToSet * 10);
 	__HAL_TIM_SET_COMPARE(&PWM_INSTANCE, TIM_CHANNEL_2, dutyCycleToSet * 10);
 	__HAL_TIM_SET_COMPARE(&PWM_INSTANCE, TIM_CHANNEL_3, dutyCycleToSet * 10);
+
+	if (MotorControl.PWM_Switching.ActiveSequence == Regeneration) {
+		__HAL_TIM_SET_COMPARE(&PWM_INSTANCE, TIM_CHANNEL_4, (dutyCycleToSet-5) * 10);
+	}
 
 	MotorControl.DutyCycle = dutyCycleToSet;
 

@@ -97,6 +97,9 @@ public class MainActivity extends AppCompatActivity {
         //BleSensorController a  = new BleSensorController(this);
         _sensorDataController = new SensorDataController(this, null);
         App.sensorDataController = _sensorDataController;
+
+        startActivity(new Intent(MainActivity.this, DeviceServicesActivity.class));
+        drawer.closeDrawers();
     }
 
     private void loadNavHeader() {

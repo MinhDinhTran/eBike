@@ -10,6 +10,8 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.HashMap;
 
+import Loging.FileLog;
+
 
 /** BLE device info services. */
 public class MyCustomService<T> extends InfoService<T> {
@@ -47,12 +49,27 @@ public class MyCustomService<T> extends InfoService<T> {
         CHARACTERISTIC_MAP.put(UUID_BIKE_FLAGS_ID, "Bike flags");
     }
 
-    private int value;
+    private int batValue;
 
-    public int getIntValue() {
-        return value;
+    public int getBatValue() {
+        return batValue;
+    }
+    private int currentValue;
+
+    public int getCurrentValue() {
+        return currentValue;
     }
 
+    private int dutyCycleValue;
+
+    public int getDutyCycleValue() {
+        return dutyCycleValue;
+    }
+
+    private float rpmValue;
+    public float getRPMValue() {
+        return rpmValue;
+    }
     private MyCustomServiceListener _listener = null;
 
     public void setServiceListener(MyCustomServiceListener listener) {
@@ -92,7 +109,7 @@ public class MyCustomService<T> extends InfoService<T> {
                     .array();
         } catch (Exception ex) {
         }
-
+        FileLog.Write("log_CustomService"+ uuid.substring(4,8),  "\t"+ data.get(BLEConst.DATA).toString());
         switch (uuid) {
             case UUID_PWM_DUTY_CYCLE_ID:
                 return new BleGattExecutor.ServiceAction[]{
@@ -118,32 +135,36 @@ public class MyCustomService<T> extends InfoService<T> {
         float floatValue = 0;
         switch (c.getUuid().toString()) {
             case UUID_BIKE_BATTERY_LEVEL_ID:
-                intValue = c.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, 0);
-                if (intValue > 4096) intValue = 0;
+                batValue = c.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, 0);
+                if (batValue > 4096) batValue = 0;
+                intValue = batValue;
                 break;
             case UUID_CURRENT_ID:
-                intValue = c.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, 0);
-                if (intValue > 4096) intValue = 0;
+                currentValue = c.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, 0);
+                if (currentValue > 4096) currentValue = 0;
+                intValue = currentValue;
                 break;
             case UUID_BIKE_SPEED_ID:
                 byte bytes[] = c.getValue();
-                floatValue = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN).getFloat();
+                rpmValue = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN).getFloat();
                 //floatValue = c.getFloatValue(BluetoothGattCharacteristic.FORMAT_FLOAT, 0);
-                if (floatValue > 4096) floatValue = 0;
-                if (floatValue < 1) floatValue = 1;
+                if (rpmValue > 4096) rpmValue = 0;
+                if (rpmValue < 1) rpmValue = 0;
+                floatValue = rpmValue;
                 break;
             case UUID_PWM_DUTY_CYCLE_ID:
-                intValue = c.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, 0);
+                dutyCycleValue = c.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, 0);
+                intValue = dutyCycleValue;
                 break;
             case UUID_BIKE_FLAGS_ID:
                 intValue = c.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT32, 0);
                 read(UUID_PWM_DUTY_CYCLE_ID);
                 break;
         }
-        value = intValue;
+
         if (_listener != null) {
             if (!c.getUuid().toString().equals( UUID_BIKE_SPEED_ID))
-                _listener.OnCharacteristicChanged(c.getUuid().toString(), value);
+                _listener.OnCharacteristicChanged(c.getUuid().toString(), intValue);
             else
                 _listener.OnCharacteristicChanged(c.getUuid().toString(), floatValue);
         }

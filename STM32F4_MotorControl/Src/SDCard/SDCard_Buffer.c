@@ -20,8 +20,8 @@ uint16_t Buffer_CanRead() {
 }
 
 char data[25] = { 0 };
-uint16_t u_data[8000];
-uint16_t i_data[8000];
+uint16_t u_data[500];
+uint16_t i_data[500];
 
 void Buffer_Init() {
 	if (Buffer_State & BUFFER_READING_DATA)
@@ -30,7 +30,7 @@ void Buffer_Init() {
 		Buffer_State |= BUFFER_CAN_READ;
 	else {
 
-		if (DataLimiter > 7990)
+		if (DataLimiter > 450)
 			return;
 		RTC_TimeTypeDef RTC_TimeStructure;
 		RTC_DateTypeDef RTC_DateStructure;
@@ -39,10 +39,10 @@ void Buffer_Init() {
 		sprintf(data, "%04d-%02d-%02d %02d:%02d:%02d", 2000 + RTC_DateStructure.Year, RTC_DateStructure.Month, RTC_DateStructure.Date, RTC_TimeStructure.Hours, RTC_TimeStructure.Minutes, RTC_TimeStructure.Seconds);
 
 		/*root = cJSON_CreateObject();
-		cJSON_AddItemToObject(root, "Data", cJSON_CreateString(data));
-		cJSON_AddItemToObject(root, "Itampa", root_Itampa = cJSON_CreateArray());
-		cJSON_AddItemToObject(root, "Srove", root_Srove = cJSON_CreateArray());
-*/
+		 cJSON_AddItemToObject(root, "Data", cJSON_CreateString(data));
+		 cJSON_AddItemToObject(root, "Itampa", root_Itampa = cJSON_CreateArray());
+		 cJSON_AddItemToObject(root, "Srove", root_Srove = cJSON_CreateArray());
+		 */
 		Buffer_State |= BUFFER_IS_INIT;
 	}
 
@@ -56,6 +56,12 @@ char* Buffer_GetString() {
 
 	return cJSON_Print(root);
 }
+
+#define HowMuchDataToAVG 240
+uint64_t u_value_AVG = 0;
+uint64_t i_value_AVG = 0;
+uint64_t avg_Index = 0;
+
 void Buffer_AddValue(uint16_t u_value, uint16_t i_value) {
 	if (Buffer_State & BUFFER_READING_DATA)
 		return;
@@ -63,13 +69,21 @@ void Buffer_AddValue(uint16_t u_value, uint16_t i_value) {
 		return;
 	//if (root == NULL || root_Itampa == NULL || root_Srove == NULL)
 	//	return;
-	if (DataLimiter > 7990)
-		return;
-	u_data[DataLimiter] = u_value;
-	i_data[DataLimiter] = i_value;
-	//cJSON_AddItemToArray(root_Itampa, cJSON_CreateNumber(u_value));
-	//cJSON_AddItemToArray(root_Srove, cJSON_CreateNumber(i_value));
-	DataLimiter++;
+	u_value_AVG += u_value;
+	i_value_AVG += i_value;
+
+	avg_Index++;
+	if (avg_Index >= HowMuchDataToAVG) {
+		avg_Index = 0;
+		if (DataLimiter > 450)
+			return;
+
+		u_data[DataLimiter] = u_value_AVG/HowMuchDataToAVG;//u_value;
+		i_data[DataLimiter] = u_value_AVG/HowMuchDataToAVG;//i_value;
+		//cJSON_AddItemToArray(root_Itampa, cJSON_CreateNumber(u_value));
+		//cJSON_AddItemToArray(root_Srove, cJSON_CreateNumber(i_value));
+		DataLimiter++;
+	}
 }
 void Buffer_OnReadFinish() {
 	//cJSON_Delete(root);
