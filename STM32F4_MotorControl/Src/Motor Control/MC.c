@@ -24,9 +24,9 @@ MotorControl_t MotorControl = {
 		.ADC_V = { 0, 0, 0 },
 		.DutyCycle = 20,
 		.Wanted_DutyCycle = 20,
-		.V_Treshold = 0,
+		.V_Treshold = 63,
 		.Integral = 0,
-		.Limits = { .Integral = 3000 // su ~50% duty cycle testuota
+		.Limits = { .Integral = 20000 // su ~50% duty cycle testuota
 		},
 		.Flags = { .ClosedLoop = 1 },
 		.PWM_Switching = { .IsRisingFront = 1, .ActiveSequence = PWMSequencesNotInit, .UseComplementaryPWM = 0, .UsePWMOnPWMN = 0 },
@@ -41,6 +41,11 @@ extern void ChangePhase(void);
 static void MotorControlThread(void const * argument);
 
 static uint8_t processUserBtn = 0;
+uint32_t CounterWhenSendIAVG = 0;
+uint64_t I_SUM = 0;
+uint64_t V_SUM = 0;
+uint64_t V_BAT = 0;
+uint8_t IsOnTheTOP = 0; // :D
 
 void Start_MotorControlThread(void) {
 
@@ -114,8 +119,6 @@ void MotorControlThread(void const * argument) // MotorControlThread function
 
 	}
 }
-uint32_t CounterWhenSendIAVG = 0;
-uint32_t I_SUM = 0;
 
 void SendIAVG() {
 	MyMsg_t *msg = malloc(sizeof(MyMsg_t));
@@ -130,6 +133,13 @@ void SendIAVG() {
 	 else if (MotorControl.PWM_Switching.ActiveSequence == Regeneration)
 	 I_AVG = 0xFFFF;*/
 }
+void SendEnergy() {
+	MyMsg_t *msg = malloc(sizeof(MyMsg_t));
+	msg->UUID = ENERGY_ID;
+	*(float*) msg->pData = MotorControl.Energy;
+	msg->length = ENERGY_LEN;
+	xQueueSendFromISR(xQueueTX, (void * ) &msg, (TickType_t ) 0);
+}
 void Tim10PulseFinished() {
 	if (HAL_TIM_OC_Stop_IT(&TIM_MC_WATCHDOG, TIM_MC_WATCHDOG_CHN) != HAL_OK)
 		Error_Handler();
@@ -142,10 +152,12 @@ void Tim9PulseFinished(void) {
 	HAL_ADCEx_InjectedStart_IT(&ADC_INSTANCE_V);
 	HAL_ADCEx_InjectedStart_IT(&ADC_INSTANCE_I);
 	HAL_ADC_Start_IT(&ADC_INSTANCE_VBAT);
+
 }
 
 void OnPWMTriggeredEXT(void) {
 	if (HAL_GPIO_ReadPin(GPIO_PWM_TRIGGER_GPIO_Port, GPIO_PWM_TRIGGER_Pin) == GPIO_PIN_SET) {
+
 		if (MotorControl.PWM_Switching.ActiveSequence == ForwardCommutation) {
 			//Tim9PulseFinished();
 			if (HAL_TIM_OC_Start_IT(&TIM_PWM_ADC_V_DELAY, TIM_PWM_ADC_V_DELAY_CHN) != HAL_OK)
@@ -162,18 +174,22 @@ void OnPWMTriggeredEXT(void) {
 		}
 		Integrate();
 
-		if (++CounterWhenSendIAVG >= 240) {
+		if (++CounterWhenSendIAVG >= 2400) {
 			CounterWhenSendIAVG = 0;
-			I_AVG = I_SUM / 240;
+			MotorControl.ADC_VBAT = V_SUM / 2400;
+			I_AVG = I_SUM / 2400; //-44.4+value*0.0217
+			MotorControl.Energy = (float) MotorControl.DutyCycle / 100 * (-44.4 + I_AVG * 0.0217) * (MotorControl.ADC_VBAT * 0.01356534);
 			SendIAVG();
+			SendEnergy();
 			I_SUM = MotorControl.ADC_I[0];
+			V_SUM = V_BAT;
 		} else {
 			I_SUM += MotorControl.ADC_I[0];
+			V_SUM += V_BAT;
 		}
 	}
 }
 
-uint8_t OnTheTOP = 0;
 void OnPWM_ADC_Measured(ADC_HandleTypeDef* hadc) {
 
 	//uint16_t current = 0;
@@ -232,23 +248,21 @@ void OnPWM_ADC_Measured(ADC_HandleTypeDef* hadc) {
 			 if (I_MAX > current)
 			 I_AVG = current;*/
 
-			if (!OnTheTOP && MotorControl.ADC_V[0] > MotorControl.ADC_VBAT*0.75) {
-				HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_15);
-				OnTheTOP = 1;
+			if (!IsOnTheTOP && MotorControl.ADC_V[0] > MotorControl.ADC_VBAT * 0.75) {
+				IsOnTheTOP = 1;
 				CalcRPM();
-			} else if (OnTheTOP && MotorControl.ADC_V[0] < MotorControl.ADC_VBAT*0.5) {
-				OnTheTOP = 0;
+			} else if (IsOnTheTOP && MotorControl.ADC_V[0] < MotorControl.ADC_VBAT * 0.5) {
+				IsOnTheTOP = 0;
 			}
 		}
 		//Buffer_AddValue(MotorControl.ADC_VBAT, MotorControl.ADC_I[0]);
 		//Buffer_AddValue(MotorControl.ADC_V[0], MotorControl.ADC_V[1]);
 
 	}
-
 }
 
 void OnVBAT_ADC_Measured(ADC_HandleTypeDef* hadc) {
-	MotorControl.ADC_VBAT = HAL_ADC_GetValue(hadc);
+	V_BAT = HAL_ADC_GetValue(hadc);
 
 	/*if (MotorControl.ADC_VBAT > 2743) //2743=42V | 2600 = +/-40V
 	 HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_SET);
@@ -284,23 +298,24 @@ static void Integrate() {
 	case ForwardCommutation:
 		midPoint = (uint16_t) (MotorControl.ADC_VBAT / 2);
 		PWM_Lv = GetActualBEMF();
-		//HAL_DAC_SetValue(&hdac, DAC_CHANNEL_2, DAC_ALIGN_12B_R, MotorControl.pwmCountThisPhase * 10);
+		//HAL_DAC_SetValue(&hdac, DAC_CHANNEL_2, DAC_ALIGN_12B_R, PWM_Lv);
 
-		/*if (PWM_Lv < 40)
-			return;*/
 		if (midPoint < 200)
 			return;
 		if (MotorControl.pwmCountThisPhase > 400) {
 			ChangePhase();
 			return;
 		}
-
+		//double toDac = 2048;
 		if (MotorControl.PWM_Switching.IsRisingFront && PWM_Lv > midPoint) {
 			MotorControl.Integral += (uint64_t) (PWM_Lv - midPoint);
+		//	toDac += ((double)MotorControl.Integral / MotorControl.Limits.Integral) * 2048;
 		} else if (!MotorControl.PWM_Switching.IsRisingFront && PWM_Lv < midPoint) {
 			MotorControl.Integral += (uint64_t) (midPoint - PWM_Lv);
+		//	toDac -= (double)MotorControl.Integral / MotorControl.Limits.Integral * 2048;
 		}
 
+		//HAL_DAC_SetValue(&hdac, DAC_CHANNEL_2, DAC_ALIGN_12B_R, (uint32_t) toDac);
 		if (MotorControl.Flags.ClosedLoop) {
 			if (MotorControl.Integral >= MotorControl.Limits.Integral) {
 				ChangePhase();
@@ -319,8 +334,7 @@ static void Integrate() {
 		break;
 	}
 }
-static void CalcRPM()
-{
+static void CalcRPM() {
 	if (HAL_TIM_OC_Stop_IT(&TIM_MC_WATCHDOG, TIM_MC_WATCHDOG_CHN) != HAL_OK)
 		Error_Handler();
 	MotorControl.RPM = (float) 2500000 / TIM_MC_WATCHDOG.Instance->CNT; // (168MHz/168) / x * 60 / 24;
@@ -342,7 +356,7 @@ void OnPhaseChanged() {
 			Buffer_Init();
 
 			CalcRPM();
-			MotorControl.Limits.Integral = MotorControl.V_Treshold * 270 + 3000;
+			MotorControl.Limits.Integral = MotorControl.V_Treshold * 590 + 1000;
 
 		}
 
@@ -382,6 +396,7 @@ void OnPhaseChanged() {
 	MotorControl.Integral = 0;
 	MotorControl.PWM_Switching.IsRisingFront = !(MotorControl.pwm_phase % 2);
 
+	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, MotorControl.PWM_Switching.IsRisingFront ? GPIO_PIN_SET : GPIO_PIN_RESET);
 	MotorControl.pwmCountThisPhase = 0;
 }
 
@@ -428,7 +443,7 @@ void ChangePWMDutyCycle(uint8_t newDutyCycle, int8_t maxStep) {
 	__HAL_TIM_SET_COMPARE(&PWM_INSTANCE, TIM_CHANNEL_3, dutyCycleToSet * 10);
 
 	if (MotorControl.PWM_Switching.ActiveSequence == Regeneration) {
-		__HAL_TIM_SET_COMPARE(&PWM_INSTANCE, TIM_CHANNEL_4, (dutyCycleToSet-5) * 10);
+		__HAL_TIM_SET_COMPARE(&PWM_INSTANCE, TIM_CHANNEL_4, (dutyCycleToSet - 5) * 10);
 	}
 
 	MotorControl.DutyCycle = dutyCycleToSet;

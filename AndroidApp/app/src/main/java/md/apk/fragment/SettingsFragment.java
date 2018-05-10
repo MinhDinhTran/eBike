@@ -7,10 +7,18 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.SeekBar;
+import android.widget.TextView;
 
+import md.App;
 import md.apk.R;
+import md.ble.BLE_Services.BLEConst;
+import md.ble.BLE_Services.InfoService;
+import md.ble.BLE_Services.MyCustomService;
+import md.ble.BleManagerService;
 
-public class SettingsFragment extends Fragment {
+public class SettingsFragment extends Fragment implements
+SeekBar.OnSeekBarChangeListener{
     public static final String TAG = "SettingsFragment";
 
     private static final String ARG_PARAM1 = "param1";
@@ -19,7 +27,6 @@ public class SettingsFragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
-
     private OnFragmentInteractionListener mListener;
 
     public SettingsFragment() {
@@ -51,13 +58,18 @@ public class SettingsFragment extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_settings, container, false);
+        View view = inflater.inflate(R.layout.fragment_settings, container, false);
+        final SeekBar seekBar = (SeekBar) view.findViewById(R.id.seekBar_vthr);
+        seekBar.setOnSeekBarChangeListener(this);
+
+        return view;
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -82,6 +94,33 @@ public class SettingsFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
+    }
+
+    @Override
+    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+
+
+
+        final InfoService<?> sensor = (InfoService<?>) App.DEVICE_DEF.getSensor(MyCustomService.UUID_SERVICE);
+        Bundle bundle = new Bundle();
+        bundle.putString(BLEConst.DATA, Integer.toString(progress));
+        switch (seekBar.getId()) {
+            case R.id.seekBar_vthr:
+               // final TextView tvPwm = (TextView) findViewById(R.id.textView_pwmdutycycle);
+               // tvPwm.setText("PWM Duty Cycle = " + progress);
+                BleManagerService.getInstance().update((MyCustomService) sensor, MyCustomService.UUID_V_THRESHOLD_ID, bundle);
+                break;
+        }
+    }
+
+    @Override
+    public void onStartTrackingTouch(SeekBar seekBar) {
+
+    }
+
+    @Override
+    public void onStopTrackingTouch(SeekBar seekBar) {
+
     }
 
     public interface OnFragmentInteractionListener {

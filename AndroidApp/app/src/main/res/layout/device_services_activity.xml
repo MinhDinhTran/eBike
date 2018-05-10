@@ -9,9 +9,10 @@
     android:screenOrientation="portrait"
     tools:context="md.ble.ui.DeviceServicesActivity">
 
-    <ScrollView
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:background="@android:color/background_dark">
 
         <android.support.design.widget.AppBarLayout
             android:id="@+id/app_bar"
@@ -28,7 +29,6 @@
                     android:layout_height="match_parent">
 
                     <TextView
-                        android:id="@+id/textView_motor"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_marginLeft="6dp"
@@ -37,7 +37,6 @@
                         android:textAppearance="@style/CodeTextAppearance" />
 
                     <TextView
-                        android:id="@+id/textview_heartrate"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_marginLeft="6dp"
@@ -46,7 +45,6 @@
                         android:textAppearance="@style/CodeTextAppearance" />
 
                     <TextView
-                        android:id="@+id/textview_leftpedal"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_marginLeft="6dp"
@@ -55,7 +53,6 @@
                         android:textAppearance="@style/CodeTextAppearance" />
 
                     <TextView
-                        android:id="@+id/textView_rightpedal"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_marginLeft="6dp"
@@ -151,7 +148,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:background="@android:color/darker_gray"
-                    android:padding="3dp" >
+                    android:padding="3dp">
 
                 </TableRow>
 
@@ -160,7 +157,7 @@
                     android:layout_height="match_parent">
 
                     <TextView
-                        android:id="@+id/textView_speed_variable"
+                        android:id="@+id/textView_speed"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_weight="1"
@@ -205,7 +202,6 @@
                     android:layout_height="match_parent">
 
                     <TextView
-                        android:id="@+id/textView_speed"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_weight="1"
@@ -214,7 +210,6 @@
                         android:textAppearance="@style/CodeTextAppearance" />
 
                     <TextView
-                        android:id="@+id/textView_rpm"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_weight="1"
@@ -223,7 +218,6 @@
                         android:textAppearance="@style/CodeTextAppearance" />
 
                     <TextView
-                        android:id="@+id/textView_bat"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_weight="1"
@@ -232,7 +226,6 @@
                         android:textAppearance="@style/CodeTextAppearance" />
 
                     <TextView
-                        android:id="@+id/textView_srove"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_weight="1"
@@ -246,65 +239,226 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:background="@android:color/darker_gray"
-                    android:padding="3dp" />
+                    android:padding="3dp" >
 
-            </TableLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@color/primary2"
-                android:orientation="vertical">
-
-
-                <TextView
-                    android:id="@+id/textView_vthr"
+                </TableRow>
+                <TableRow
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="V Threshold ="
-                    android:textColor="@color/text" />
+                    android:layout_height="match_parent">
 
-                <SeekBar
-                    android:id="@+id/seekBar_vthr"
-                    style="@style/tallerBarStyle"
+                    <TextView
+                        android:id="@+id/textView_atstumas_variable"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:text="0"
+                        android:textAlignment="center"
+                        android:textAppearance="@style/CodeTextAppearance"
+                        android:textSize="24sp" />
+
+                    <TextView
+                        android:id="@+id/textView_likesAtst_variable"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:text="0"
+                        android:textAlignment="center"
+                        android:textAppearance="@style/CodeTextAppearance"
+                        android:textSize="24sp" />
+
+                    <TextView
+                        android:id="@+id/textView_sunaudotaenergija_variable"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:text="0"
+                        android:textAlignment="center"
+                        android:textAppearance="@style/CodeTextAppearance"
+                        android:textSize="24sp" />
+
+                    <TextView
+                        android:id="@+id/textView_galia"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:text="0"
+                        android:textAlignment="center"
+                        android:textAppearance="@style/CodeTextAppearance"
+                        android:textSize="24sp" />
+                </TableRow>
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:text="KM"
+                        android:textAlignment="center"
+                        android:textAppearance="@style/CodeTextAppearance" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:text="KM"
+                        android:textAlignment="center"
+                        android:textAppearance="@style/CodeTextAppearance" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:text="Wh"
+                        android:textAlignment="center"
+                        android:textAppearance="@style/CodeTextAppearance" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:text="W"
+                        android:textAlignment="center"
+                        android:textAppearance="@style/CodeTextAppearance" />
+
+                </TableRow>
+
+                <TableRow
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:scrollbarStyle="outsideInset" />
+                    android:background="@android:color/darker_gray"
+                    android:padding="3dp" >
 
-                <LinearLayout
+                </TableRow>
+
+                <TableRow
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:orientation="horizontal">
+                    android:layout_height="match_parent">
 
-                    <Button
-                        android:id="@+id/button_vthr_down"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                    <TextView
+                        android:id="@+id/textView_1"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
                         android:layout_weight="1"
                         android:text="-"
-                        android:textSize="18sp" />
+                        android:textAlignment="center"
+                        android:textAppearance="@style/CodeTextAppearance"
+                        android:textSize="24sp" />
 
-                    <Button
-                        android:id="@+id/button_vthr_up"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                    <TextView
+                        android:id="@+id/textView_2"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
                         android:layout_weight="1"
-                        android:text="+" />
+                        android:text="-"
+                        android:textAlignment="center"
+                        android:textAppearance="@style/CodeTextAppearance"
+                        android:textSize="24sp" />
 
-                </LinearLayout>
+                    <TextView
+                        android:id="@+id/textView_3"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:text="-"
+                        android:textAlignment="center"
+                        android:textAppearance="@style/CodeTextAppearance"
+                        android:textSize="24sp" />
+
+                    <TextView
+                        android:id="@+id/textView_baterijos_lygis"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:text="-"
+                        android:textAlignment="center"
+                        android:textAppearance="@style/CodeTextAppearance"
+                        android:textSize="24sp" />
+                </TableRow>
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:text="-"
+                        android:textAlignment="center"
+                        android:textAppearance="@style/CodeTextAppearance" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:text="-"
+                        android:textAlignment="center"
+                        android:textAppearance="@style/CodeTextAppearance" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:text="-"
+                        android:textAlignment="center"
+                        android:textAppearance="@style/CodeTextAppearance" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:text="Batt lv. (%)"
+                        android:textAlignment="center"
+                        android:textAppearance="@style/CodeTextAppearance" />
+
+                </TableRow>
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@android:color/darker_gray"
+                    android:padding="3dp" >
+
+                </TableRow>
+            </TableLayout>
+
+        </android.support.design.widget.AppBarLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/app_bar"
+            android:background="@color/primary2"
+            android:orientation="vertical">
+
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1" >
 
                 <ProgressBar
                     android:id="@+id/progressBar3"
-                    style="@android:style/Widget.DeviceDefault.Light.ProgressBar.Horizontal"
+                    style="@android:style/Widget.Holo.Light.ProgressBar.Horizontal"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:background="@android:color/background_dark"
                     android:max="4096"
-                    android:progress="20" />
+                    android:minHeight="30dp"
+                    android:progress="20"
+                    android:scaleY="5"
+                    android:secondaryProgress="2048" />
+
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1" >
 
                 <ProgressBar
                     android:id="@+id/progressBar4"
@@ -313,7 +467,16 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:background="@android:color/background_dark"
-                    android:max="2048" />
+                    android:max="2048"
+                    android:minHeight="25dp"
+                    android:progress="512"
+                    android:scaleY="5" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1" >
 
                 <ProgressBar
                     android:id="@+id/progressBar5"
@@ -322,82 +485,51 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:background="@android:color/background_dark"
-                    android:max="2048" />
+                    android:max="2048"
+                    android:minHeight="25dp"
+                    android:progress="1024"
+                    android:scaleY="5" />
+            </TableRow>
 
-                <TextView
-                    android:id="@+id/textView_pwmdutycycle"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentStart="true"
-                    android:layout_weight="1"
-                    android:text="PWM Duty Cycle ="
-                    android:textColor="@color/text" />
+        </LinearLayout>
 
-                <SeekBar
-                    android:id="@+id/seekBar_pwm"
-                    style="@style/tallerBarStyle"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_alignParentEnd="true"
-                    android:layout_alignParentTop="true"
-                    android:layout_toEndOf="@+id/textView_vthr"
-                    android:layout_weight="1"
-                    android:progress="20" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:orientation="vertical">
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="horizontal">
+            <TextView
+                android:id="@+id/textView_pwmdutycycle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_weight="1"
+                android:text="PWM Duty Cycle ="
+                android:textColor="@android:color/background_light" />
 
-                    <Button
-                        android:id="@+id/button_pwm_down"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="-"
-                        android:textSize="18sp" />
+            <SeekBar
+                android:id="@+id/seekBar_pwm"
+                style="@style/tallerBarStyle"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentTop="true"
+                android:layout_toEndOf="@+id/textView_vthr"
+                android:layout_weight="1"
+                android:paddingBottom="16dp"
+                android:progress="20" />
 
-                    <Button
-                        android:id="@+id/button_pwm_up"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="+" />
+            <ToggleButton
+                android:id="@+id/toggleButton_start"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:text="ToggleButton"
+                android:textSize="48sp" />
 
-                </LinearLayout>
+        </LinearLayout>
 
-                <View
-                    android:id="@+id/divider"
-                    android:layout_width="match_parent"
-                    android:layout_height="50dp"
-                    android:layout_weight="1"
-                    android:background="?android:attr/listDivider" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical">
-
-                    <ToggleButton
-                        android:id="@+id/toggleButton_start"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="ToggleButton"
-                        android:textSize="48sp" />
-
-                </LinearLayout>
-
-                <com.github.mikephil.charting.charts.LineChart
-                    android:id="@+id/chart_itampa"
-                    android:layout_width="match_parent"
-                    android:layout_height="250dp"
-                    android:visibility="visible">
-
-                </com.github.mikephil.charting.charts.LineChart>
-
-            </LinearLayout>
-
-        </android.support.design.widget.AppBarLayout>
-    </ScrollView>
+    </RelativeLayout>
 
 </android.support.design.widget.CoordinatorLayout>

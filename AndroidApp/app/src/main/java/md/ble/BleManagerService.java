@@ -172,6 +172,7 @@ public class BleManagerService extends com.chimeraiot.android.ble.BleService
                     getBleManager().listen(address, sensor, MyCustomService.UUID_BIKE_BATTERY_LEVEL_ID);
                     getBleManager().listen(address, sensor, MyCustomService.UUID_CURRENT_ID);
                     getBleManager().listen(address, sensor, MyCustomService.UUID_BIKE_SPEED_ID);
+                    getBleManager().listen(address, sensor, MyCustomService.UUID_ENERGY_ID);
                     getBleManager().listen(address, sensor, MyCustomService.UUID_BIKE_FLAGS_ID);
                 }
             }

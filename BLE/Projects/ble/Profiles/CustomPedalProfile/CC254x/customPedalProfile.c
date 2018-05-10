@@ -18,6 +18,7 @@
         
 #include "hal_key.h"
 #include "hal_adc.h"
+#include "OnBoard.h"
 /*********************************************************************
  * MACROS
  */
@@ -252,7 +253,10 @@ bStatus_t customPedalProfile_SetParameter( uint8 param, uint8 len, void *value )
      if ( GATTServApp_ProcessCharCfg( _BATTERY_LV_NotiConfig, ((uint8*)&_BATTERY_LV_Value), FALSE,
                                   customPedalProfileAttrTbl, GATT_NUM_ATTRS( customPedalProfileAttrTbl ),
                                   INVALID_TASK_ID, customPedalProfile_ReadAttrCB ) != SUCCESS)
+     {
        printf("WTF customPedalProfile_SetParameter\n");
+       SystemReset();
+     }
       break;
       
     case PEDALLING_STRENGTH_ID:
@@ -260,7 +264,10 @@ bStatus_t customPedalProfile_SetParameter( uint8 param, uint8 len, void *value )
      if ( GATTServApp_ProcessCharCfg( _PEDALLING_STRENGTH_NotiConfig, ((uint8*)&_PEDALLING_STRENGTH_Value), FALSE,
                                   customPedalProfileAttrTbl, GATT_NUM_ATTRS( customPedalProfileAttrTbl ),
                                   INVALID_TASK_ID, customPedalProfile_ReadAttrCB ) != SUCCESS)
+       {
        printf("WTF customPedalProfile_SetParameter\n");
+       SystemReset();
+      }
       break;
       
     case CONFIG_ID:
@@ -273,8 +280,10 @@ bStatus_t customPedalProfile_SetParameter( uint8 param, uint8 len, void *value )
      if ( GATTServApp_ProcessCharCfg( _RAW_DATA_NotiConfig, ((uint8*)&_RAW_DATA_Value), FALSE,
                                   customPedalProfileAttrTbl, GATT_NUM_ATTRS( customPedalProfileAttrTbl ),
                                   INVALID_TASK_ID, customPedalProfile_ReadAttrCB ) != SUCCESS)
+      {
        printf("WTF customPedalProfile_SetParameter\n");
-
+       SystemReset();
+     }
       break;
     default:
       ret = INVALIDPARAMETER;

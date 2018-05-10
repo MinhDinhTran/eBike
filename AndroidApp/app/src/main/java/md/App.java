@@ -46,7 +46,7 @@ public class App extends Application {
         BleConfig.setDebugEnabled(true);
         enableBleIfNotEnabled();
         startBleSensorsService();
-      //  startGPSService();
+        startGPSService();
     }
     private void startBleSensorsService()
     {

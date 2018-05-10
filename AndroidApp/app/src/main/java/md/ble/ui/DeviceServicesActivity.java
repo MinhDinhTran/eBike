@@ -47,10 +47,6 @@ public class DeviceServicesActivity extends Activity
     @SuppressWarnings("UnusedDeclaration")
     private final static String TAG = DeviceServicesActivity.class.getSimpleName();
     // Controls
-    Button button_pwm_down = null;
-    Button button_pwm_up = null;
-    Button button_vthr_down = null;
-    Button button_vthr_up = null;
     ToggleButton button_Start = null;
     ToggleButton button_motor = null;
     ToggleButton button_heartrate= null;
@@ -58,13 +54,13 @@ public class DeviceServicesActivity extends Activity
     ToggleButton button_right_peda = null;
     //
     Long lastChanged_PWMDutyCycle = 0L;
-    List<Entry> entries = new ArrayList<Entry>();
+   /* List<Entry> entries = new ArrayList<Entry>();
     LineDataSet dataSet;
     LineChart chart_itampa;
     LineData lineData;
 
     long chartDataIndex = 0;
-    int chartDatarefreshCounter = 0;
+    int chartDatarefreshCounter = 0;*/
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -74,17 +70,8 @@ public class DeviceServicesActivity extends Activity
 
         final SeekBar seekBar = (SeekBar) findViewById(R.id.seekBar_pwm);
         seekBar.setOnSeekBarChangeListener(this);
-        final SeekBar seekBar2 = (SeekBar) findViewById(R.id.seekBar_vthr);
-        seekBar2.setOnSeekBarChangeListener(this);
 
-        button_pwm_down = (Button) findViewById(R.id.button_pwm_down);
-        button_pwm_down.setOnClickListener(this);
-        button_pwm_up = (Button) findViewById(R.id.button_pwm_up);
-        button_pwm_up.setOnClickListener(this);
-        button_vthr_down = (Button) findViewById(R.id.button_vthr_down);
-        button_vthr_down.setOnClickListener(this);
-        button_vthr_up = (Button) findViewById(R.id.button_vthr_up);
-        button_vthr_up.setOnClickListener(this);
+
         button_Start = (ToggleButton) findViewById(R.id.toggleButton_start);
         button_Start.setOnClickListener(this);
 
@@ -97,19 +84,14 @@ public class DeviceServicesActivity extends Activity
         button_right_peda = (ToggleButton) findViewById(R.id.toggleButton_ble_right_pedal);
         button_right_peda.setOnClickListener(this);
 
-        chart_itampa = (LineChart) findViewById(R.id.chart_itampa);
 
-
-
-
-
-        entries.add(new Entry(0,0));
+       /* entries.add(new Entry(0,0));
         dataSet = new LineDataSet(entries, "Itampa");
         lineData = new LineData(dataSet);
         chart_itampa.setData(lineData);
 
         chart_itampa.invalidate();
-        chart_itampa.getXAxis().setGranularity(1f);
+        chart_itampa.getXAxis().setGranularity(1f);*/
 
 
         SubscribeBLEServices();
@@ -171,13 +153,6 @@ public class DeviceServicesActivity extends Activity
                 tvPwm.setText("PWM Duty Cycle = " + progress);
                 BleManagerService.getInstance().update((MyCustomService) sensor, MyCustomService.UUID_PWM_DUTY_CYCLE_ID, bundle);
                 break;
-            case R.id.seekBar_vthr:
-                final TextView tvVthr = (TextView) findViewById(R.id.textView_vthr);
-                int val = progress*270+3000;
-                tvVthr.setText("V Threshold = " + val);
-
-                BleManagerService.getInstance().update((MyCustomService) sensor, MyCustomService.UUID_V_THRESHOLD_ID, bundle);
-                break;
         }
     }
 
@@ -218,21 +193,8 @@ public class DeviceServicesActivity extends Activity
     @Override
     public void onClick(View v) {
         final SeekBar seekBar_pwm = (SeekBar) findViewById(R.id.seekBar_pwm);
-        final SeekBar seekBar_vthr = (SeekBar) findViewById(R.id.seekBar_vthr);
 
         switch (v.getId()) {
-            case R.id.button_pwm_down:
-                seekBar_pwm.setProgress(seekBar_pwm.getProgress() - 3);
-                break;
-            case R.id.button_pwm_up:
-                seekBar_pwm.setProgress(seekBar_pwm.getProgress() + 3);
-                break;
-            case R.id.button_vthr_down:
-                seekBar_vthr.setProgress(seekBar_vthr.getProgress() - 3);
-                break;
-            case R.id.button_vthr_up:
-                seekBar_vthr.setProgress(seekBar_vthr.getProgress() + 3);
-                break;
             case R.id.toggleButton_start:
 
                 final ToggleButton button_Start = (ToggleButton) findViewById(R.id.toggleButton_start);
@@ -320,8 +282,14 @@ public class DeviceServicesActivity extends Activity
                 TextView textView;
                 switch (characteristic) {
                     case MyCustomService.UUID_BIKE_BATTERY_LEVEL_ID:
+                        double VBat = value*0.01400529697297297297297297297297;//0.01356534;
+                        double y = -0.1416* VBat*VBat*VBat + 15.745 * VBat*VBat - 569.4 * VBat + 6731.1;
                         textView = (TextView) findViewById(R.id.textView_bat_variable);
-                        textView.setText(String.format ("%.2f", value*0.01356534));// 3.2*((2.2k + 36k)/2.2k) = 55.56 / 4096
+                        textView.setText(String.format ("%.2f", VBat));// 3.2*((2.2k + 36k)/2.2k) = 55.56 / 4096
+                        textView.refreshDrawableState();
+
+                        textView = (TextView) findViewById(R.id.textView_baterijos_lygis);
+                        textView.setText(String.format ("%.2f", y));// 3.2*((2.2k + 36k)/2.2k) = 55.56 / 4096
                         textView.refreshDrawableState();
                         break;
                     case MyCustomService.UUID_CURRENT_ID:
@@ -332,7 +300,7 @@ public class DeviceServicesActivity extends Activity
                         ProgressBar bar = (ProgressBar) findViewById(R.id.progressBar3);
                         bar.setProgress(value);
 
-                        dataSet.addEntry(new Entry(chartDataIndex++, value));
+                      /*  dataSet.addEntry(new Entry(chartDataIndex++, value));
 
                         if (chartDataIndex > 100)
                             dataSet.removeEntry(0);
@@ -345,7 +313,7 @@ public class DeviceServicesActivity extends Activity
 
                             chart_itampa.fitScreen();
                             chart_itampa.invalidate();
-                        }
+                        }*/
 
                         textView.refreshDrawableState();
 
@@ -389,8 +357,12 @@ public class DeviceServicesActivity extends Activity
                         textView.setText(String.format ("%.1f", value));
                         textView.refreshDrawableState();
 
-                        textView = (TextView) findViewById(R.id.textView_speed_variable);
+                        textView = (TextView) findViewById(R.id.textView_speed);
                         textView.setText(String.format ("%.1f", value * 72 * 0.001885));
+                        break;
+                    case MyCustomService.UUID_ENERGY_ID:
+                        textView = (TextView) findViewById(R.id.textView_galia);
+                        textView.setText(String.format ("%.1f", value));
                         textView.refreshDrawableState();
                         break;
                 }

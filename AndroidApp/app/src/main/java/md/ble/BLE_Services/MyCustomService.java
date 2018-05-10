@@ -33,6 +33,7 @@ public class MyCustomService<T> extends InfoService<T> {
     public static final String UUID_CURRENT_ID = "0000fff5-0000-1000-8000-00805f9b34fb";
     public static final String UUID_BIKE_SPEED_ID = "0000fff6-0000-1000-8000-00805f9b34fb";
     public static final String UUID_BIKE_FLAGS_ID = "0000fff7-0000-1000-8000-00805f9b34fb";
+    public static final String UUID_ENERGY_ID = "0000fff8-0000-1000-8000-00805f9b34fb";
 
     /**
      * Characteristics.
@@ -47,6 +48,7 @@ public class MyCustomService<T> extends InfoService<T> {
         CHARACTERISTIC_MAP.put(UUID_CURRENT_ID, "Electric current level");
         CHARACTERISTIC_MAP.put(UUID_BIKE_SPEED_ID, "Bike speed");
         CHARACTERISTIC_MAP.put(UUID_BIKE_FLAGS_ID, "Bike flags");
+        CHARACTERISTIC_MAP.put(UUID_ENERGY_ID, "energy");
     }
 
     private int batValue;
@@ -69,6 +71,10 @@ public class MyCustomService<T> extends InfoService<T> {
     private float rpmValue;
     public float getRPMValue() {
         return rpmValue;
+    }
+    private float energyValue;
+    public float getEnergyValue() {
+        return energyValue;
     }
     private MyCustomServiceListener _listener = null;
 
@@ -132,6 +138,7 @@ public class MyCustomService<T> extends InfoService<T> {
     @Override
     protected boolean apply(final BluetoothGattCharacteristic c, final T data) {
         int intValue = 0;
+        byte bytes[];
         float floatValue = 0;
         switch (c.getUuid().toString()) {
             case UUID_BIKE_BATTERY_LEVEL_ID:
@@ -145,7 +152,7 @@ public class MyCustomService<T> extends InfoService<T> {
                 intValue = currentValue;
                 break;
             case UUID_BIKE_SPEED_ID:
-                byte bytes[] = c.getValue();
+                bytes = c.getValue();
                 rpmValue = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN).getFloat();
                 //floatValue = c.getFloatValue(BluetoothGattCharacteristic.FORMAT_FLOAT, 0);
                 if (rpmValue > 4096) rpmValue = 0;
@@ -160,13 +167,21 @@ public class MyCustomService<T> extends InfoService<T> {
                 intValue = c.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT32, 0);
                 read(UUID_PWM_DUTY_CYCLE_ID);
                 break;
+            case UUID_ENERGY_ID:
+                bytes = c.getValue();
+                energyValue = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN).getFloat();
+                //floatValue = c.getFloatValue(BluetoothGattCharacteristic.FORMAT_FLOAT, 0);
+                if (energyValue > 2000) energyValue = 2000;// 42*45 =1890
+                if (energyValue < -2000) energyValue = -2000;
+                floatValue = energyValue;
+                break;
         }
 
         if (_listener != null) {
-            if (!c.getUuid().toString().equals( UUID_BIKE_SPEED_ID))
-                _listener.OnCharacteristicChanged(c.getUuid().toString(), intValue);
-            else
+            if (c.getUuid().toString().equals( UUID_BIKE_SPEED_ID) ||c.getUuid().toString().equals( UUID_ENERGY_ID)  )
                 _listener.OnCharacteristicChanged(c.getUuid().toString(), floatValue);
+            else
+                _listener.OnCharacteristicChanged(c.getUuid().toString(), intValue);
         }
        // Log.d(TAG, "MyCustomService.Value ='" + value);
         return true;

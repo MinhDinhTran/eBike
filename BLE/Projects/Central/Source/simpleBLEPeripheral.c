@@ -296,6 +296,7 @@ void SimpleBLEPeripheral_Init( uint8 task_id )
     uint16 batValue = 0;
     uint16 currentValue = 0;
     float speedValue = 0;
+    float energyValue = 0;
     uint32 flagsValue = 0;
     
     SimpleProfile_SetParameter( MODE_ID, MODE_LEN, &modeValue );
@@ -304,6 +305,7 @@ void SimpleBLEPeripheral_Init( uint8 task_id )
     SimpleProfile_SetParameter( BIKE_BATTERY_LEVEL_ID, BIKE_BATTERY_LEVEL_LEN, &batValue );
     SimpleProfile_SetParameter( CURRENT_ID, CURRENT_LEN, &currentValue );
     SimpleProfile_SetParameter( BIKE_SPEED_ID, BIKE_SPEED_LEN, &speedValue );
+    SimpleProfile_SetParameter( ENERGY_ID, ENERGY_LEN, &energyValue );
     SimpleProfile_SetParameter( BIKE_FLAGS_ID, BIKE_FLAGS_LEN, &flagsValue );
   }
 

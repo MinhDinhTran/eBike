@@ -14,6 +14,7 @@
 #define CURRENT_ID                      4
 #define BIKE_SPEED_ID                   5
 #define BIKE_FLAGS_ID                   6
+#define ENERGY_ID                   	7
 
 
 #define MODE_LEN                        1
@@ -23,6 +24,7 @@
 #define CURRENT_LEN                     2
 #define BIKE_SPEED_LEN                  4
 #define BIKE_FLAGS_LEN                  4
+#define ENERGY_LEN                 		4
 
 typedef struct UART_Driver UART_Driver;
 struct UART_Driver

@@ -26,27 +26,29 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 		{
 			ChangePWMSwitchingSequence(Regeneration);
 			HAL_GPIO_WritePin(GPIOD, GPIO_PIN_13, GPIO_PIN_SET);
-			MotorControl.Flags.OverCurrent = 1;
 			flag = 1;
 		}
 		else
 		{
 			HAL_GPIO_WritePin(GPIOD, GPIO_PIN_13, GPIO_PIN_RESET);
-			MotorControl.Flags.OverCurrent = 0;
 		}
 
-		MyMsg_t *msg = malloc(sizeof(MyMsg_t));
-		msg->UUID = PWM_DUTY_CYCLE_ID;
-		*(uint32_t*)msg->pData = 20;
-		msg->length = PWM_DUTY_CYCLE_LEN;
-		xQueueSendFromISR(xQueueTX, (void * ) &msg, (TickType_t ) 0);
+		if (MotorControl.Flags.OverCurrent&0x1 != flag&0x1 )
+		{
+			MyMsg_t *msg = malloc(sizeof(MyMsg_t));
+			msg->UUID = PWM_DUTY_CYCLE_ID;
+			*(uint32_t*)msg->pData = 20;
+			msg->length = PWM_DUTY_CYCLE_LEN;
+			xQueueSendFromISR(xQueueTX, (void * ) &msg, (TickType_t ) 0);
 
-		msg = malloc(sizeof(MyMsg_t));
-		msg->UUID = BIKE_FLAGS_ID;
-		*(uint32_t*)msg->pData = flag;
-		msg->length = BIKE_FLAGS_LEN;
-		xQueueSendFromISR(xQueueTX, (void * ) &msg, (TickType_t ) 0);
+			msg = malloc(sizeof(MyMsg_t));
+			msg->UUID = BIKE_FLAGS_ID;
+			*(uint32_t*)msg->pData = flag;
+			msg->length = BIKE_FLAGS_LEN;
+			xQueueSendFromISR(xQueueTX, (void * ) &msg, (TickType_t ) 0);
 
+			MotorControl.Flags.OverCurrent = flag;
+		}
 
 		break;
 	case GPIO_PIN_10:

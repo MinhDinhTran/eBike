@@ -33,8 +33,8 @@
         <item name="android:indeterminateOnly">false</item>
         <item name="android:progressDrawable">@android:drawable/progress_horizontal</item>
         <item name="android:indeterminateDrawable">@android:drawable/progress_horizontal</item>
-        <item name="android:minHeight">40dp</item>
-        <item name="android:maxHeight">40dp</item>
+        <item name="android:minHeight">80dp</item>
+        <item name="android:maxHeight">80dp</item>
 
         app:dsb_min="2"
         app:dsb_max="15"

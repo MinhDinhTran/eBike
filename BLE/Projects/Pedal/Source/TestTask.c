@@ -18,12 +18,9 @@
 #include "customPedalProfile.h"
 
 #define TestTask_MeasureADC                               0x0001
-#define TestTask_MeasureADC_Period                        10
+#define TestTask_MeasureADC_Period                        50
 
-#define DataCountToAVG 5
-uint16 AdcData[DataCountToAVG] = {0};
-uint8 dataCount = 0;
-uint16 AdcDataAVG = 0;
+uint16 AdcData = 0;
 
 uint16 countWhenMeasureBattery = 0;
 extern bool Connected;
@@ -62,8 +59,8 @@ uint16 TestTask_ProcessEvent( uint8 task_id, uint16 events )
         */
         
         
-    AdcData[0] = HalAdcRead ( HAL_ADC_CHANNEL_1, HAL_ADC_RESOLUTION_12);
-        customPedalProfile_SetParameter( RAW_DATA_ID, RAW_DATA_LEN, & AdcData[0] );
+    AdcData = HalAdcRead ( HAL_ADC_CHANNEL_1, HAL_ADC_RESOLUTION_12);
+    customPedalProfile_SetParameter( RAW_DATA_ID, RAW_DATA_LEN, &AdcData);
         
         
         

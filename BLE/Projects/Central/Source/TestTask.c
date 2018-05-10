@@ -151,6 +151,13 @@ static void SetParameter()
       isParameterSet = 1;
     }
     break;
+  case ENERGY_ID:
+  if (UART_suffixCnt == 6+ENERGY_LEN)
+  {
+    SimpleProfile_SetParameter( ENERGY_ID, ENERGY_LEN, &UART_data);
+    isParameterSet = 1;
+  }
+  break;
   case BIKE_FLAGS_ID:
     if (UART_suffixCnt == 6+BIKE_FLAGS_LEN)
     {

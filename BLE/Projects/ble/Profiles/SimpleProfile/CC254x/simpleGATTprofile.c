@@ -25,7 +25,7 @@
  * CONSTANTS
  */
 
-#define SERVAPP_NUM_ATTR_SUPPORTED      27
+#define SERVAPP_NUM_ATTR_SUPPORTED      31
 
 /*********************************************************************
  * TYPEDEFS
@@ -47,6 +47,7 @@ createUUID(UUID_V_THRESHOLD_ID);
 createUUID(UUID_BIKE_BATTERY_LEVEL_ID);
 createUUID(UUID_CURRENT_ID);
 createUUID(UUID_BIKE_SPEED_ID);
+createUUID(UUID_ENERGY_ID);
 createUUID(UUID_BIKE_FLAGS_ID);
 
 /*********************************************************************
@@ -98,6 +99,11 @@ static float _BIKE_SPEED_Value = 0;
 static uint8 _BIKE_SPEED_Desc[] = "Speed";
 static gattCharCfg_t* _BIKE_SPEED_NotiConfig;
 
+static uint8 _ENERGY_Props = GATT_PROP_READ|GATT_PROP_NOTIFY;
+static float _ENERGY_Value = 0;
+static uint8 _ENERGY_Desc[] = "Energy";
+static gattCharCfg_t* _ENERGY_NotiConfig;
+
 static uint8 _BIKE_FLAGS_Props = GATT_PROP_READ|GATT_PROP_NOTIFY;
 static uint32 _BIKE_FLAGS_Value = 0;
 static uint8 _BIKE_FLAGS_Desc[] = ".";
@@ -147,6 +153,11 @@ static gattAttribute_t simpleProfileAttrTbl[SERVAPP_NUM_ATTR_SUPPORTED] =
    ATT_Value_Declaration(GATT_PERMIT_READ,    &_BIKE_SPEED_Value, _UUID_BIKE_SPEED_ID )
    ATT_Desc_Declaration(GATT_PERMIT_READ,     _BIKE_SPEED_Desc)
    ATT_Noti_Declaration(                      &_BIKE_SPEED_NotiConfig)  
+     
+   ATT_Declaration(GATT_PERMIT_READ,          &_ENERGY_Props)
+   ATT_Value_Declaration(GATT_PERMIT_READ,    &_ENERGY_Value, _UUID_ENERGY_ID )
+   ATT_Desc_Declaration(GATT_PERMIT_READ,     _ENERGY_Desc)
+   ATT_Noti_Declaration(                      &_ENERGY_NotiConfig)  
      
    ATT_Declaration(GATT_PERMIT_READ,          &_BIKE_FLAGS_Props)
    ATT_Value_Declaration(GATT_PERMIT_READ,    &_BIKE_FLAGS_Value, _UUID_BIKE_FLAGS_ID )
@@ -205,9 +216,12 @@ bStatus_t SimpleProfile_AddService( uint32 services )
   
   _BIKE_FLAGS_NotiConfig = (gattCharCfg_t *)osal_mem_alloc( sizeof(gattCharCfg_t) *
                                                               linkDBNumConns );
+  _ENERGY_NotiConfig = (gattCharCfg_t *)osal_mem_alloc( sizeof(gattCharCfg_t) *
+                                                              linkDBNumConns );
   
   if ( _BIKE_BATTERY_LEVEL_NotiConfig == NULL || _CURRENT_NotiConfig == NULL 
-      || _BIKE_SPEED_NotiConfig == NULL || _BIKE_FLAGS_NotiConfig == NULL)
+      || _BIKE_SPEED_NotiConfig == NULL || _BIKE_FLAGS_NotiConfig == NULL
+        || _ENERGY_NotiConfig == NULL )
   {     
     return ( bleMemAllocError );
   }
@@ -218,6 +232,7 @@ bStatus_t SimpleProfile_AddService( uint32 services )
   GATTServApp_InitCharCfg( INVALID_CONNHANDLE, _BIKE_BATTERY_LEVEL_NotiConfig );
   GATTServApp_InitCharCfg( INVALID_CONNHANDLE, _CURRENT_NotiConfig );
   GATTServApp_InitCharCfg( INVALID_CONNHANDLE, _BIKE_SPEED_NotiConfig );
+  GATTServApp_InitCharCfg( INVALID_CONNHANDLE, _ENERGY_NotiConfig );
   GATTServApp_InitCharCfg( INVALID_CONNHANDLE, _BIKE_FLAGS_NotiConfig );
   
   if ( services & SIMPLEPROFILE_SERVICE )
@@ -323,6 +338,17 @@ bStatus_t SimpleProfile_SetParameter( uint8 param, uint8 len, void *value )
        SystemReset();
      }
       break;
+    case ENERGY_ID:
+      SetValue(float, _ENERGY_Value);
+      
+     if ( GATTServApp_ProcessCharCfg( _ENERGY_NotiConfig, ((uint8*)&_ENERGY_Value), FALSE,
+                                  simpleProfileAttrTbl, GATT_NUM_ATTRS( simpleProfileAttrTbl ),
+                                  INVALID_TASK_ID, simpleProfile_ReadAttrCB ) != SUCCESS)
+     {
+       printf("WTF\n");
+       SystemReset();
+     }
+      break;
     case BIKE_FLAGS_ID:
       SetValue(uint32, _BIKE_FLAGS_Value);      
      if ( GATTServApp_ProcessCharCfg( _BIKE_FLAGS_NotiConfig, ((uint8*)&_BIKE_FLAGS_Value), FALSE,
@@ -379,6 +405,9 @@ bStatus_t SimpleProfile_GetParameter( uint8 param, void *value )
       break;
     case BIKE_SPEED_ID:
       VOID memcpy( value, &_BIKE_SPEED_Value, BIKE_SPEED_LEN );
+      break;
+    case ENERGY_ID:
+      VOID memcpy( value, &_ENERGY_Value, ENERGY_LEN );
       break;
     case BIKE_FLAGS_ID:
       VOID memcpy( value, &_BIKE_FLAGS_Value, BIKE_FLAGS_LEN );
@@ -454,6 +483,10 @@ static bStatus_t simpleProfile_ReadAttrCB( uint16 connHandle, gattAttribute_t *p
       case UUID_BIKE_SPEED_ID:
         *pLen = BIKE_SPEED_LEN;
         VOID memcpy( pValue, pAttr->pValue, BIKE_SPEED_LEN );
+        break;
+      case UUID_ENERGY_ID:
+        *pLen = ENERGY_LEN;
+        VOID memcpy( pValue, pAttr->pValue, ENERGY_LEN );
         break;
       case UUID_BIKE_FLAGS_ID:
         *pLen = BIKE_FLAGS_LEN;
@@ -541,6 +574,13 @@ static bStatus_t simpleProfile_WriteAttrCB( uint16 connHandle, gattAttribute_t *
         {
           memcpy (pAttr->pValue, pValue, len );
           notifyApp = BIKE_SPEED_ID;
+        }
+        break;
+      case UUID_ENERGY_ID:
+        if ( offset == 0 && len == ENERGY_LEN )
+        {
+          memcpy (pAttr->pValue, pValue, len );
+          notifyApp = ENERGY_ID;
         }
         break;
       case UUID_BIKE_FLAGS_ID:

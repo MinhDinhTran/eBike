@@ -58,6 +58,7 @@ struct MotorControl_t
 
     float Wanted_RPM;
     float RPM;
+    float Energy;
 
     arm_pid_instance_f32 PID;
 };

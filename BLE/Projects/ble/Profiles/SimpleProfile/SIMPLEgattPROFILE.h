@@ -69,6 +69,7 @@ extern "C"
 #define CURRENT_ID                      4
 #define BIKE_SPEED_ID                   5
 #define BIKE_FLAGS_ID                   6
+#define ENERGY_ID                       7
   
 // Simple Profile Service UUID
 #define SIMPLEPROFILE_SERV_UUID         0xFFF0
@@ -81,6 +82,7 @@ extern "C"
 #define UUID_CURRENT_ID                 0xFFF5
 #define UUID_BIKE_SPEED_ID              0xFFF6
 #define UUID_BIKE_FLAGS_ID              0xFFF7
+#define UUID_ENERGY_ID                  0xFFF8
     
 // Simple Keys Profile Services bit fields
 #define SIMPLEPROFILE_SERVICE               0x00000001
@@ -92,6 +94,7 @@ extern "C"
 #define CURRENT_LEN                     2
 #define BIKE_SPEED_LEN                  4
 #define BIKE_FLAGS_LEN                  4
+#define ENERGY_LEN                      4
 
 /*********************************************************************
  * TYPEDEFS
