@@ -26,7 +26,7 @@ MotorControl_t MotorControl = {
 		.Wanted_DutyCycle = 20,
 		.V_Treshold = 63,
 		.Integral = 0,
-		.Limits = { .Integral = 20000 // su ~50% duty cycle testuota
+		.Limits = { .Integral = 20000
 		},
 		.Flags = { .ClosedLoop = 1 },
 		.PWM_Switching = { .IsRisingFront = 1, .ActiveSequence = PWMSequencesNotInit, .UseComplementaryPWM = 0, .UsePWMOnPWMN = 0 },
@@ -178,7 +178,7 @@ void OnPWMTriggeredEXT(void) {
 			CounterWhenSendIAVG = 0;
 			MotorControl.ADC_VBAT = V_SUM / 2400;
 			I_AVG = I_SUM / 2400; //-44.4+value*0.0217
-			MotorControl.Energy = (float) MotorControl.DutyCycle / 100 * (-44.4 + I_AVG * 0.0217) * (MotorControl.ADC_VBAT * 0.01356534);
+			MotorControl.Energy = (float) (-44.4 + (float)I_AVG * 0.0217) * (MotorControl.ADC_VBAT * 0.01356534);
 			SendIAVG();
 			SendEnergy();
 			I_SUM = MotorControl.ADC_I[0];
@@ -255,7 +255,8 @@ void OnPWM_ADC_Measured(ADC_HandleTypeDef* hadc) {
 				IsOnTheTOP = 0;
 			}
 		}
-		//Buffer_AddValue(MotorControl.ADC_VBAT, MotorControl.ADC_I[0]);
+		//MotorControl.ADC_VBAT
+		Buffer_AddValue(V_BAT, MotorControl.ADC_I[0]);
 		//Buffer_AddValue(MotorControl.ADC_V[0], MotorControl.ADC_V[1]);
 
 	}

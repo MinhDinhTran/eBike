@@ -2,7 +2,7 @@ close all;
 clear all;
 clc;
 load('Data');
-load('D');
+% load('D');
 
 
 
@@ -14,98 +14,90 @@ load('D');
 % plot(Data.PedalR.T, Data.PedalR.Raw )
 % hold off
 
-dutys = [50 60 70 90].';
-
-for j = 1:size(dutys)
-    x = [];
-    y = [];
-    y2 = [];
-    index = 1;
-    s = size(D.T);
-    for i = 1:s(2)-1
-        if (D.Duty(i) == dutys(j))
-            x(index) = D.Speed(i);
-            y(index) = (Maxx.PedalL(i) - Minn.PedalL(i)) / (D.Current(i)*D.Vbat(i));
-            y2(index) = (Maxx.PedalR(i) - Minn.PedalR(i)) / (D.Current(i)*D.Vbat(i));
-            index = index + 1;
-        end
-    end
-    subplot(4,1,j)
-    hold on
-    yyaxis left
-    plot(x, y,'*')
-    xlim([0 200])
-    ylim([0 0.0002])
-    yyaxis right
-    plot(x, y2,'*')
-    xlim([0 200])
-    ylim([0 0.0002])
-    legend(num2str(dutys(j)))
-    hold off  
-    
-end
-
-
-
-
-Fs = 100;            % Sampling frequency
-T = 1/Fs;             % Sampling period
-L = size(Data.PedalL.Raw);             % Length of signal
-L = L(1);
-t = (0:L-1)*T;        % Time vector
-% plot(1000*t(1:50),X(1:50))
-Y = fft(Data.PedalL.Raw);
-
-P2 = abs(Y/L);
-P1 = P2(1:L/2+1);
-P1(2:end-1) = 2*P1(2:end-1);
-
-f = Fs*(0:(L/2))/L;
-plot(f,P1)
+% % % % % % % % dutys = [50 60 70 90].';
+% % % % % % % % 
+% % % % % % % % for j = 1:size(dutys)
+% % % % % % % %     x = [];
+% % % % % % % %     y = [];
+% % % % % % % %     y2 = [];
+% % % % % % % %     index = 1;
+% % % % % % % %     s = size(D.T);
+% % % % % % % %     for i = 1:s(2)-1
+% % % % % % % %         if (D.Duty(i) == dutys(j))
+% % % % % % % %             x(index) = D.Speed(i);
+% % % % % % % %             y(index) = (Maxx.PedalL(i) - Minn.PedalL(i)) / (D.Current(i)*D.Vbat(i));
+% % % % % % % %             y2(index) = (Maxx.PedalR(i) - Minn.PedalR(i)) / (D.Current(i)*D.Vbat(i));
+% % % % % % % %             index = index + 1;
+% % % % % % % %         end
+% % % % % % % %     end
+% % % % % % % %     subplot(4,1,j)
+% % % % % % % %     hold on
+% % % % % % % %     yyaxis left
+% % % % % % % %     plot(x, y,'*')
+% % % % % % % %     xlim([0 200])
+% % % % % % % %     ylim([0 0.0002])
+% % % % % % % %     yyaxis right
+% % % % % % % %     plot(x, y2,'*')
+% % % % % % % %     xlim([0 200])
+% % % % % % % %     ylim([0 0.0002])
+% % % % % % % %     legend(num2str(dutys(j)))
+% % % % % % % %     hold off  
+% % % % % % % %     
+% % % % % % % % end
+% % % % % % % % 
+% % % % % % % % 
 
 
-% % % % % % % % % % % % % % % % % %  High Pass Filter
-% % % % % % % % % % % % % % Fpass = 0.1;
-% % % % % % % % % % % % % % Fstop = 0.002;
-% % % % % % % % % % % % % % Apass = 1;
-% % % % % % % % % % % % % % Astop = 65;
-% % % % % % % % % % % % % % Fs = 100;
-% % % % % % % % % % % % % % % 
-% % % % % % % % % % % % % % % d = designfilt('lowpassfir', ...
-% % % % % % % % % % % % % % %   'PassbandFrequency',Fpass,'StopbandFrequency',Fstop, ...
-% % % % % % % % % % % % % % %   'PassbandRipple',Apass,'StopbandAttenuation',Astop, ...
-% % % % % % % % % % % % % % %   'DesignMethod','equiripple','SampleRate',Fs);
-% % % % % % % % % % % % % % 
-% % % % % % % % % % % % % % d = designfilt('highpassfir','StopbandFrequency',Fstop, ...
-% % % % % % % % % % % % % %   'PassbandFrequency',Fpass,'StopbandAttenuation',Astop, ...
-% % % % % % % % % % % % % %   'PassbandRipple',Apass,'SampleRate',Fs,'DesignMethod','equiripple');
-% % % % % % % % % % % % % % 
-% % % % % % % % % % % % % % % fvtool(d)
-% % % % % % % % % % % % % % y1 =filter(d,Data.PedalL.Raw);
-% % % % % % % % % % % % % % 
-% % % % % % % % % % % % % % 
-% % % % % % % % % % % % % % % % % % End of High Pass Filter
+% % % % % % figure(3) 
+% % % % % % hold on
+% % % % % % % 
+% % % % % % % yyaxis left
+% % % % % % % plot(Data.PedalL.T, y1,'b');
+% % % % % % yyaxis right
+% % % % % % plot(Data.PedalL.T, Data.PedalL.Raw,'r');
+% % % % % % 
+% % % % % % hold off
 
-% y[n]=?*y[n?1]+x[n]?x[n?1]
-% y1 = filter(b, a, Data.PedalL.Raw);
-y1 = filter([1 -1], [1 -0.999], Data.PedalL.Raw);
 
-figure(3) 
+
+[pks,locs,w,p] = findpeaks(Data.PedalL.Raw,...
+    'MinPeakProminence',80,...
+    'MinPeakDistance',15,...
+    'Annotate','extents');
+
+dif = diff(locs);
+dif = 1./(dif*datenum(seconds(60)));
+diffe = zeros(size(Data.PedalL.T));
+diffe(locs(1:end-1)) = dif;
+diffe(diffe==0) = NaN;
+diffe = fillmissing(diffe,'previous');
+
+
+
+
+pp = zeros(size(Data.PedalL.T));
+pp(locs) = p;
+% pp(pp==0) = NaN;
+% pp = fillmissing(pp,'previous');
+
+figure(1)
+subplot(2,1,1)
 hold on
-
 yyaxis left
-plot(Data.PedalL.T, y1,'b');
+plot(Data.PedalL.T,Data.PedalL.Raw,'-v','MarkerIndices',locs)
 yyaxis right
-plot(Data.PedalL.T, Data.PedalL.Raw,'r');
-
+plot(Data.PedalL.T, diffe);
 hold off
+subplot(2,1,2)
+plot(Data.PedalL.T, pp);
 
-
-
-
-
-
-
+% figure
+% [pks, locs] = findpeaks(Data.PedalL.Raw,'MaPeakProminence',4,'Annotate','extents');
+% peakInterval = diff(locs);
+% plot(peakInterval)
+% grid on
+% 
+% plot(p)
 
 
 

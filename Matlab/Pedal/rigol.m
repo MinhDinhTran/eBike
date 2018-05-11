@@ -73,18 +73,18 @@ plot (DeadTime_PWM1N_F)
 hold off
 % title(sprintf('BEMF_Retarded'));
 
-% subplot(6,1,1)
-% plot (PWM1)
-% subplot(6,1,2)
-% plot (PWM1N)
-% subplot(6,1,3)
-% plot (PWM2)
-% subplot(6,1,4)
-% plot (PWM2N)
-% subplot(6,1,5)
-% plot (PWM3)
-% subplot(6,1,6)
-% plot (PWM3N)
+subplot(6,1,1)
+plot (PWM1)
+subplot(6,1,2)
+plot (PWM1N)
+subplot(6,1,3)
+plot (PWM2)
+subplot(6,1,4)
+plot (PWM2N)
+subplot(6,1,5)
+plot (PWM3)
+subplot(6,1,6)
+plot (PWM3N)
 
 
 xlabel('t, s'); ylabel('U, V');

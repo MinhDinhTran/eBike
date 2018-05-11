@@ -8,7 +8,7 @@ clc;
 path = './20180507_2/';
 path = './20180508_2/';
 path = './New Folder/';
-path = './New Folder (2)/';
+path = './New Folder (3)/';
 
 listing = dir(path);
 for fileNo = 3:size(listing)
@@ -23,7 +23,7 @@ for fileNo = 3:size(listing)
     sizeV = size(A);
     len = fix(sizeV(1)/2);
     
-    dateArray =  linspace(dataN,dataN+seconds((len-1)*1/100),len-1).';
+    dateArray =  linspace(dataN,dataN+seconds((len-1)*1/24000),len-1).';
     
     % plot (A);
     figure(1)

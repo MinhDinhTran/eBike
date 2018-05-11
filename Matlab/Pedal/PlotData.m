@@ -23,7 +23,7 @@ for j = 1:size(dutys)
     for i = 1:s(2)-1
         if (D.Duty(i) == dutys(j))
             x(index) = D.Speed(i);
-            y(index) = D.Current(i)*D.Vbat(i);
+            y(index) = -44.4+(D.Current(i)*0.0217)+0.6;
             index = index + 1;
         end
     end
@@ -34,3 +34,16 @@ for j = 1:size(dutys)
 end
 figure(2)
 legend(num2str(dutys))
+
+
+
+
+
+
+
+
+hold on
+% plot(Apsauga_Trigger)
+plot(Apsauga_faze)
+
+hold off

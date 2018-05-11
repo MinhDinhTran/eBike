@@ -55,7 +55,7 @@ FRESULT ChangeFile() {
 	RTC_DateTypeDef RTC_DateStructure;
 	HAL_RTC_GetTime(&hrtc, &RTC_TimeStructure, RTC_FORMAT_BIN);
 	HAL_RTC_GetDate(&hrtc, &RTC_DateStructure, RTC_FORMAT_BIN);
-	sprintf(data, "%02d%02d%02d (%d).txt", RTC_TimeStructure.Hours, RTC_TimeStructure.Minutes, RTC_TimeStructure.Seconds, fileCount++);
+	sprintf(data, "%02d%02d_%03d.txt", RTC_TimeStructure.Hours, RTC_TimeStructure.Minutes, fileCount++);
 
 	res = f_open(&Fil, data, FA_OPEN_APPEND | FA_WRITE | FA_READ);
 
