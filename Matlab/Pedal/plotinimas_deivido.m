@@ -1,14 +1,16 @@
 %apsauga suveikimo laikas taisyti!!!!
 figure(1)
-hold on
+
 yyaxis left
 plot(Apsauga_faze(:,2), 'r');
 yyaxis right
-plotyy(Apsauga_Trigger(:,2), 'blue',Apsauga_MCU(:,2), 'black');
-%plotyy(Apsauga_MCU(:,2), 'black');
+hold on
+plot(Apsauga_Trigger(:,2), 'blue');
+plot(Apsauga_MCU(:,2), '-black');
+hold off
+
 xt = get(gca, 'XTick');
 set(gca, 'XTick',xt, 'XTickLabel',xt/10)
-hold off
 
 
 %faze ankstinta
