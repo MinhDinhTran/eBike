@@ -10,7 +10,7 @@ hold on
 yyaxis left
 plot(D.T, D.Current)
 yyaxis right
-plot(D.T, D.Duty)
+plot(D.T, D.Vbat)
 hold off
 
 dutys = [50 60 70 90].';

@@ -205,7 +205,11 @@ public class DeviceServicesActivity extends Activity
 
 
                 final SeekBar seekBar_pwm1 = (SeekBar) findViewById(R.id.seekBar_pwm);
-                seekBar_pwm1.setProgress(20);
+                if(button_Start.isChecked())
+                    seekBar_pwm1.setProgress(20);
+                else
+                    seekBar_pwm1.setProgress(80);
+
                 break;
           /*  case R.id.button_MeasureHeartRate:
 

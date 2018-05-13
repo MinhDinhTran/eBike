@@ -80,6 +80,10 @@ pp(locs) = p;
 % pp(pp==0) = NaN;
 % pp = fillmissing(pp,'previous');
 
+
+% Data.PedalL.D = Data.PedalL.Raw.*Data.PedalL.Raw.*(-0.021865445939308)+(6.884278410655374.*Data.PedalL.Raw)
+% Data.PedalR.D = Data.PedalR.Raw.*Data.PedalR.Raw.*(-0.006791354486600)+(3.551341158326144.*Data.PedalR.Raw) 
+% pp = pp.*pp.*(-0.021865445939308)+(6.884278410655374.*pp) 
 figure(1)
 subplot(2,1,1)
 hold on
