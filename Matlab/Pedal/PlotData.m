@@ -5,13 +5,13 @@ load('D');
 
 
 
-% figure(1)
-% hold on
-% yyaxis left
-% plot(D.T, D.Current)
-% yyaxis right
-% plot(D.T, D.Duty)
-% hold off
+figure(1)
+hold on
+yyaxis left
+plot(D.T, D.Current)
+yyaxis right
+plot(D.T, D.Duty)
+hold off
 
 dutys = [50 60 70 90].';
 
@@ -42,8 +42,3 @@ legend(num2str(dutys))
 
 
 
-hold on
-% plot(Apsauga_Trigger)
-plot(Apsauga_faze)
-
-hold off
