@@ -18,7 +18,7 @@
 #include "customPedalProfile.h"
 
 #define TestTask_MeasureADC                               0x0001
-#define TestTask_MeasureADC_Period                        50
+#define TestTask_MeasureADC_Period                        100
 
 uint16 AdcData = 0;
 

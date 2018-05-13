@@ -7,8 +7,13 @@ clc;
 % path = './20180508_panemunes tiltas/';
 % path = './20180508_2/';
 
-path = './20180509_Azuolynas_regeneracija/';
 
+path = './svoriu_test/';
+path = './20180509_Azuolynas_regeneracija/';
+path = './svoriu_test 0-80/';
+path = './svoriu_test2 0-100/';
+path = './svoriu_test3 0-100/';
+path = './svoriu_test4 0-100/';
 listing = dir(path);
 for fileNo = 3:size(listing)
     file = strcat(path,listing(fileNo).name);
