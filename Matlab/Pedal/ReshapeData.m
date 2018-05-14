@@ -15,7 +15,7 @@ maxT = max([max(Data.Vbat.T), max(Data.Current.T),...
 %         
 % minT = min([min(Data.PedalL.T), min(Data.Duty.T)]);
 % maxT = max([max(Data.PedalL.T), max(Data.Duty.T)]);
-TimeBase = minT:seconds(1):maxT;
+TimeBase = minT:seconds(10):maxT;
 
 D.T = TimeBase;
 fields = fieldnames(Data);

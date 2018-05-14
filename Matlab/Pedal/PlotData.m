@@ -1,6 +1,7 @@
 close all;
 clear all;
 clc;
+load('Data');
 load('D');
 
 
