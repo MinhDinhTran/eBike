@@ -1,7 +1,7 @@
 close all;
 clear all;
 clc;
-feature('DefaultCharacterSet', 'ASCII') 
+feature('DefaultCharacterSet', 'windows-1252') 
 load('G');
 % load('G_L');
 % 
@@ -22,7 +22,7 @@ hold on
 errorbar(xx,yy,err/2,'blue')
 hold off
 
-p = polyfit(xx,yy,2);
+p = polyfit(xx,yy,1);
 y1 = polyval(p,xx);
 figure(1)
 % yyaxis left
@@ -51,7 +51,7 @@ hold on
 errorbar(xx,yy,err/2,'black')
 hold off
 
-p = polyfit(xx,yy,2);
+p = polyfit(xx,yy,1);
 y1 = polyval(p,xx);
 figure(1)
 

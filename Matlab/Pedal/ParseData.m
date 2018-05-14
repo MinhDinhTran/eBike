@@ -9,13 +9,12 @@ clc;
 
 
 path = './svoriu_test/';
-path = './20180509_Azuolynas_regeneracija/';
 path = './svoriu_test 0-80/';
 path = './svoriu_test2 0-100/';
 path = './svoriu_test3 0-100/';
-path = './20180509_Azuolynas_regeneracija/';
-path = './pasivazinejimas/';
 path = './pasivazinejimas2/';
+path = './pasivazinejimas/';
+path = './20180509_Azuolynas_regeneracija/';
 % path = './svoriu_test4 0-100/';
 listing = dir(path);
 for fileNo = 3:size(listing)
@@ -51,6 +50,12 @@ for fileNo = 3:size(listing)
         case 'log_CustomServicefff2.txt'
             Data.Duty.Raw = str2double(C{3});
             Data.Duty.T = datetime(C{2},'InputFormat','HH:mm:ss.SSS');
+            
+        case 'log_ MI Band 22a37.txt'
+            Data.HR.Raw = str2double(C{3});
+            Data.HR.T = datetime(C{2},'InputFormat','HH:mm:ss.SSS');
+            x = find(Data.HR.Raw<0);
+            Data.HR.Raw(x) = Data.HR.Raw(x) + 255;
         otherwise
             
     end
