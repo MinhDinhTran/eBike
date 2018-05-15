@@ -12,10 +12,10 @@ path = './svoriu_test/';
 path = './svoriu_test 0-80/';
 path = './svoriu_test2 0-100/';
 path = './svoriu_test3 0-100/';
-path = './20180509_Azuolynas_regeneracija/';
 path = './pasivazinejimas/';
 path = './pasivazinejimas2/';
 path = './Stadionas+Deivio kelione i MS/';
+path = './20180509_Azuolynas_regeneracija/';
 
 % path = './svoriu_test4 0-100/';
 listing = dir(path);
