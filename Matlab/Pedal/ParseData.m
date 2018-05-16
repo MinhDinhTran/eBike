@@ -16,6 +16,7 @@ path = './pasivazinejimas/';
 path = './pasivazinejimas2/';
 path = './Stadionas+Deivio kelione i MS/';
 path = './20180509_Azuolynas_regeneracija/';
+path = './Nm/';
 
 % path = './svoriu_test4 0-100/';
 listing = dir(path);
@@ -30,6 +31,7 @@ for fileNo = 3:size(listing)
         case 'log_ eBike MCfff4.txt'
             Data.Vbat.Raw = str2double(C{3});
             Data.Vbat.T = datetime(C{2},'InputFormat','HH:mm:ss.SSS');
+            Data.Vbat.D = Data.Vbat.Raw.*0.01400529697297297297297297297297;
         case 'log_ eBike MCfff5.txt'
             Data.Current.Raw = str2double(C{3});
             Data.Current.T = datetime(C{2},'InputFormat','HH:mm:ss.SSS');
@@ -63,7 +65,7 @@ for fileNo = 3:size(listing)
     end
 end
 clearvars -except Data
-save('Data')
+save('Nm')
 
 
 
