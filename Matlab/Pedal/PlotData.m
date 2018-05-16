@@ -1,7 +1,6 @@
 close all;
 clear all;
-clc;
-load('Data');
+clc;load('Data');
 load('D');
 
 

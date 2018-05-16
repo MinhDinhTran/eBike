@@ -85,6 +85,14 @@ public class DeviceServicesActivity extends Activity
         button_right_peda.setOnClickListener(this);
 
 
+        Button button = (Button) findViewById(R.id.button1);
+        button.setOnClickListener(this);
+        button = (Button) findViewById(R.id.button2);
+        button.setOnClickListener(this);
+        button = (Button) findViewById(R.id.button3);
+        button.setOnClickListener(this);
+        button = (Button) findViewById(R.id.button4);
+        button.setOnClickListener(this);
        /* entries.add(new Entry(0,0));
         dataSet = new LineDataSet(entries, "Itampa");
         lineData = new LineData(dataSet);
@@ -205,10 +213,14 @@ public class DeviceServicesActivity extends Activity
 
 
                 final SeekBar seekBar_pwm1 = (SeekBar) findViewById(R.id.seekBar_pwm);
-                if(button_Start.isChecked())
+                if(button_Start.isChecked()){
+                    lastChanged_PWMDutyCycle = 0l;
                     seekBar_pwm1.setProgress(20);
-                else
+                }
+                else{
+                    lastChanged_PWMDutyCycle = 0l;
                     seekBar_pwm1.setProgress(80);
+                }
 
                 break;
           /*  case R.id.button_MeasureHeartRate:
@@ -241,6 +253,22 @@ public class DeviceServicesActivity extends Activity
                     BleManagerService.getInstance().ConnectToDevice(AppConfig.DEF_EBIKE_PEDAL_R);
                 else
                     BleManagerService.getInstance().CancelSearch(AppConfig.DEF_EBIKE_PEDAL_R);
+                break;
+            case R.id.button1:
+                lastChanged_PWMDutyCycle = 0l;
+                seekBar_pwm.setProgress(50);
+                break;
+            case R.id.button2:
+                lastChanged_PWMDutyCycle = 0l;
+                seekBar_pwm.setProgress(60);
+                break;
+            case R.id.button3:
+                lastChanged_PWMDutyCycle = 0l;
+                seekBar_pwm.setProgress(70);
+                break;
+            case R.id.button4:
+                lastChanged_PWMDutyCycle = 0l;
+                seekBar_pwm.setProgress(80);
                 break;
             default:
                 break;
