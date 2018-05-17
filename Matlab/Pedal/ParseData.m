@@ -17,7 +17,7 @@ path = './pasivazinejimas2/';
 path = './Stadionas+Deivio kelione i MS/';
 path = './20180509_Azuolynas_regeneracija/';
 path = './Nm/';
-
+path = './New Folderrr/';
 % path = './svoriu_test4 0-100/';
 listing = dir(path);
 for fileNo = 3:size(listing)
@@ -65,7 +65,7 @@ for fileNo = 3:size(listing)
     end
 end
 clearvars -except Data
-save('Nm')
+save('nmnmn')
 
 
 

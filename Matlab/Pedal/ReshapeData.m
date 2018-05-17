@@ -2,7 +2,8 @@ close all;
 clear all;
 clc;
 % load('Data');
-load('Nm');
+%load('Nm');
+load('nmnmn');
 
 minT = min([min(Data.Vbat.T), min(Data.Current.T),...
             min(Data.Speed.T), min(Data.Power.T),...
@@ -24,7 +25,7 @@ maxT = max([max(Data.Vbat.T), max(Data.Current.T),...
 %         
 % minT = min([min(Data.PedalL.T), min(Data.Duty.T)]);
 % maxT = max([max(Data.PedalL.T), max(Data.Duty.T)]);
-TimeBase = minT:seconds(1):maxT;
+TimeBase = minT:seconds(0.001):maxT;
 
 D.T = TimeBase;
 fields = fieldnames(Data);
@@ -83,7 +84,7 @@ end
 Minn.T = TimeBase;
 Maxx.T = TimeBase;
 clearvars -except D Minn Maxx
-save('Nm2');
+save('nmnmn2');
 
 
 
