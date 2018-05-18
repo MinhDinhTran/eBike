@@ -49,7 +49,6 @@ for j = 1:size(dutys)
     hold off   
 end
 figure(2)
-legend(num2str(dutys))
 
 
 

@@ -79,30 +79,41 @@ for i = 1 : s(2)
     Whv(i) = mean(Wv(1:i)) * ((T(i)-T(1))/hours(1));
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-figure(3)
-subplot(6,1,1)
+figure(30)
+subplot(2,1,1)
 plot(T, W)
+xlabel('Laikas');
+ylabel('Galia, W')
 
-subplot(6,1,2)
+subplot(2,1,2)
 plot(T, Wh)
+xlabel('Laikas');
+ylabel('Energija, Wh')
 
-subplot(6,1,3)
+figure(31)
+subplot(2,1,1)
 x = find(W>0);
 plot(T(x), W(x))
+xlabel('Laikas');
+ylabel('Galia, W')
 
-subplot(6,1,4)
+subplot(2,1,2)
 plot(T(xr), Whr)
+xlabel('Laikas');
+ylabel('Energija, Wh')
 
 
-
+figure(32)
 s = size(T);
 whrrr = zeros(1,s(2));
 whrrr(xv) = W(xv);
 x = find(whrrr==0);
 whrrr(x) = 0;
 
-subplot(6,1,5)
+subplot(2,1,1)
 plot(T, -whrrr)
+xlabel('Laikas');
+ylabel('Galia, W')
 
 
 
@@ -110,8 +121,10 @@ plot(T, -whrrr)
 % x = find(W<0);
 % plot(T(x), -W(x))
 
-subplot(6,1,6)
+subplot(2,1,2)
 plot(T(xv), -Whv)
+xlabel('Laikas');
+ylabel('Energija, Wh')
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
