@@ -50,7 +50,12 @@ for j = 1:size(dutys)
 end
 figure(2)
 
-
+xlim([0 400]);
+legend(num2str(dutys),'Location','northwest')
+%%%legend({'cos(x)','cos(2x)'},'Location','southwest')
+title(legend,'Impulso skverbtis, %')
+xlabel('Apsisukimai per min., RPM');
+ylabel('Srovë, A')
 
 
 
