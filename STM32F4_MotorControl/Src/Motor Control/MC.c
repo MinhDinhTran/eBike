@@ -109,13 +109,13 @@ void MotorControlThread(void const * argument) // MotorControlThread function
 		 osDelay(200);
 		 I_MAX = 0;*/
 
-		msg = malloc(sizeof(MyMsg_t));
+		/*msg = malloc(sizeof(MyMsg_t));
 		msg->UUID = BIKE_SPEED_ID;
 		*(float*) msg->pData = MotorControl.RPM;
 		msg->length = BIKE_SPEED_LEN;
 		xQueueSendFromISR(xQueueTX, (void * ) &msg, (TickType_t ) 0);
 		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_14);
-		osDelay(200);
+		osDelay(200);*/
 
 	}
 }
@@ -345,6 +345,13 @@ static void CalcRPM() {
 		Error_Handler();
 	if (MotorControl.RPM > 1000 || MotorControl.RPM < 0)
 		MotorControl.RPM = 0;
+
+
+	MyMsg_t* msg = malloc(sizeof(MyMsg_t));
+	msg->UUID = BIKE_SPEED_ID;
+	*(float*) msg->pData = MotorControl.RPM;
+	msg->length = BIKE_SPEED_LEN;
+	xQueueSendFromISR(xQueueTX, (void * ) &msg, (TickType_t ) 0);
 }
 int CountwhenCreatenewFile = 0;
 void OnPhaseChanged() {

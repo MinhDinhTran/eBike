@@ -256,11 +256,11 @@ public class DeviceServicesActivity extends Activity
                 break;
             case R.id.button1:
                 lastChanged_PWMDutyCycle = 0l;
-                seekBar_pwm.setProgress(50);
+                seekBar_pwm.setProgress(30);
                 break;
             case R.id.button2:
                 lastChanged_PWMDutyCycle = 0l;
-                seekBar_pwm.setProgress(60);
+                seekBar_pwm.setProgress(40);
                 break;
             case R.id.button3:
                 lastChanged_PWMDutyCycle = 0l;

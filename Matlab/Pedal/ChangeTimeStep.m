@@ -1,9 +1,9 @@
-function [ rez, minn, maxx ] = ChangeTimeStep( time, data, newinterval )
+function [ rez, minn, maxx ] = ChangeTimeStep( time, data, newinterval, synchTime )
 %UNTITLED2 Summary of this function goes here
 %   Detailed explanation goes here
 
-    minT = min(time);
-    maxT = max(time);
+    minT = min([min(time) min(synchTime)]);
+    maxT = max([max(time) max(synchTime)]);
     TimeBase = minT:newinterval:maxT;
     sizey = size(TimeBase);
 

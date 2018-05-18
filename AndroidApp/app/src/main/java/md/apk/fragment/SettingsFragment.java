@@ -106,8 +106,8 @@ SeekBar.OnSeekBarChangeListener{
         bundle.putString(BLEConst.DATA, Integer.toString(progress));
         switch (seekBar.getId()) {
             case R.id.seekBar_vthr:
-               // final TextView tvPwm = (TextView) findViewById(R.id.textView_pwmdutycycle);
-               // tvPwm.setText("PWM Duty Cycle = " + progress);
+                final TextView tvPwm = (TextView) getActivity().findViewById(R.id.textView_vthr);
+                tvPwm.setText("V thr = " + (progress* 590 + 1000));
                 BleManagerService.getInstance().update((MyCustomService) sensor, MyCustomService.UUID_V_THRESHOLD_ID, bundle);
                 break;
         }
