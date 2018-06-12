@@ -2,7 +2,6 @@ package md.ble.BLE_Services;
 
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.os.Bundle;
-import android.util.Log;
 
 import com.chimeraiot.android.ble.BleGattExecutor;
 
@@ -15,9 +14,8 @@ import Loging.FileLog;
 
 /** BLE device info services. */
 public class MyCustomService<T> extends InfoService<T> {
-    public interface MyCustomServiceListener {
-        void OnCharacteristicChanged(String characteristic, int value);
-        void OnCharacteristicChanged(String characteristic, float value);
+    public interface Listener {
+        void OnCharacteristicChanged(String characteristic, double value);
     }
 
     private static final String TAG = MyCustomService.class.getSimpleName();
@@ -31,7 +29,7 @@ public class MyCustomService<T> extends InfoService<T> {
     public static final String UUID_V_THRESHOLD_ID = "0000fff3-0000-1000-8000-00805f9b34fb";
     public static final String UUID_BIKE_BATTERY_LEVEL_ID = "0000fff4-0000-1000-8000-00805f9b34fb";
     public static final String UUID_CURRENT_ID = "0000fff5-0000-1000-8000-00805f9b34fb";
-    public static final String UUID_BIKE_SPEED_ID = "0000fff6-0000-1000-8000-00805f9b34fb";
+    public static final String UUID_BIKE_RPM_ID = "0000fff6-0000-1000-8000-00805f9b34fb";
     public static final String UUID_BIKE_FLAGS_ID = "0000fff7-0000-1000-8000-00805f9b34fb";
     public static final String UUID_ENERGY_ID = "0000fff8-0000-1000-8000-00805f9b34fb";
 
@@ -46,7 +44,7 @@ public class MyCustomService<T> extends InfoService<T> {
         CHARACTERISTIC_MAP.put(UUID_V_THRESHOLD_ID, "V THRESHOLD");
         CHARACTERISTIC_MAP.put(UUID_BIKE_BATTERY_LEVEL_ID, "Bike battery level");
         CHARACTERISTIC_MAP.put(UUID_CURRENT_ID, "Electric current level");
-        CHARACTERISTIC_MAP.put(UUID_BIKE_SPEED_ID, "Bike speed");
+        CHARACTERISTIC_MAP.put(UUID_BIKE_RPM_ID, "Bike speed");
         CHARACTERISTIC_MAP.put(UUID_BIKE_FLAGS_ID, "Bike flags");
         CHARACTERISTIC_MAP.put(UUID_ENERGY_ID, "energy");
     }
@@ -76,9 +74,9 @@ public class MyCustomService<T> extends InfoService<T> {
     public float getEnergyValue() {
         return energyValue;
     }
-    private MyCustomServiceListener _listener = null;
+    private Listener _listener = null;
 
-    public void setServiceListener(MyCustomServiceListener listener) {
+    public void setServiceListener(Listener listener) {
         _listener = listener;
     }
 
@@ -151,7 +149,7 @@ public class MyCustomService<T> extends InfoService<T> {
                 if (currentValue > 4096) currentValue = 0;
                 intValue = currentValue;
                 break;
-            case UUID_BIKE_SPEED_ID:
+            case UUID_BIKE_RPM_ID:
                 bytes = c.getValue();
                 rpmValue = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN).getFloat();
                 //floatValue = c.getFloatValue(BluetoothGattCharacteristic.FORMAT_FLOAT, 0);
@@ -178,7 +176,7 @@ public class MyCustomService<T> extends InfoService<T> {
         }
 
         if (_listener != null) {
-            if (c.getUuid().toString().equals( UUID_BIKE_SPEED_ID) ||c.getUuid().toString().equals( UUID_ENERGY_ID)  )
+            if (c.getUuid().toString().equals(UUID_BIKE_RPM_ID) ||c.getUuid().toString().equals( UUID_ENERGY_ID)  )
                 _listener.OnCharacteristicChanged(c.getUuid().toString(), floatValue);
             else
                 _listener.OnCharacteristicChanged(c.getUuid().toString(), intValue);

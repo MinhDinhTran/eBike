@@ -12,8 +12,8 @@ import java.util.HashMap;
 
 /** BLE device info services. */
 public class MyPedalService<T> extends InfoService<T> {
-    public interface MyPedalServiceListener {
-        void OnCharacteristicChanged(String name, String characteristic, int value);
+    public interface Listener {
+        void OnCharacteristicChanged(String name, String characteristic, double value);
     }
 
     private static final String TAG = MyPedalService.class.getSimpleName();
@@ -45,9 +45,9 @@ public class MyPedalService<T> extends InfoService<T> {
         return _rawValue;
     }
 
-    private MyPedalServiceListener _listener = null;
+    private Listener _listener = null;
 
-    public void setServiceListener(MyPedalServiceListener listener) {
+    public void setServiceListener(Listener listener) {
         _listener = listener;
     }
 

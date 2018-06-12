@@ -171,7 +171,7 @@ public class BleManagerService extends com.chimeraiot.android.ble.BleService
                 if (sensor != null) {
                     getBleManager().listen(address, sensor, MyCustomService.UUID_BIKE_BATTERY_LEVEL_ID);
                     getBleManager().listen(address, sensor, MyCustomService.UUID_CURRENT_ID);
-                    getBleManager().listen(address, sensor, MyCustomService.UUID_BIKE_SPEED_ID);
+                    getBleManager().listen(address, sensor, MyCustomService.UUID_BIKE_RPM_ID);
                     getBleManager().listen(address, sensor, MyCustomService.UUID_ENERGY_ID);
                     getBleManager().listen(address, sensor, MyCustomService.UUID_BIKE_FLAGS_ID);
                 }
@@ -211,7 +211,7 @@ public class BleManagerService extends com.chimeraiot.android.ble.BleService
         if (sensor instanceof MyCustomService) {
             if (characteristicUuid.equals(MyCustomService.UUID_BIKE_BATTERY_LEVEL_ID))
                 sensorData.setValue((((MyCustomService) sensor).getBatValue()));
-            else if (characteristicUuid.equals(MyCustomService.UUID_BIKE_SPEED_ID))
+            else if (characteristicUuid.equals(MyCustomService.UUID_BIKE_RPM_ID))
                 sensorData.setValue((((MyCustomService) sensor).getRPMValue()));
             else if (characteristicUuid.equals(MyCustomService.UUID_CURRENT_ID))
                 sensorData.setValue((((MyCustomService) sensor).getCurrentValue()));

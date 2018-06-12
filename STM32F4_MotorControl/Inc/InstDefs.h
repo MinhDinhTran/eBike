@@ -14,7 +14,7 @@
 
 #define ADC_INSTANCE_V  hadc1
 #define ADC_INSTANCE_I  hadc2
-#define ADC_INSTANCE_VBAT  hadc1
+#define ADC_INSTANCE_VBAT  hadc2
 
 #define PWM_INSTANCE  htim1
 #define BLE_INSTANCE  USART3

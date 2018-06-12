@@ -1,8 +1,8 @@
 package md.ble;
 
-import com.chimeraiot.android.ble.BleManager;
+        import com.chimeraiot.android.ble.BleManager;
 
-import md.App;
+        import md.App;
 
 /** BLE service. */
 public class BleSensorService extends com.chimeraiot.android.ble.BleService {

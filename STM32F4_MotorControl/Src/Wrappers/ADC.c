@@ -6,7 +6,7 @@ extern void OnVBAT_ADC_Measured(ADC_HandleTypeDef* hadc);
 extern void OnPWM_ADC_Measured(ADC_HandleTypeDef* hadc);
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
-	if (hadc->Instance == ADC1)
+	if (hadc->Instance == ADC2)
 		OnVBAT_ADC_Measured(hadc);
 }
 void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef* hadc)

@@ -254,7 +254,7 @@ bStatus_t customPedalProfile_SetParameter( uint8 param, uint8 len, void *value )
                                   customPedalProfileAttrTbl, GATT_NUM_ATTRS( customPedalProfileAttrTbl ),
                                   INVALID_TASK_ID, customPedalProfile_ReadAttrCB ) != SUCCESS)
      {
-       printf("WTF customPedalProfile_SetParameter\n");
+       //printf("WTF customPedalProfile_SetParameter\n");
        SystemReset();
      }
       break;
@@ -265,7 +265,7 @@ bStatus_t customPedalProfile_SetParameter( uint8 param, uint8 len, void *value )
                                   customPedalProfileAttrTbl, GATT_NUM_ATTRS( customPedalProfileAttrTbl ),
                                   INVALID_TASK_ID, customPedalProfile_ReadAttrCB ) != SUCCESS)
        {
-       printf("WTF customPedalProfile_SetParameter\n");
+       //printf("WTF customPedalProfile_SetParameter\n");
        SystemReset();
       }
       break;
@@ -281,7 +281,7 @@ bStatus_t customPedalProfile_SetParameter( uint8 param, uint8 len, void *value )
                                   customPedalProfileAttrTbl, GATT_NUM_ATTRS( customPedalProfileAttrTbl ),
                                   INVALID_TASK_ID, customPedalProfile_ReadAttrCB ) != SUCCESS)
       {
-       printf("WTF customPedalProfile_SetParameter\n");
+       //printf("WTF customPedalProfile_SetParameter\n");
        SystemReset();
      }
       break;

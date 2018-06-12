@@ -1,30 +1,36 @@
-package md.apk.fragment;
+package md.apk.Settings;
 
+import android.app.Activity;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ListView;
+import android.widget.SeekBar;
+import android.widget.TextView;
 
+import md.App;
 import md.apk.R;
-import md.apk.activity.MainActivity;
+import md.ble.BLE_Services.BLEConst;
+import md.ble.BLE_Services.InfoService;
+import md.ble.BLE_Services.MyCustomService;
+import md.ble.BleManagerService;
 
-public class HistoryFragment extends Fragment {
-    public static final String TAG = "HistoryFragment";
+public class SettingsFragment extends Fragment implements
+SeekBar.OnSeekBarChangeListener {
+    public static final String TAG = SettingsFragment.class.getSimpleName();
+
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
 
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
-
     private OnFragmentInteractionListener mListener;
 
-    public HistoryFragment() {
+    public SettingsFragment() {
         // Required empty public constructor
     }
 
@@ -34,11 +40,11 @@ public class HistoryFragment extends Fragment {
      *
      * @param param1 Parameter 1.
      * @param param2 Parameter 2.
-     * @return A new instance of fragment HistoryFragment.
+     * @return A new instance of fragment SettingsFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static HistoryFragment newInstance(String param1, String param2) {
-        HistoryFragment fragment = new HistoryFragment();
+    public static SettingsFragment newInstance(String param1, String param2) {
+        SettingsFragment fragment = new SettingsFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
@@ -53,21 +59,18 @@ public class HistoryFragment extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_history, container, false);
-    }
+        View view = inflater.inflate(R.layout.fragment_settings, container, false);
+        final SeekBar seekBar = (SeekBar) view.findViewById(R.id.seekBar_vthr);
+        seekBar.setOnSeekBarChangeListener(this);
 
-    @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-
-        MainActivity activity =  (MainActivity)getActivity();
-        ListView listView = (ListView) activity.findViewById(R.id.listViewToDo);
+        return view;
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -94,16 +97,35 @@ public class HistoryFragment extends Fragment {
         mListener = null;
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
+    @Override
+    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+        final InfoService<?> sensor = (InfoService<?>) App.DEVICE_DEF.getSensor(MyCustomService.UUID_SERVICE);
+        Bundle bundle = new Bundle();
+        bundle.putString(BLEConst.DATA, Integer.toString(progress));
+        switch (seekBar.getId()) {
+            case R.id.seekBar_vthr:
+                Activity act = getActivity();
+                if (act != null) {
+                    final TextView tvPwm = (TextView) act.findViewById(R.id.textView_vthr);
+                    if (tvPwm != null) {
+                        tvPwm.setText("V thr = " + (progress * 590 + 1000));
+                        BleManagerService.getInstance().update((MyCustomService) sensor, MyCustomService.UUID_V_THRESHOLD_ID, bundle);
+                    }
+                }
+                break;
+        }
+    }
+
+    @Override
+    public void onStartTrackingTouch(SeekBar seekBar) {
+
+    }
+
+    @Override
+    public void onStopTrackingTouch(SeekBar seekBar) {
+
+    }
+
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);

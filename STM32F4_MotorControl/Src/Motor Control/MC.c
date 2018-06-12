@@ -248,10 +248,10 @@ void OnPWM_ADC_Measured(ADC_HandleTypeDef* hadc) {
 			 if (I_MAX > current)
 			 I_AVG = current;*/
 
-			if (!IsOnTheTOP && MotorControl.ADC_V[0] > MotorControl.ADC_VBAT * 0.75) {
+			if (!IsOnTheTOP && MotorControl.ADC_V[0] > MotorControl.ADC_VBAT * 0.6) {
 				IsOnTheTOP = 1;
 				CalcRPM();
-			} else if (IsOnTheTOP && MotorControl.ADC_V[0] < MotorControl.ADC_VBAT * 0.5) {
+			} else if (IsOnTheTOP && MotorControl.ADC_V[0] < MotorControl.ADC_VBAT * 0.3) {
 				IsOnTheTOP = 0;
 			}
 		}
@@ -289,7 +289,7 @@ static uint32_t GetActualBEMF() {
 	}
 	return 0;
 }
-
+int failCount = 0;
 static void Integrate() {
 	uint16_t midPoint = 0;
 	uint32_t PWM_Lv = 0;
@@ -304,9 +304,37 @@ static void Integrate() {
 		if (midPoint < 200)
 			return;
 		if (MotorControl.pwmCountThisPhase > 400) {
-			ChangePhase();
+			failCount++;
+			if (failCount > 2)
+			{
+				failCount = 0;
+				uint32_t flag = 0;
+				ChangePWMSwitchingSequence(Regeneration);
+				HAL_GPIO_WritePin(GPIOD, GPIO_PIN_13, GPIO_PIN_SET);
+				flag = 1;
+				if (MotorControl.Flags.OverCurrent&0x1 != flag&0x1 )
+				{
+					MyMsg_t *msg = malloc(sizeof(MyMsg_t));
+					msg->UUID = PWM_DUTY_CYCLE_ID;
+					*(uint32_t*)msg->pData = 20;
+					msg->length = PWM_DUTY_CYCLE_LEN;
+					xQueueSendFromISR(xQueueTX, (void * ) &msg, (TickType_t ) 0);
+
+					msg = malloc(sizeof(MyMsg_t));
+					msg->UUID = BIKE_FLAGS_ID;
+					*(uint32_t*)msg->pData = flag;
+					msg->length = BIKE_FLAGS_LEN;
+					xQueueSendFromISR(xQueueTX, (void * ) &msg, (TickType_t ) 0);
+
+					MotorControl.Flags.OverCurrent = flag;
+				}
+			}else
+			{
+				ChangePhase();
+			}
 			return;
 		}
+		failCount = 0;
 		//double toDac = 2048;
 		if (MotorControl.PWM_Switching.IsRisingFront && PWM_Lv > midPoint) {
 			MotorControl.Integral += (uint64_t) (PWM_Lv - midPoint);

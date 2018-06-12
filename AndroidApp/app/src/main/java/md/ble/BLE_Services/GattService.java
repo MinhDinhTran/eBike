@@ -13,7 +13,7 @@ public class GattService<T> extends InfoService<T> {
     private static final HashMap<String, String> CHARACTERISTIC_MAP = new HashMap<>();
 
     static {
-        CHARACTERISTIC_MAP.put(UUID_DEVICE_NAME, "Service Changed");
+        CHARACTERISTIC_MAP.put(UUID_DEVICE_NAME, "Service MessageReceived");
     }
 
     protected GattService(T model) {

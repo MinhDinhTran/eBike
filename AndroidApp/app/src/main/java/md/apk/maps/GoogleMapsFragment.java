@@ -1,4 +1,4 @@
-package md.apk.fragment;
+package md.apk.maps;
 
 
 import android.Manifest;
@@ -21,7 +21,7 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 
 public class GoogleMapsFragment extends SupportMapFragment implements OnMapReadyCallback {
-    public static final String TAG = "GoogleMapsFragment";
+    public static final String TAG = GoogleMapsFragment.class.getSimpleName();
 
     private GoogleMap mMap;
     private int PERMISSION_REQUEST_CODE = 0;

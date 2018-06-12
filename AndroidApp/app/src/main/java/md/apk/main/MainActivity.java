@@ -1,4 +1,4 @@
-package md.apk.activity;
+package md.apk.main;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -24,14 +24,14 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
 import md.App;
 import md.DB.SensorDataController;
-import md.ble.ui.DeviceServicesActivity;
+import md.apk.activity.AboutUsActivity;
+import md.apk.activity.PrivacyPolicyActivity;
+import md.apk.dashboard.DashboardFragment;
 import md.apk.R;
-import md.apk.fragment.ConnectedDeviceFragment;
-import md.apk.fragment.GoogleMapsFragment;
-import md.apk.fragment.HistoryFragment;
-import md.apk.fragment.HomeFragment;
-import md.apk.fragment.ProfileFragment;
-import md.apk.fragment.SettingsFragment;
+import md.apk.history.HistoryFragment;
+import md.apk.history.HistoryFragment2;
+import md.apk.maps.GoogleMapsFragment;
+import md.apk.Settings.SettingsFragment;
 import md.apk.other.Chronometer;
 
 public class MainActivity extends AppCompatActivity {
@@ -48,7 +48,6 @@ public class MainActivity extends AppCompatActivity {
     private String[] activityTitles;
     private boolean shouldLoadHomeFragOnBackPress = true;
     private Handler mHandler;
-    private SensorDataController _sensorDataController = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,6 +55,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setElevation(0);
 
         mHandler = new Handler();
 
@@ -93,12 +93,9 @@ public class MainActivity extends AppCompatActivity {
             loadHomeFragment();
         }
 
+        App.sensorDataController = new SensorDataController(this, null);;
 
-        //BleSensorController a  = new BleSensorController(this);
-        _sensorDataController = new SensorDataController(this, null);
-        App.sensorDataController = _sensorDataController;
-
-        startActivity(new Intent(MainActivity.this, DeviceServicesActivity.class));
+        //startActivity(new Intent(MainActivity.this, DashboardFragment.class));
         drawer.closeDrawers();
     }
 
@@ -123,8 +120,8 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 Fragment fragment = getHomeFragment();
                 FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-                fragmentTransaction.setCustomAnimations(android.R.anim.fade_in,
-                        android.R.anim.fade_out);
+              //  fragmentTransaction.setCustomAnimations(android.R.anim.fade_in,
+              //          android.R.anim.fade_out);
                 fragmentTransaction.replace(R.id.frame, fragment, CURRENT_TAG);
                 fragmentTransaction.commit();
             }
@@ -144,14 +141,17 @@ public class MainActivity extends AppCompatActivity {
                 return new HomeFragment();
             case 1:
                 return new GoogleMapsFragment();
-            case 2:
-                return new HistoryFragment();
-            case 3:
+           case 2:
+               return new HistoryFragment2();
+                //return new HistoryFragment();
+            /* case 3:
                 return new ProfileFragment();
             case 4:
-                return new ConnectedDeviceFragment();
+                return new ConnectedDeviceFragment();*/
             case 5:
                 return new SettingsFragment();
+            case 6:
+                return new DashboardFragment();
             default:
                 return new HomeFragment();
         }
@@ -184,23 +184,17 @@ public class MainActivity extends AppCompatActivity {
                         navItemIndex = 2;
                         CURRENT_TAG = HistoryFragment.TAG;
                         break;
-                    case R.id.nav_profile:
-                        navItemIndex = 3;
-                        CURRENT_TAG = ProfileFragment.TAG;
-                        break;
-                    case R.id.nav_connecteddevice:
-                        navItemIndex = 4;
-                        CURRENT_TAG = ConnectedDeviceFragment.TAG;
-                        break;
                     case R.id.nav_settings:
                         navItemIndex = 5;
                         CURRENT_TAG = SettingsFragment.TAG;
                         break;
-                    case R.id.nav_bluetooth:
-                       // startActivityForResult(new Intent(MainActivity.this, DeviceScanActivity.class), 0);
-                        startActivity(new Intent(MainActivity.this, DeviceServicesActivity.class));
-                        drawer.closeDrawers();
-                        return true;
+                    case R.id.nav_dashboard:
+                        navItemIndex = 6;
+                        CURRENT_TAG = DashboardFragment.TAG;
+                      //  startActivity(new Intent(MainActivity.this, DashboardFragment.class));
+                       // drawer.closeDrawers();
+                        //                        return true;
+                        break;
                     case R.id.nav_about_us:
                         startActivity(new Intent(MainActivity.this, AboutUsActivity.class));
                         drawer.closeDrawers();
@@ -237,7 +231,7 @@ public class MainActivity extends AppCompatActivity {
                 super.onDrawerOpened(drawerView);
             }
         };
-        drawer.setDrawerListener(actionBarDrawerToggle);
+        drawer.addDrawerListener(actionBarDrawerToggle);
         actionBarDrawerToggle.syncState();
     }
     @Override
@@ -248,9 +242,9 @@ public class MainActivity extends AppCompatActivity {
             // Make sure the request was successful
             if (resultCode == RESULT_OK) {
 
-                final Intent intent = new Intent(this, DeviceServicesActivity.class);
-               // intent.putExtra(DeviceServicesActivity.EXTRAS_DEVICE_NAME, data.getStringExtra(DeviceServicesActivity.EXTRAS_DEVICE_NAME));
-               // intent.putExtra(DeviceServicesActivity.EXTRAS_DEVICE_ADDRESS, data.getStringExtra(DeviceServicesActivity.EXTRAS_DEVICE_ADDRESS));
+                final Intent intent = new Intent(this, DashboardFragment.class);
+               // intent.putExtra(DashboardFragment.EXTRAS_DEVICE_NAME, data.getStringExtra(DashboardFragment.EXTRAS_DEVICE_NAME));
+               // intent.putExtra(DashboardFragment.EXTRAS_DEVICE_ADDRESS, data.getStringExtra(DashboardFragment.EXTRAS_DEVICE_ADDRESS));
 
                 startActivity(intent);
             }
@@ -303,7 +297,6 @@ public class MainActivity extends AppCompatActivity {
             mButton.setText("Stop");
             mButton.setBackground(ContextCompat.getDrawable(this, (R.drawable.button_oval_yellow)));
         }
-
         isChronometerStarted = !isChronometerStarted;
     }
 }

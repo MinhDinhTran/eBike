@@ -5,18 +5,15 @@ import android.os.Bundle;
 
 import com.chimeraiot.android.ble.BleGattExecutor;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.HashMap;
 
-import md.ble.BLE_Services.BLEConst;
 import md.ble.BLE_Services.InfoService;
 
 
 /** BLE device info services. */
 public class HeartRateService<T> extends InfoService<T> {
-    public interface HeartRateServiceListener {
-        void OnCharacteristicChanged(String characteristic, int value);
+    public interface Listener {
+        void OnCharacteristicChanged(String characteristic, double value);
     }
 
     private static final String TAG = HeartRateService.class.getSimpleName();
@@ -24,7 +21,6 @@ public class HeartRateService<T> extends InfoService<T> {
      * Service UUID.
      */
     public static final String UUID_SERVICE = "0000180d-0000-1000-8000-00805f9b34fb";
-
     public static final String UUID_HEARTRATE_MEASURE_ID = "00002a37-0000-1000-8000-00805f9b34fb";
     public static final String UUID_HEARTRATE_CONTROL_ID = "00002a39-0000-1000-8000-00805f9b34fb";
 
@@ -50,8 +46,8 @@ public class HeartRateService<T> extends InfoService<T> {
         return _controlValue;
     }
 
-    private HeartRateServiceListener _listener = null;
-    public void setServiceListener(HeartRateServiceListener listener) {
+    private Listener _listener = null;
+    public void setServiceListener(Listener listener) {
         _listener = listener;
     }
 
