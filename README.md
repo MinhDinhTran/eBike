@@ -1,10 +1,8 @@
-eBike controler software using STM32F407 microprocessor. 
+eBike controler software using STM32F4 discovery board 
 
-BLDC motor control using BEMF integration.
+BLDC motor control using BEMF integration. https://www.youtube.com/watch?v=_967mS4ky_4
 
-<iframe width="854" height="480" src="https://www.youtube.com/embed/_967mS4ky_4" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-
-Android aplication used for data motor speed control and displaying system parameters.
+Android aplication used for data motor commutation, speed control and displaying system parameters.
 Azure cloud services for storing data.
-BLE 4.0 comunication using HM-10 bluetooth modules.
+BLE 4.0 comunication using HM-10 (CC2541) bluetooth modules.
 Force measuring pedals.
