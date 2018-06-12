@@ -1,1 +1,0 @@
-plotApsauga_faze(:,1), Apsauga_faze(:,2)
